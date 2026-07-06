@@ -31,7 +31,7 @@
       <el-table-column prop="updatedAt" label="最近更新" min-width="160" />
       <el-table-column label="状态" min-width="100">
         <template #default="{ row }">
-          <el-tag :type="statusTagMap[row.status]">{{ statusLabelMap[row.status] }}</el-tag>
+          <el-tag :type="getStatusTag(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" min-width="280" fixed="right">
@@ -49,16 +49,27 @@
 
 <script setup lang="ts">
 import { dataSources as sources } from '../../mock/platform'
+import type { DataSource } from '../../types/platform'
 
-const statusLabelMap = {
+type StatusKey = DataSource['status']
+
+const statusLabelMap: Record<StatusKey, string> = {
   connected: '已连接',
   warning: '告警',
   failed: '失败',
 }
 
-const statusTagMap = {
+const statusTagMap: Record<StatusKey, 'success' | 'warning' | 'danger'> = {
   connected: 'success',
   warning: 'warning',
   failed: 'danger',
-} as const
+}
+
+function getStatusLabel(status: StatusKey) {
+  return statusLabelMap[status]
+}
+
+function getStatusTag(status: StatusKey) {
+  return statusTagMap[status]
+}
 </script>

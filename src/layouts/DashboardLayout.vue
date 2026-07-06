@@ -1,15 +1,16 @@
 <template>
-  <div class="min-h-screen bg-slate-100 text-slate-800">
+  <router-view v-if="isFullscreen" />
+  <div v-else class="min-h-screen bg-slate-100 text-slate-800">
     <div class="flex min-h-screen">
       <aside class="w-72 border-r border-slate-200 bg-slate-950 text-slate-100">
         <div class="border-b border-slate-800 px-6 py-6">
           <div class="text-lg font-semibold tracking-tight">IoT Visual Platform</div>
           <div class="mt-2 text-sm text-slate-400">
-            面向工业数据可视化的 2D/3D 组态与数据管理平台原型
+            物联网大屏可视化平台
           </div>
         </div>
 
-        <div class="px-4 py-5">
+        <div class="py-5">
           <div
             v-for="group in navigationGroups"
             :key="group.title"
@@ -47,20 +48,6 @@
               <div class="text-sm text-slate-500">{{ currentSection }}</div>
               <h1 class="mt-1 text-2xl font-semibold text-slate-950">{{ currentTitle }}</h1>
             </div>
-            <div class="grid min-w-[380px] grid-cols-3 gap-3">
-              <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                <div class="text-xs text-slate-500">在线项目</div>
-                <div class="mt-1 text-lg font-semibold text-slate-900">24</div>
-              </div>
-              <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                <div class="text-xs text-slate-500">数据源</div>
-                <div class="mt-1 text-lg font-semibold text-slate-900">11</div>
-              </div>
-              <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-                <div class="text-xs text-slate-500">活跃用户</div>
-                <div class="mt-1 text-lg font-semibold text-slate-900">36</div>
-              </div>
-            </div>
           </div>
         </header>
 
@@ -96,10 +83,8 @@ const navigationGroups = [
   {
     title: 'Visualization',
     items: [
-      { label: '大屏项目', path: '/screens', icon: DataBoard },
-      { label: '2D 编辑器', path: '/screens/editor', icon: Grid },
-      { label: '三维场景', path: '/scenes', icon: Box },
-      { label: '3D 编辑器', path: '/scenes/editor', icon: Collection },
+      { label: '大屏可视化', path: '/screens', icon: DataBoard },
+      { label: '三维可视化', path: '/scenes', icon: Box },
     ],
   },
   {
@@ -127,6 +112,7 @@ const sectionLabelMap: Record<string, string> = {
   'system-management': '系统管理',
 }
 
+const isFullscreen = computed(() => Boolean(route.meta.fullscreen))
 const currentTitle = computed(() => String(route.meta.title ?? 'IoT Visual Platform'))
 const currentSection = computed(() => sectionLabelMap[String(route.meta.section ?? 'overview')])
 </script>

@@ -34,7 +34,7 @@
       <el-table-column prop="updatedAt" label="最近更新" min-width="160" />
       <el-table-column label="状态" min-width="100">
         <template #default="{ row }">
-          <el-tag :type="tagTypeMap[row.status]">{{ statusLabelMap[row.status] }}</el-tag>
+          <el-tag :type="getTagType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" min-width="240" fixed="right">
@@ -52,20 +52,30 @@
 
 <script setup lang="ts">
 import { sceneProjects as projects } from '../../mock/platform'
+import type { SceneProject } from '../../types/platform'
+
+type ProjectStatus = SceneProject['status']
 
 const groups = [...new Set(projects.map((item) => item.group))]
-
-const statusLabelMap = {
+const statusLabelMap: Record<ProjectStatus, string> = {
   draft: '草稿',
   editing: '编辑中',
   published: '已发布',
   archived: '已归档',
 }
 
-const tagTypeMap = {
+const tagTypeMap: Record<ProjectStatus, 'success' | 'warning' | 'info' | 'primary' | 'danger'> = {
   draft: 'info',
   editing: 'warning',
   published: 'success',
   archived: 'info',
-} as const
+}
+
+function getStatusLabel(status: ProjectStatus) {
+  return statusLabelMap[status]
+}
+
+function getTagType(status: ProjectStatus) {
+  return tagTypeMap[status]
+}
 </script>

@@ -2,9 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import DashboardLayout from '../layouts/DashboardLayout.vue'
 import OverviewHome from '../views/overview/OverviewHome.vue'
 import ScreenProjectsView from '../views/screens/ScreenProjectsView.vue'
-import ScreenEditorView from '../views/screens/ScreenEditorView.vue'
+import ScreenEditor from '../views/screens/ScreenEditor.vue'
 import SceneProjectsView from '../views/scenes/SceneProjectsView.vue'
-import SceneEditorView from '../views/scenes/SceneEditorView.vue'
 import DataSourcesView from '../views/data/DataSourcesView.vue'
 import DatasetsView from '../views/data/DatasetsView.vue'
 import UserManagementView from '../views/system/UserManagementView.vue'
@@ -29,25 +28,19 @@ const router = createRouter({
           path: 'screens',
           name: 'screens',
           component: ScreenProjectsView,
-          meta: { title: '大屏项目', section: 'screen-visualization' },
+          meta: { title: '大屏可视化', section: 'screen-visualization' },
         },
         {
-          path: 'screens/editor',
+          path: 'screens/:id/editor',
           name: 'screen-editor',
-          component: ScreenEditorView,
-          meta: { title: '2D 编辑器', section: 'screen-visualization' },
+          component: ScreenEditor,
+          meta: { title: '大屏编辑器', section: 'screen-editor', fullscreen: true },
         },
         {
           path: 'scenes',
           name: 'scenes',
           component: SceneProjectsView,
-          meta: { title: '三维场景', section: 'scene-visualization' },
-        },
-        {
-          path: 'scenes/editor',
-          name: 'scene-editor',
-          component: SceneEditorView,
-          meta: { title: '3D 编辑器', section: 'scene-visualization' },
+          meta: { title: '三维可视化', section: 'scene-visualization' },
         },
         {
           path: 'data-sources',
