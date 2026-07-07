@@ -18,25 +18,20 @@
 
     <div class="grid h-[calc(100vh-4rem)] min-h-0 grid-cols-[280px_1fr_300px]">
       <aside class="border-r border-slate-200 bg-white p-4">
-        <div class="mb-4">
-          <div class="text-sm font-medium text-slate-900">基础组件</div>
-          <div class="mt-1 text-xs text-slate-500">拖拽到中间画布</div>
-        </div>
-
-        <div
-          v-for="item in palette"
-          :key="item.component"
-          class="mb-3 flex cursor-grab items-center gap-3 rounded-lg border border-slate-200 px-3 py-3"
-          draggable="true"
-          @dragstart="onPaletteDragStart($event, item)"
-          @dragend="onPaletteDragEnd"
-        >
-          <span class="h-3 w-3 rounded-full" :class="item.dotClass"></span>
-          <div>
-            <div class="text-sm font-medium">{{ item.label }}</div>
-            <div class="text-xs text-slate-500">{{ item.desc }}</div>
-          </div>
-        </div>
+        <el-collapse v-model="SidebarActiveNames">
+          <el-collapse-item :title="group.label" :name="group.label" v-for="group in PaletteList">
+            <div class="pt-3">
+              <div v-for="item in group.items" :key="item.component"
+                class="mb-1 flex cursor-grab items-center gap-3 rounded-lg border border-slate-200 px-3 py-2"
+                draggable="true" @dragstart="onPaletteDragStart($event, item)" @dragend="onPaletteDragEnd">
+                <div>
+                  <div class="text-sm font-medium">{{ item.label }}</div>
+                  <div class="text-xs text-slate-500">{{ item.desc }}</div>
+                </div>
+              </div>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
       </aside>
 
       <main class="flex min-w-0 min-h-0 flex-col bg-slate-100 p-4">
@@ -45,33 +40,17 @@
           <div class="text-xs text-slate-400">支持拖拽、缩放、选中</div>
         </div>
 
-        <div
-          ref="canvasRef"
+        <div ref="canvasRef"
           class="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
-          @dragover.prevent
-          @drop="onCanvasDrop"
-          @pointerdown.self="selectedId = null"
-        >
+          @dragover.prevent @drop="onCanvasDrop" @pointerdown.self="selectedId = null">
           <div ref="stageRef" class="screen-stage">
             <div class="screen-stage-grid"></div>
 
-            <vue-draggable-resizable
-              v-for="node in nodes"
-              :key="node.id"
-              :x="node.x"
-              :y="node.y"
-              :w="node.w"
-              :h="node.h"
-              :parent="false"
-              @dragging="(x: number, y: number) => updatePos(node.id, x, y)"
-              @resizing="(x: number, y: number, w: number, h: number) => updateSize(node.id, x, y, w, h)"
-            >
+            <vue-draggable-resizable v-for="node in nodes" :key="node.id" :x="node.x" :y="node.y" :w="node.w"
+              :h="node.h" :parent="false" @dragging="(x: number, y: number) => updatePos(node.id, x, y)"
+              @resizing="(x: number, y: number, w: number, h: number) => updateSize(node.id, x, y, w, h)">
               <div class="screen-node" :class="[node.component, { selected: selectedId === node.id }]">
-                <component
-                  :is="componentMap[node.component]"
-                  v-bind="node.props"
-                  @click.stop="selectedId = node.id"
-                />
+                <component :is="componentMap[node.component]" v-bind="node.props" @click.stop="selectedId = node.id" />
               </div>
             </vue-draggable-resizable>
           </div>
@@ -109,19 +88,9 @@
             <el-divider><span class="text-xs text-slate-400">数据配置</span></el-divider>
 
             <el-form-item label="绑定数据集">
-              <el-select
-                v-model="selectedNode.props.datasetId"
-                placeholder="选择关联的数据集"
-                clearable
-                class="w-full"
-                @change="handleDatasetChange"
-              >
-                <el-option
-                  v-for="ds in datasetOptions"
-                  :key="ds.id"
-                  :label="ds.name"
-                  :value="ds.id"
-                />
+              <el-select v-model="selectedNode.props.datasetId" placeholder="选择关联的数据集" clearable class="w-full"
+                @change="handleDatasetChange">
+                <el-option v-for="ds in datasetOptions" :key="ds.id" :label="ds.name" :value="ds.id" />
               </el-select>
             </el-form-item>
 
@@ -129,31 +98,13 @@
               <!-- Chart widget: bind X and Y axes -->
               <template v-if="selectedNode.component === 'chart'">
                 <el-form-item label="维度字段 (X轴/分类)">
-                  <el-select
-                    v-model="selectedNode.props.xField"
-                    placeholder="选择X轴维度列"
-                    class="w-full"
-                  >
-                    <el-option
-                      v-for="col in datasetColumns"
-                      :key="col"
-                      :label="col"
-                      :value="col"
-                    />
+                  <el-select v-model="selectedNode.props.xField" placeholder="选择X轴维度列" class="w-full">
+                    <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
                   </el-select>
                 </el-form-item>
                 <el-form-item label="指标字段 (Y轴/数值)">
-                  <el-select
-                    v-model="selectedNode.props.yField"
-                    placeholder="选择Y轴数值列"
-                    class="w-full"
-                  >
-                    <el-option
-                      v-for="col in datasetColumns"
-                      :key="col"
-                      :label="col"
-                      :value="col"
-                    />
+                  <el-select v-model="selectedNode.props.yField" placeholder="选择Y轴数值列" class="w-full">
+                    <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
                   </el-select>
                 </el-form-item>
               </template>
@@ -161,17 +112,8 @@
               <!-- Text widget: bind single display column -->
               <template v-else-if="selectedNode.component === 'text'">
                 <el-form-item label="展示数值列">
-                  <el-select
-                    v-model="selectedNode.props.yField"
-                    placeholder="选择要展示的数值列"
-                    class="w-full"
-                  >
-                    <el-option
-                      v-for="col in datasetColumns"
-                      :key="col"
-                      :label="col"
-                      :value="col"
-                    />
+                  <el-select v-model="selectedNode.props.yField" placeholder="选择要展示的数值列" class="w-full">
+                    <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
                   </el-select>
                 </el-form-item>
               </template>
@@ -230,7 +172,7 @@ const screenTitle = computed(() => {
   return projectDetail.value?.name || `加载中... (${projectId})`
 })
 
-const palette = PaletteList
+const SidebarActiveNames = ref<string[]>([])
 
 const componentMap: Record<PaletteItem['component'], unknown> = {
   rect: WidgetRect,
@@ -249,7 +191,7 @@ function onPaletteDragStart(e: DragEvent, item: PaletteItem) {
   e.dataTransfer?.setData('application/json', JSON.stringify(item))
 }
 
-function onPaletteDragEnd() {}
+function onPaletteDragEnd() { }
 
 function updatePos(id: string, x: number, y: number) {
   const n = nodes.value.find((node) => node.id === id)
@@ -360,7 +302,7 @@ async function handlePublish() {
     } finally {
       publishing.value = false
     }
-  }).catch(() => {})
+  }).catch(() => { })
 }
 
 async function handlePreview() {
@@ -388,7 +330,7 @@ async function handleDatasetChange(datasetId: string) {
   }
   datasetColumns.value = []
   if (!datasetId) return
-  
+
   try {
     const res: any = await request.get(`/api/datasets/${datasetId}/preview`)
     datasetColumns.value = res.columns || []

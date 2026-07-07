@@ -11,12 +11,7 @@
         </el-select>
         <el-select v-model="group" placeholder="大屏分组">
           <el-option label="全部分组" value="all" />
-          <el-option
-            v-for="item in groups"
-            :key="item"
-            :label="item"
-            :value="item"
-          />
+          <el-option v-for="item in groups" :key="item" :label="item" :value="item" />
         </el-select>
         <div class="flex justify-end gap-3">
           <el-button @click="reset">重置</el-button>
@@ -25,29 +20,32 @@
       </div>
     </el-card>
 
-    <el-table v-loading="loading" :data="filteredProjects" border>
-      <el-table-column prop="name" label="大屏名称" min-width="220" />
-      <el-table-column prop="group" label="分组" min-width="120" />
-      <el-table-column prop="scene" label="关联三维场景" min-width="130" />
-      <el-table-column prop="owner" label="负责人" min-width="100" />
-      <el-table-column prop="publishedVersion" label="发布版本" min-width="100" />
-      <el-table-column prop="updatedAt" label="最近更新" min-width="160" />
-      <el-table-column label="状态" min-width="100">
-        <template #default="{ row }">
-          <el-tag :type="getTagType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" min-width="280" fixed="right">
-        <template #default="{ row }">
-          <div class="flex gap-2">
-            <el-button size="small" type="success" plain @click="openPreview(row.id)">预览</el-button>
-            <el-button size="small" type="primary" @click="openEditor(row.id)">编辑</el-button>
-            <el-button size="small" @click="handlePublish(row)">发布</el-button>
-            <el-button size="small" type="danger" plain @click="handleDelete(row.id)">删除</el-button>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div class="p-4 bg-white">
+
+      <el-table v-loading="loading" :data="filteredProjects" border>
+        <el-table-column prop="name" label="大屏名称" min-width="220" />
+        <el-table-column prop="group" label="分组" min-width="120" />
+        <el-table-column prop="scene" label="关联三维场景" min-width="130" />
+        <el-table-column prop="owner" label="负责人" min-width="100" />
+        <el-table-column prop="publishedVersion" label="发布版本" min-width="100" />
+        <el-table-column prop="updatedAt" label="最近更新" min-width="160" />
+        <el-table-column label="状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag :type="getTagType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="280" fixed="right">
+          <template #default="{ row }">
+            <div class="flex gap-2">
+              <el-button size="small" type="success" plain @click="openPreview(row.id)">预览</el-button>
+              <el-button size="small" type="primary" @click="openEditor(row.id)">编辑</el-button>
+              <el-button size="small" @click="handlePublish(row)">发布</el-button>
+              <el-button size="small" type="danger" plain @click="handleDelete(row.id)">删除</el-button>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
   </div>
 </template>
 
@@ -168,7 +166,7 @@ async function handlePublish(row: ScreenProject) {
     } catch (err) {
       console.error(err)
     }
-  }).catch(() => {})
+  }).catch(() => { })
 }
 
 const filteredProjects = computed(() => {

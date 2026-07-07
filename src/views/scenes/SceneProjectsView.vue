@@ -11,12 +11,7 @@
         </el-select>
         <el-select v-model="selectedGroup" placeholder="项目分组" clearable>
           <el-option label="全部分组" value="all" />
-          <el-option
-            v-for="group in groups"
-            :key="group"
-            :label="group"
-            :value="group"
-          />
+          <el-option v-for="group in groups" :key="group" :label="group" :value="group" />
         </el-select>
         <div class="flex justify-end gap-3">
           <el-button @click="resetFilters">重置</el-button>
@@ -25,37 +20,34 @@
       </div>
     </el-card>
 
-    <el-table v-loading="loading" :data="filteredProjects" border>
-      <el-table-column prop="name" label="场景名称" min-width="220" />
-      <el-table-column prop="group" label="分组" min-width="120" />
-      <el-table-column prop="owner" label="负责人" min-width="100" />
-      <el-table-column prop="modelCount" label="模型数" min-width="90" />
-      <el-table-column prop="engine" label="渲染引擎" min-width="110" />
-      <el-table-column prop="updatedAt" label="最近更新" min-width="160" />
-      <el-table-column label="状态" min-width="100">
-        <template #default="{ row }">
-          <el-tag :type="getTagType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" min-width="240" fixed="right">
-        <template #default="{ row }">
-          <div class="flex gap-2">
-            <el-button size="small" type="primary" @click="handleEdit(row.id)">编辑</el-button>
-            <el-button size="small" @click="handlePreview(row.id)">预览</el-button>
-            <el-button size="small" type="success" plain :disabled="row.status === 'published'" @click="handlePublish(row)">发布</el-button>
-            <el-button size="small" type="danger" plain @click="handleDelete(row)">删除</el-button>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
-
+    <div class="p-4 bg-white">
+      <el-table v-loading="loading" :data="filteredProjects" border>
+        <el-table-column prop="name" label="场景名称" min-width="220" />
+        <el-table-column prop="group" label="分组" min-width="120" />
+        <el-table-column prop="owner" label="负责人" min-width="100" />
+        <el-table-column prop="modelCount" label="模型数" min-width="90" />
+        <el-table-column prop="engine" label="渲染引擎" min-width="110" />
+        <el-table-column prop="updatedAt" label="最近更新" min-width="160" />
+        <el-table-column label="状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag :type="getTagType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="240" fixed="right">
+          <template #default="{ row }">
+            <div class="flex gap-2">
+              <el-button size="small" type="primary" @click="handleEdit(row.id)">编辑</el-button>
+              <el-button size="small" @click="handlePreview(row.id)">预览</el-button>
+              <el-button size="small" type="success" plain :disabled="row.status === 'published'"
+                @click="handlePublish(row)">发布</el-button>
+              <el-button size="small" type="danger" plain @click="handleDelete(row)">删除</el-button>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
     <!-- Create Scene Dialog -->
-    <el-dialog
-      v-model="createDialogVisible"
-      title="新建三维场景"
-      width="480px"
-      destroy-on-close
-    >
+    <el-dialog v-model="createDialogVisible" title="新建三维场景" width="480px" destroy-on-close>
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
         <el-form-item label="场景名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入三维场景名称" />

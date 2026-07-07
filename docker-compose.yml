@@ -1,0 +1,24 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: iot-mysql
+    restart: always
+
+    ports:
+      - "3306:3306"
+
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: iot_visual_platform
+      TZ: Asia/Shanghai
+
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./server/data/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    command:
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+
+volumes:
+  mysql-data:
