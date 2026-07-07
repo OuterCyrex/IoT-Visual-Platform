@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS screen_projects (
   status VARCHAR(32) NOT NULL,
   published_version VARCHAR(64) NOT NULL,
   tags TEXT NOT NULL,
+  screen_nodes TEXT NOT NULL,
   updated_at VARCHAR(32) NOT NULL
 );
 
@@ -53,6 +54,7 @@ CREATE TABLE IF NOT EXISTS scene_projects (
   model_count INT NOT NULL,
   status VARCHAR(32) NOT NULL,
   engine VARCHAR(64) NOT NULL,
+  scene_nodes TEXT NOT NULL,
   updated_at VARCHAR(32) NOT NULL
 );
 
@@ -70,6 +72,7 @@ CREATE TABLE IF NOT EXISTS data_sources (
 CREATE TABLE IF NOT EXISTS datasets (
   id VARCHAR(64) PRIMARY KEY,
   name VARCHAR(128) NOT NULL,
+  data_source_id VARCHAR(64) NOT NULL,
   source_name VARCHAR(128) NOT NULL,
   table_name VARCHAR(255) NOT NULL,
   refresh_mode VARCHAR(32) NOT NULL,
@@ -82,4 +85,40 @@ CREATE TABLE IF NOT EXISTS project_memberships (
   user_id VARCHAR(64) NOT NULL,
   project_id VARCHAR(64) NOT NULL,
   access_level VARCHAR(16) NOT NULL
+);
+
+-- Create separate IoT database for physical connection simulation
+CREATE DATABASE IF NOT EXISTS factory_prod
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE factory_prod;
+
+CREATE TABLE IF NOT EXISTS energy_realtime_view (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  timestamp DATETIME NOT NULL,
+  workshop_name VARCHAR(64) NOT NULL,
+  electricity_kwh DECIMAL(10, 2) NOT NULL,
+  water_m3 DECIMAL(10, 2) NOT NULL,
+  gas_m3 DECIMAL(10, 2) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS device_alarm_stream (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  timestamp DATETIME NOT NULL,
+  device_id VARCHAR(64) NOT NULL,
+  device_name VARCHAR(128) NOT NULL,
+  alarm_level VARCHAR(16) NOT NULL,
+  alarm_message VARCHAR(255) NOT NULL,
+  status VARCHAR(16) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS device_assets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  asset_code VARCHAR(64) NOT NULL UNIQUE,
+  name VARCHAR(128) NOT NULL,
+  type VARCHAR(64) NOT NULL,
+  model VARCHAR(64) NOT NULL,
+  location VARCHAR(128) NOT NULL,
+  status VARCHAR(32) NOT NULL
 );

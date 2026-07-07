@@ -5,5 +5,12 @@ export interface ScreenNode {
   w: number
   h: number
   component: string
-  props: Record<string, unknown>
+  props: {
+    text?: string
+    datasetId?: string
+    xField?: string
+    yField?: string
+    refreshInterval?: number
+    [key: string]: any
+  }
 }

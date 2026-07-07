@@ -18,6 +18,7 @@ export const screenProjects: ScreenProject[] = [
     status: 'published',
     publishedVersion: 'v1.8.0',
     tags: ['能耗', '实时监控'],
+    screenNodes: [],
   },
   {
     id: 'scr-002',
@@ -29,6 +30,7 @@ export const screenProjects: ScreenProject[] = [
     status: 'editing',
     publishedVersion: 'v0.9.2',
     tags: ['产线', 'OEE'],
+    screenNodes: [],
   },
   {
     id: 'scr-003',
@@ -40,6 +42,7 @@ export const screenProjects: ScreenProject[] = [
     status: 'draft',
     publishedVersion: '未发布',
     tags: ['环保', '告警'],
+    screenNodes: [],
   },
 ]
 
@@ -53,6 +56,7 @@ export const sceneProjects: SceneProject[] = [
     updatedAt: '2026-07-05 16:10',
     status: 'published',
     engine: 'Three.js',
+    sceneNodes: [],
   },
   {
     id: 'scn-002',
@@ -63,6 +67,7 @@ export const sceneProjects: SceneProject[] = [
     updatedAt: '2026-07-03 14:40',
     status: 'editing',
     engine: 'Three.js',
+    sceneNodes: [],
   },
   {
     id: 'scn-003',
@@ -73,6 +78,7 @@ export const sceneProjects: SceneProject[] = [
     updatedAt: '2026-07-01 10:30',
     status: 'draft',
     engine: 'Three.js',
+    sceneNodes: [],
   },
 ]
 
@@ -113,6 +119,7 @@ export const datasets: Dataset[] = [
   {
     id: 'set-001',
     name: '车间实时能耗',
+    dataSourceId: 'ds-001',
     sourceName: '生产 MySQL 主库',
     tableName: 'energy_realtime_view',
     refreshMode: '5 min',
@@ -122,17 +129,19 @@ export const datasets: Dataset[] = [
   {
     id: 'set-002',
     name: '设备告警流',
-    sourceName: '告警 MQTT Broker',
-    tableName: 'topic:/alarm/#',
-    refreshMode: 'real-time',
+    dataSourceId: 'ds-001',
+    sourceName: '生产 MySQL 主库',
+    tableName: 'device_alarm_stream',
+    refreshMode: '5 min',
     fieldCount: 8,
     updatedAt: '2026-07-05 13:44',
   },
   {
     id: 'set-003',
     name: '设备资产清单',
-    sourceName: '设备台账 REST API',
-    tableName: '/assets/list',
+    dataSourceId: 'ds-001',
+    sourceName: '生产 MySQL 主库',
+    tableName: 'device_assets',
     refreshMode: 'manual',
     fieldCount: 11,
     updatedAt: '2026-07-03 09:05',

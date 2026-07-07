@@ -1,5 +1,6 @@
-import { createServer } from 'node:http'
-import { notFound, readJsonBody, sendJson } from './lib/http.ts'
+import express from 'express'
+import cors from 'cors'
+import morgan from 'morgan'
 import { forbidden, unauthorized } from './lib/http.ts'
 import { roleHasPermission, verifyToken } from './lib/auth.ts'
 import { getUserById, listRoles } from './lib/store.ts'
@@ -8,77 +9,85 @@ import { routes } from './routes/platform.ts'
 const port = Number(process.env.API_PORT ?? 4000)
 const host = process.env.API_HOST ?? '127.0.0.1'
 
-const server = createServer(async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+const app = express()
 
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204)
-    res.end()
-    return
+// Enable CORS
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}))
+
+// Parse JSON payloads
+app.use(express.json())
+
+// Standard morgan dev logging middleware
+app.use(morgan('dev'))
+
+// Register routes
+for (const route of routes) {
+  const method = route.method.toLowerCase()
+  if (method !== 'get' && method !== 'post' && method !== 'put' && method !== 'delete' && method !== 'patch') {
+    continue
   }
 
-  if (!req.url || !req.method) {
-    sendJson(res, 400, { message: 'Invalid request' })
-    return
-  }
+  app[method](route.pattern, async (req, res) => {
+    const matched = req.path.match(route.pattern)
+    const params = matched?.groups ?? {}
+    const url = new URL(req.originalUrl, `http://localhost:${port}`)
 
-  const url = new URL(req.url, `http://localhost:${port}`)
-  const body = ['POST', 'PUT', 'PATCH'].includes(req.method) ? await readJsonBody(req) : undefined
-  const authHeader = req.headers.authorization
-  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : ''
-  const tokenPayload = bearerToken ? verifyToken(bearerToken) : null
-  const authUser = tokenPayload ? await getUserById(tokenPayload.userId) : null
-  const roles = await listRoles()
-  const authRole = roles?.find((role) => role.name === authUser?.role)
+    // Handle body compatibility (undefined if empty/no content)
+    let body = ['POST', 'PUT', 'PATCH'].includes(req.method) ? req.body : undefined
 
-  for (const route of routes) {
-    if (route.method !== req.method) {
-      continue
-    }
+    // Authenticate user
+    const authHeader = req.headers.authorization
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : ''
+    const tokenPayload = bearerToken ? verifyToken(bearerToken) : null
+    const authUser = tokenPayload ? await getUserById(tokenPayload.userId) : null
+    const roles = await listRoles()
+    const authRole = roles?.find((role) => role.name === authUser?.role)
 
-    const matched = url.pathname.match(route.pattern)
-    if (!matched) {
-      continue
+    // Authorization
+    if (route.permission) {
+      if (!authUser) {
+        unauthorized(res)
+        return
+      }
+      if (authUser.status !== 'active') {
+        forbidden(res, 'User is disabled')
+        return
+      }
+      if (!roleHasPermission(authRole, route.permission)) {
+        forbidden(res, `Missing permission: ${route.permission}`)
+        return
+      }
     }
 
     try {
-      if (route.permission) {
-        if (!authUser) {
-          unauthorized(res)
-          return
-        }
-        if (authUser.status !== 'active') {
-          forbidden(res, 'User is disabled')
-          return
-        }
-        if (!roleHasPermission(authRole, route.permission)) {
-          forbidden(res, `Missing permission: ${route.permission}`)
-          return
-        }
-      }
-
       await route.handler({
         req,
         res,
         url,
-        params: matched.groups ?? {},
+        params,
         body,
         authUser,
       })
     } catch (error) {
-      sendJson(res, 500, {
+      console.error(`[API Error] ${req.method} ${req.path}:`, error)
+      res.status(500).json({
         message: 'Internal server error',
         error: error instanceof Error ? error.message : String(error),
       })
     }
-    return
-  }
+  })
+}
 
-  notFound(res)
+// Fallback 404 for unhandled requests
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' })
 })
 
-server.listen(port, host, () => {
+app.listen(port, host, () => {
   console.log(`IoT Visual Platform API listening on http://${host}:${port}`)
 })
+

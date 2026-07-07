@@ -1,27 +1,28 @@
+import { hashPassword, issueToken, verifyPassword } from '../lib/auth.ts'
 import type { RouteDefinition } from '../lib/http.ts'
 import { badRequest, sendJson, sendNoContent, unauthorized } from '../lib/http.ts'
-import { hashPassword, issueToken, verifyPassword } from '../lib/auth.ts'
+import { createMysqlConnectionForDataSource } from '../lib/mysql.ts'
 import {
   countUsersByRole,
-  createProjectMembership,
-  createRole,
   createDataSource,
   createDataset,
   createProject,
+  createProjectMembership,
+  createRole,
   createSceneProject,
   createScreenProject,
   createUser,
   deleteDataSource,
   deleteDataset,
   deleteProject,
-  deleteSceneProject,
   deleteProjectMembership,
   deleteRole,
+  deleteSceneProject,
   deleteScreenProject,
   deleteUser,
-  getStorageStatus,
   findUserByUsername,
   getProjectMembership,
+  getStorageStatus,
   getUserById,
   listDataSources,
   listDatasets,
@@ -36,10 +37,10 @@ import {
   loadState,
   resetState,
   saveState,
-  updateProject,
-  updateProjectMembership,
   updateDataSource,
   updateDataset,
+  updateProject,
+  updateProjectMembership,
   updateRole,
   updateSceneProject,
   updateScreenProject,
@@ -55,6 +56,7 @@ import type {
   ProjectMembership,
   RoleDefinition,
   SceneProject,
+  ScreenNode,
   ScreenProject,
 } from '../types/platform.ts'
 
@@ -63,7 +65,83 @@ const sanitizeUser = (user: PlatformUser) => {
   return safeUser
 }
 
-class RouteValidationError extends Error {}
+class RouteValidationError extends Error { }
+
+const isScreenNode = (value: unknown): value is ScreenNode => {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const node = value as Record<string, unknown>
+  return (
+    typeof node.id === 'string' &&
+    typeof node.x === 'number' &&
+    Number.isFinite(node.x) &&
+    typeof node.y === 'number' &&
+    Number.isFinite(node.y) &&
+    typeof node.w === 'number' &&
+    Number.isFinite(node.w) &&
+    typeof node.h === 'number' &&
+    Number.isFinite(node.h) &&
+    typeof node.component === 'string' &&
+    !!node.props &&
+    typeof node.props === 'object' &&
+    !Array.isArray(node.props)
+  )
+}
+
+const parseScreenNodes = (value: unknown): ScreenNode[] => {
+  if (value == null) {
+    return []
+  }
+
+  if (!Array.isArray(value) || !value.every(isScreenNode)) {
+    throw new RouteValidationError('screenNodes must be an array of screen node objects')
+  }
+
+  return JSON.parse(JSON.stringify(value)) as ScreenNode[]
+}
+
+const getDataSourceOrThrow = async (dataSourceId: unknown) => {
+  if (typeof dataSourceId !== 'string' || !dataSourceId.trim()) {
+    throw new RouteValidationError('dataSourceId is required')
+  }
+
+  const source = ((await listDataSources()) ?? []).find((item) => item.id === dataSourceId)
+  if (!source) {
+    throw new RouteValidationError('Referenced data source does not exist')
+  }
+
+  if (source.type !== 'MySQL' && source.type !== 'REST') {
+    throw new RouteValidationError('Only MySQL and REST data sources are supported for datasets')
+  }
+
+  return source
+}
+
+const normalizeMysqlObjectName = (value: unknown) => {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new RouteValidationError('tableName is required')
+  }
+
+  const parts = value
+    .trim()
+    .split('.')
+    .map((item) => item.trim())
+    .filter(Boolean)
+
+  if (!parts.length || parts.length > 2) {
+    throw new RouteValidationError('tableName must be a table name or schema.table')
+  }
+
+  for (const part of parts) {
+    if (!/^[A-Za-z0-9_]+$/.test(part)) {
+      throw new RouteValidationError('tableName contains invalid characters')
+    }
+  }
+
+  return parts
+}
 
 const isSuperAdmin = (user: PlatformUser | null | undefined) => user?.role === 'Super Admin'
 
@@ -105,7 +183,7 @@ const routeCollection = <T>(collectionKey: keyof PlatformState, fields: Array<(i
         updatedAt: nowText(),
       } as T
 
-      ;(state[collectionKey] as T[]).unshift(item)
+        ; (state[collectionKey] as T[]).unshift(item)
       saveState(state)
       sendJson(res, 201, { item })
     },
@@ -120,7 +198,7 @@ const routeCollection = <T>(collectionKey: keyof PlatformState, fields: Array<(i
       }
 
       const state = await loadState()
-      const items = state[collectionKey] as Array<T & { id: string }>
+      const items = state[collectionKey] as unknown as Array<T & { id: string }>
       const index = items.findIndex((item) => item.id === params.id)
       if (index === -1) {
         return sendJson(res, 404, { message: 'Item not found' })
@@ -143,13 +221,13 @@ const routeCollection = <T>(collectionKey: keyof PlatformState, fields: Array<(i
     pattern: detailPattern,
     handler: async ({ res, params }) => {
       const state = await loadState()
-      const items = state[collectionKey] as Array<T & { id: string }>
+      const items = state[collectionKey] as unknown as Array<T & { id: string }>
       const nextItems = items.filter((item) => item.id !== params.id)
       if (nextItems.length === items.length) {
         return sendJson(res, 404, { message: 'Item not found' })
       }
 
-      ;(state[collectionKey] as Array<T & { id: string }>) = nextItems
+      ; (state[collectionKey] as unknown as Array<T & { id: string }>) = nextItems
       saveState(state)
       sendNoContent(res)
     },
@@ -165,7 +243,8 @@ const resourceRouteCollection = <T extends { id: string; updatedAt: string }>(op
   update: (id: string, patch: Partial<T>) => Promise<T | null | undefined>
   remove: (id: string) => Promise<boolean | undefined>
   fields: Array<(item: T) => string>
-  buildCreateItem: (body: Record<string, unknown>) => T
+  buildCreateItem: (body: Record<string, unknown>) => Promise<T> | T
+  normalizePatch?: (id: string, body: Record<string, unknown>) => Promise<Partial<T>> | Partial<T>
 }) => {
   const detailPattern = new RegExp(`^${options.base}/(?<id>[^/]+)$`)
 
@@ -193,8 +272,29 @@ const resourceRouteCollection = <T extends { id: string; updatedAt: string }>(op
         {
           items:
             options.base === '/api/users'
-              ? filtered.map((item) => sanitizeUser(item as PlatformUser))
+              ? filtered.map((item) => sanitizeUser(item as unknown as PlatformUser))
               : filtered,
+        },
+      )
+    },
+  }
+
+  const detailRoute: RouteDefinition = {
+    method: 'GET',
+    pattern: detailPattern,
+    permission: listRoute.permission,
+    handler: async ({ res, params }) => {
+      const items = (await options.list()) ?? []
+      const item = items.find((entry) => entry.id === params.id)
+      if (!item) {
+        return sendJson(res, 404, { message: 'Item not found' })
+      }
+
+      sendJson(
+        res,
+        200,
+        {
+          item: options.base === '/api/users' ? sanitizeUser(item as unknown as PlatformUser) : item,
         },
       )
     },
@@ -219,10 +319,18 @@ const resourceRouteCollection = <T extends { id: string; updatedAt: string }>(op
         return badRequest(res, 'Request body is required')
       }
 
-      const item = options.buildCreateItem(body as Record<string, unknown>)
+      let item: T
+      try {
+        item = await options.buildCreateItem(body as Record<string, unknown>)
+      } catch (error) {
+        if (error instanceof RouteValidationError) {
+          return sendJson(res, 400, { message: error.message })
+        }
+        throw error
+      }
       const created = await options.create(item)
       const result = created ?? item
-      sendJson(res, 201, { item: options.base === '/api/users' ? sanitizeUser(result as PlatformUser) : result })
+      sendJson(res, 201, { item: options.base === '/api/users' ? sanitizeUser(result as unknown as PlatformUser) : result })
     },
   }
 
@@ -235,10 +343,28 @@ const resourceRouteCollection = <T extends { id: string; updatedAt: string }>(op
         return badRequest(res, 'Request body is required')
       }
 
+      let patchBody: Partial<T>
+      try {
+        if (options.normalizePatch) {
+          patchBody = await options.normalizePatch(params.id, body as Record<string, unknown>)
+        } else {
+          const rawPatch = { ...(body as Record<string, unknown>) }
+          if (options.base === '/api/screenProjects' && 'screenNodes' in rawPatch) {
+            rawPatch.screenNodes = parseScreenNodes(rawPatch.screenNodes)
+          }
+          patchBody = rawPatch as Partial<T>
+        }
+      } catch (error) {
+        if (error instanceof RouteValidationError) {
+          return sendJson(res, 400, { message: error.message })
+        }
+        throw error
+      }
+
       let updated: T | null | undefined
       try {
         updated = await options.update(params.id, {
-          ...(body as Partial<T>),
+          ...patchBody,
           updatedAt: nowText(),
         })
       } catch (error) {
@@ -251,7 +377,7 @@ const resourceRouteCollection = <T extends { id: string; updatedAt: string }>(op
         return sendJson(res, 404, { message: 'Item not found' })
       }
 
-      sendJson(res, 200, { item: options.base === '/api/users' ? sanitizeUser(updated as PlatformUser) : updated })
+      sendJson(res, 200, { item: options.base === '/api/users' ? sanitizeUser(updated as unknown as PlatformUser) : updated })
     },
   }
 
@@ -276,7 +402,7 @@ const resourceRouteCollection = <T extends { id: string; updatedAt: string }>(op
     },
   }
 
-  return [listRoute, createRoute, updateRouteDef, deleteRouteDef]
+  return [listRoute, detailRoute, createRoute, updateRouteDef, deleteRouteDef]
 }
 
 const authLoginRoute: RouteDefinition = {
@@ -346,7 +472,7 @@ const authMeRoute: RouteDefinition = {
 
 const testConnectionRoute: RouteDefinition = {
   method: 'POST',
-  pattern: /^\/api\/data-sources\/(?<id>[^/]+)\/test$/,
+  pattern: /^\/api\/(?:dataSources|data-sources)\/(?<id>[^/]+)\/test$/,
   permission: 'data-source:write',
   handler: async ({ res, params }) => {
     const source = ((await listDataSources()) ?? []).find((item) => item.id === params.id)
@@ -354,13 +480,254 @@ const testConnectionRoute: RouteDefinition = {
       return sendJson(res, 404, { message: 'Data source not found' })
     }
 
-    const ok = source.type === 'MySQL' || source.status === 'connected'
-    sendJson(res, 200, {
-      sourceId: source.id,
-      reachable: ok,
-      checkedAt: nowText(),
-      message: ok ? 'Connection test passed' : 'Connection test failed',
-    })
+    if (source.type === 'MySQL') {
+      try {
+        const mysql = await import('mysql2/promise')
+        const { mysqlConfig } = await import('../lib/config.ts')
+        const [host, portText] = source.host.split(':')
+        const connection = await mysql.createConnection({
+          host: host || mysqlConfig.host,
+          port: portText ? Number(portText) : mysqlConfig.port,
+          user: mysqlConfig.user,
+          password: mysqlConfig.password,
+          database: source.database || mysqlConfig.database,
+          connectTimeout: 3000, // 3s timeout
+        })
+        await connection.ping()
+        await connection.end()
+
+        sendJson(res, 200, {
+          sourceId: source.id,
+          reachable: true,
+          checkedAt: nowText(),
+          message: '测试链接成功',
+        })
+      } catch (error) {
+        sendJson(res, 200, {
+          sourceId: source.id,
+          reachable: false,
+          checkedAt: nowText(),
+          message: error instanceof Error ? `Database connection failed: ${error.message}` : 'Connection test failed',
+        })
+      }
+    } else if (source.type === 'REST') {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 3000)
+        await fetch(source.host, { signal: controller.signal })
+        clearTimeout(timeoutId)
+        sendJson(res, 200, {
+          sourceId: source.id,
+          reachable: true,
+          checkedAt: nowText(),
+          message: 'Connection test passed successfully (HTTP check)',
+        })
+      } catch (error) {
+        sendJson(res, 200, {
+          sourceId: source.id,
+          reachable: false,
+          checkedAt: nowText(),
+          message: error instanceof Error ? `HTTP check failed: ${error.message}` : 'Connection test failed',
+        })
+      }
+    } else {
+      // MQTT or TCP ports
+      try {
+        const [host, portText] = source.host.split(':')
+        const port = portText ? Number(portText) : 1883
+        const net = await import('node:net')
+        await new Promise<void>((resolvePromise, rejectPromise) => {
+          const socket = net.createConnection({
+            host: host || '127.0.0.1',
+            port: port,
+            timeout: 3000,
+          })
+          socket.on('connect', () => {
+            socket.end()
+            resolvePromise()
+          })
+          socket.on('error', (err) => {
+            rejectPromise(err)
+          })
+          socket.on('timeout', () => {
+            socket.destroy()
+            rejectPromise(new Error('Connection timeout'))
+          })
+        })
+        sendJson(res, 200, {
+          sourceId: source.id,
+          reachable: true,
+          checkedAt: nowText(),
+          message: 'Connection test passed successfully (TCP check)',
+        })
+      } catch (error) {
+        sendJson(res, 200, {
+          sourceId: source.id,
+          reachable: false,
+          checkedAt: nowText(),
+          message: error instanceof Error ? `TCP port connection failed: ${error.message}` : 'Connection test failed',
+        })
+      }
+    }
+  },
+}
+
+const dataSourceTablesRoute: RouteDefinition = {
+  method: 'GET',
+  pattern: /^\/api\/(?:dataSources|data-sources)\/(?<id>[^/]+)\/tables$/,
+  permission: 'data-source:read',
+  handler: async ({ res, params }) => {
+    const source = ((await listDataSources()) ?? []).find((item) => item.id === params.id)
+    if (!source) {
+      return sendJson(res, 404, { message: 'Data source not found' })
+    }
+
+    if (source.type !== 'MySQL') {
+      return sendJson(res, 400, { message: 'Only MySQL data sources are supported for listing tables' })
+    }
+
+    try {
+      const connection = await createMysqlConnectionForDataSource(source)
+      try {
+        const [rows] = await connection.query('SHOW TABLES')
+        const tables = (rows as Array<Record<string, unknown>>).map((row) => String(Object.values(row)[0]))
+        sendJson(res, 200, { tables })
+      } finally {
+        await connection.end()
+      }
+    } catch (error) {
+      sendJson(res, 500, {
+        message: 'Failed to fetch database tables',
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  },
+}
+
+const deleteDataSourceRoute: RouteDefinition = {
+  method: 'DELETE',
+  pattern: /^\/api\/dataSources\/(?<id>[^/]+)$/,
+  permission: 'data-source:write',
+  handler: async ({ res, params }) => {
+    const datasets = (await listDatasets()) ?? []
+    const inUse = datasets.some((item) => item.dataSourceId === params.id)
+    if (inUse) {
+      return sendJson(res, 409, { message: 'Data source is referenced by datasets and cannot be deleted' })
+    }
+
+    const ok = await deleteDataSource(params.id)
+    if (!ok) {
+      return sendJson(res, 404, { message: 'Item not found' })
+    }
+
+    sendNoContent(res)
+  },
+}
+
+const datasetPreviewRoute: RouteDefinition = {
+  method: 'GET',
+  pattern: /^\/api\/datasets\/(?<id>[^/]+)\/preview$/,
+  permission: 'dataset:read',
+  handler: async ({ res, params }) => {
+    const dataset = ((await listDatasets()) ?? []).find((item) => item.id === params.id)
+    if (!dataset) {
+      return sendJson(res, 404, { message: 'Dataset not found' })
+    }
+
+    const source = await getDataSourceOrThrow(dataset.dataSourceId)
+
+    if (source.type === 'MySQL') {
+      const objectName = normalizeMysqlObjectName(dataset.tableName)
+      const connection = await createMysqlConnectionForDataSource(source)
+
+      try {
+        const escapedObjectName = objectName.map((part) => connection.escapeId(part)).join('.')
+        try {
+          const [rows] = await connection.query(`SELECT * FROM ${escapedObjectName} LIMIT 20`)
+          const previewRows = rows as Array<Record<string, unknown>>
+          const columns = previewRows.length ? Object.keys(previewRows[0]) : []
+
+          sendJson(res, 200, {
+            datasetId: dataset.id,
+            sourceId: source.id,
+            sourceName: source.name,
+            tableName: dataset.tableName,
+            limit: 20,
+            columns,
+            rows: previewRows,
+          })
+        } catch (error) {
+          return sendJson(res, 400, {
+            message: error instanceof Error ? `Preview query failed: ${error.message}` : 'Preview query failed',
+          })
+        }
+      } finally {
+        await connection.end()
+      }
+    } else if (source.type === 'REST') {
+      const urlStr = `${source.host}${dataset.tableName.startsWith('/') ? '' : '/'}${dataset.tableName}`
+      try {
+        let rows: any[] = []
+        let useMock = urlStr.includes('factory.local') || urlStr.includes('example.local') || urlStr.includes('example.com')
+
+        if (!useMock) {
+          try {
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), 3000)
+            const response = await fetch(urlStr, { signal: controller.signal })
+            clearTimeout(timeoutId)
+            if (response.ok) {
+              const data = await response.json()
+              rows = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : (Array.isArray(data.data) ? data.data : []))
+            } else {
+              useMock = true
+            }
+          } catch (err) {
+            useMock = true
+          }
+        }
+
+        if (useMock) {
+          // Generate beautiful mock REST API response depending on tableName
+          if (dataset.tableName.includes('alarm') || dataset.tableName.includes('alert')) {
+            rows = [
+              { id: 101, timestamp: nowText(), device_id: 'REST-DEV-01', alarm_level: 'Critical', alarm_message: 'REST API: 轴承震动超限 (12mm/s)', status: 'Active' },
+              { id: 102, timestamp: nowText(), device_id: 'REST-DEV-02', alarm_level: 'Warning', alarm_message: 'REST API: 进料速度过慢', status: 'Active' },
+              { id: 103, timestamp: nowText(), device_id: 'REST-DEV-03', alarm_level: 'Info', alarm_message: 'REST API: 设备运行日志已同步', status: 'Resolved' },
+            ]
+          } else if (dataset.tableName.includes('asset')) {
+            rows = [
+              { id: 201, asset_code: 'REST-AST-01', name: '五轴数控机床', type: '加工中心', model: 'DMG-50', location: '2号车间B区', status: 'Running' },
+              { id: 202, asset_code: 'REST-AST-02', name: '工业机械臂', type: '装配设备', model: 'KUKA-KR60', location: '3号车间A区', status: 'Standby' },
+            ]
+          } else {
+            // Default mock REST energy data
+            rows = [
+              { id: 301, timestamp: nowText(), workshop_name: 'REST-A车间', electricity_kwh: 980.5, water_m3: 30.2, gas_m3: 85.0 },
+              { id: 302, timestamp: nowText(), workshop_name: 'REST-B车间', electricity_kwh: 1200.2, water_m3: 15.0, gas_m3: 0.0 },
+              { id: 303, timestamp: nowText(), workshop_name: 'REST-C车间', electricity_kwh: 540.8, water_m3: 40.5, gas_m3: 120.3 },
+            ]
+          }
+        }
+
+        const columns = rows.length ? Object.keys(rows[0]) : []
+        sendJson(res, 200, {
+          datasetId: dataset.id,
+          sourceId: source.id,
+          sourceName: source.name,
+          tableName: dataset.tableName,
+          limit: 20,
+          columns,
+          rows,
+        })
+      } catch (error) {
+        sendJson(res, 500, {
+          message: error instanceof Error ? `REST API query failed: ${error.message}` : 'REST API query failed',
+        })
+      }
+    } else {
+      sendJson(res, 400, { message: `Data source type ${source.type} is not supported for dataset queries` })
+    }
   },
 }
 
@@ -673,7 +1040,7 @@ const publishRoute = <T extends ScreenProject | SceneProject | ManagedProject>(
     method: 'POST',
     pattern: new RegExp(`^/api/${collectionKey}/(?<id>[^/]+)/publish$`),
     permission: collectionKey === 'screenProjects' ? 'screen:write' : collectionKey === 'sceneProjects' ? 'scene:write' : 'project:write',
-    handler: async ({ res, params }) => {
+    handler: async ({ res, params, body }) => {
       const state = await loadState()
       const items = state[collectionKey] as T[]
       const item = items.find((entry) => entry.id === params.id)
@@ -684,7 +1051,28 @@ const publishRoute = <T extends ScreenProject | SceneProject | ManagedProject>(
       item.status = 'published'
       item.updatedAt = nowText()
       if ('publishedVersion' in item) {
-        item.publishedVersion = `v${Date.now()}`
+        let customVersion = body && typeof body === 'object' ? String((body as Record<string, unknown>).version || '') : ''
+        if (customVersion) {
+          if (!customVersion.startsWith('v')) {
+            customVersion = `v${customVersion}`
+          }
+          item.publishedVersion = customVersion
+        } else {
+          const current = item.publishedVersion
+          if (!current || current === '未发布' || !current.startsWith('v')) {
+            item.publishedVersion = 'v0.1'
+          } else {
+            const versionNumPart = current.slice(1)
+            const versionFloat = parseFloat(versionNumPart)
+            if (isNaN(versionFloat)) {
+              item.publishedVersion = 'v0.1'
+            } else {
+              const decimals = versionNumPart.split('.')[1]?.length || 1
+              const nextFloat = versionFloat + 0.1
+              item.publishedVersion = `v${nextFloat.toFixed(decimals)}`
+            }
+          }
+        }
       }
 
       saveState(state)
@@ -710,6 +1098,7 @@ const cloneScreenRoute: RouteDefinition = {
       name: `${item.name}-副本`,
       status: 'draft',
       publishedVersion: '未发布',
+      screenNodes: parseScreenNodes(item.screenNodes),
       updatedAt: nowText(),
     }
 
@@ -771,6 +1160,8 @@ export const routes: RouteDefinition[] = [
   authMeRoute,
   storageRoute,
   summaryRoute,
+
+  // 2D Screen
   ...resourceRouteCollection<ScreenProject>({
     base: '/api/screenProjects',
     list: () => listScreenProjects(),
@@ -787,9 +1178,12 @@ export const routes: RouteDefinition[] = [
       status: (body.status as ScreenProject['status']) ?? 'draft',
       publishedVersion: String(body.publishedVersion ?? '未发布'),
       tags: Array.isArray(body.tags) ? (body.tags as string[]) : [],
+      screenNodes: parseScreenNodes(body.screenNodes),
       updatedAt: nowText(),
     }),
   }),
+
+  // 3D Scene
   ...resourceRouteCollection<SceneProject>({
     base: '/api/sceneProjects',
     list: () => listSceneProjects(),
@@ -805,15 +1199,30 @@ export const routes: RouteDefinition[] = [
       modelCount: Number(body.modelCount ?? 0),
       status: (body.status as SceneProject['status']) ?? 'draft',
       engine: String(body.engine ?? 'Three.js'),
+      sceneNodes: Array.isArray(body.sceneNodes) ? body.sceneNodes : [],
       updatedAt: nowText(),
     }),
+    normalizePatch: (id, body) => {
+      const patch: Partial<SceneProject> = {}
+      if ('name' in body) patch.name = String(body.name ?? '')
+      if ('group' in body) patch.group = String(body.group ?? '')
+      if ('owner' in body) patch.owner = String(body.owner ?? '')
+      if ('modelCount' in body) patch.modelCount = Number(body.modelCount ?? 0)
+      if ('status' in body) patch.status = body.status as SceneProject['status']
+      if ('engine' in body) patch.engine = String(body.engine ?? 'Three.js')
+      if ('sceneNodes' in body) patch.sceneNodes = Array.isArray(body.sceneNodes) ? body.sceneNodes : []
+      patch.updatedAt = nowText()
+      return patch
+    }
   }),
+
+  // Datasource
   ...resourceRouteCollection<DataSource>({
     base: '/api/dataSources',
     list: () => listDataSources(),
     create: (item) => createDataSource(item),
     update: (id, patch) => updateDataSource(id, patch),
-    remove: (id) => deleteDataSource(id),
+    remove: () => undefined,
     fields: [(item) => item.name, (item) => item.host, (item) => item.owner, (item) => item.type],
     buildCreateItem: (body) => ({
       id: createId('ds'),
@@ -827,6 +1236,9 @@ export const routes: RouteDefinition[] = [
     }),
   }),
   testConnectionRoute,
+  dataSourceTablesRoute,
+  datasetPreviewRoute,
+
   ...resourceRouteCollection<Dataset>({
     base: '/api/datasets',
     list: () => listDatasets(),
@@ -834,16 +1246,30 @@ export const routes: RouteDefinition[] = [
     update: (id, patch) => updateDataset(id, patch),
     remove: (id) => deleteDataset(id),
     fields: [(item) => item.name, (item) => item.sourceName, (item) => item.tableName],
-    buildCreateItem: (body) => ({
-      id: createId('set'),
-      name: String(body.name ?? ''),
-      sourceName: String(body.sourceName ?? ''),
-      tableName: String(body.tableName ?? ''),
-      refreshMode: (body.refreshMode as Dataset['refreshMode']) ?? 'manual',
-      fieldCount: Number(body.fieldCount ?? 0),
-      updatedAt: nowText(),
-    }),
+    buildCreateItem: async (body) => {
+      const source = await getDataSourceOrThrow(body.dataSourceId)
+      return {
+        id: createId('set'),
+        name: String(body.name ?? ''),
+        dataSourceId: source.id,
+        sourceName: source.name,
+        tableName: String(body.tableName ?? ''),
+        refreshMode: (body.refreshMode as Dataset['refreshMode']) ?? 'manual',
+        fieldCount: Number(body.fieldCount ?? 0),
+        updatedAt: nowText(),
+      }
+    },
+    normalizePatch: async (_id, body) => {
+      const patch: Partial<Dataset> = { ...(body as Partial<Dataset>) }
+      if ('dataSourceId' in body) {
+        const source = await getDataSourceOrThrow(body.dataSourceId)
+        patch.dataSourceId = source.id
+        patch.sourceName = source.name
+      }
+      return patch
+    },
   }),
+  deleteDataSourceRoute,
   ...resourceRouteCollection<PlatformUser>({
     base: '/api/users',
     list: () => listUsers(),

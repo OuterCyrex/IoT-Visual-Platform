@@ -12,7 +12,7 @@
 
         <div class="py-5">
           <div
-            v-for="group in navigationGroups"
+            v-for="group in filteredNavigationGroups"
             :key="group.title"
             class="mb-6"
           >
@@ -42,12 +42,26 @@
       </aside>
 
       <main class="flex-1 overflow-auto">
-        <header class="border-b border-slate-200 bg-white px-8 py-5">
-          <div class="flex items-start justify-between gap-6">
+        <header class="border-b border-slate-200 bg-white px-8 py-4">
+          <div class="flex items-center justify-between gap-6">
             <div>
               <div class="text-sm text-slate-500">{{ currentSection }}</div>
               <h1 class="mt-1 text-2xl font-semibold text-slate-950">{{ currentTitle }}</h1>
             </div>
+
+            <!-- User Menu Dropdown -->
+            <el-dropdown trigger="click" @command="handleCommand">
+              <span class="flex items-center gap-2 cursor-pointer hover:text-blue-600 transition-colors">
+                <el-avatar :size="32" class="bg-blue-600 text-white font-bold">{{ avatarText }}</el-avatar>
+                <span class="text-sm font-medium text-slate-700">{{ username }}</span>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item disabled>角色: {{ userRole }}</el-dropdown-item>
+                  <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </header>
 
@@ -65,17 +79,31 @@ import {
   Collection,
   Connection,
   DataBoard,
-  Grid,
   Monitor,
   Setting,
   User,
 } from '@element-plus/icons-vue'
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 const route = useRoute()
+const router = useRouter()
 
-const navigationGroups = [
+const userStr = localStorage.getItem('auth_user')
+const user = userStr ? JSON.parse(userStr) : null
+const username = computed(() => user?.displayName || '未登录')
+const userRole = computed(() => user?.role || '访客')
+const avatarText = computed(() => (user?.displayName || 'U').slice(0, 1).toUpperCase())
+
+interface NavItem {
+  label: string
+  path: string
+  icon: any
+  permission?: string
+}
+
+const navigationGroups: Array<{ title: string; items: NavItem[] }> = [
   {
     title: 'Overview',
     items: [{ label: '平台概览', path: '/overview', icon: Monitor }],
@@ -83,26 +111,38 @@ const navigationGroups = [
   {
     title: 'Visualization',
     items: [
-      { label: '大屏可视化', path: '/screens', icon: DataBoard },
-      { label: '三维可视化', path: '/scenes', icon: Box },
+      { label: '大屏可视化', path: '/screens', icon: DataBoard, permission: 'screen:read' },
+      { label: '三维可视化', path: '/scenes', icon: Box, permission: 'scene:read' },
     ],
   },
   {
     title: 'Data',
     items: [
-      { label: '数据源管理', path: '/data-sources', icon: Connection },
-      { label: '数据集管理', path: '/datasets', icon: Collection },
+      { label: '数据源管理', path: '/data-sources', icon: Connection, permission: 'data-source:read' },
+      { label: '数据集管理', path: '/datasets', icon: Collection, permission: 'dataset:read' },
     ],
   },
   {
     title: 'System',
     items: [
-      { label: '用户管理', path: '/users', icon: User },
-      { label: '项目管理', path: '/projects', icon: DataBoard },
-      { label: '系统设置', path: '/settings', icon: Setting },
+      { label: '用户管理', path: '/users', icon: User, permission: 'user:read' },
+      { label: '项目管理', path: '/projects', icon: DataBoard, permission: 'project:read' },
+      { label: '系统设置', path: '/settings', icon: Setting, permission: 'system:write' },
     ],
   },
 ]
+
+const filteredNavigationGroups = computed(() => {
+  const permissionsStr = localStorage.getItem('auth_permissions')
+  const userPermissions: string[] = permissionsStr ? JSON.parse(permissionsStr) : []
+
+  return navigationGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => !item.permission || userPermissions.includes(item.permission)),
+    }))
+    .filter((group) => group.items.length > 0)
+})
 
 const sectionLabelMap: Record<string, string> = {
   overview: '平台总览',
@@ -115,4 +155,14 @@ const sectionLabelMap: Record<string, string> = {
 const isFullscreen = computed(() => Boolean(route.meta.fullscreen))
 const currentTitle = computed(() => String(route.meta.title ?? 'IoT Visual Platform'))
 const currentSection = computed(() => sectionLabelMap[String(route.meta.section ?? 'overview')])
+
+function handleCommand(command: string) {
+  if (command === 'logout') {
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('auth_user')
+    localStorage.removeItem('auth_permissions')
+    ElMessage.success('已成功退出登录')
+    router.push({ name: 'login' })
+  }
+}
 </script>

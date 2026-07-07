@@ -13,6 +13,7 @@ import type {
   PlatformUser,
   RoleDefinition,
   SceneProject,
+  ScreenNode,
   ScreenProject,
 } from '../types/platform.ts'
 
@@ -427,16 +428,16 @@ const readStateFromMysql = async (): Promise<PlatformState> => {
       'SELECT id, name, type, project_group, owner, status, updated_at FROM projects ORDER BY name',
     )
     const [screenRows] = await connection.query(
-      'SELECT id, name, project_group, scene, owner, status, published_version, tags, updated_at FROM screen_projects ORDER BY name',
+      'SELECT id, name, project_group, scene, owner, status, published_version, tags, screen_nodes, updated_at FROM screen_projects ORDER BY name',
     )
     const [sceneRows] = await connection.query(
-      'SELECT id, name, project_group, owner, model_count, status, engine, updated_at FROM scene_projects ORDER BY name',
+      'SELECT id, name, project_group, owner, model_count, status, engine, scene_nodes, updated_at FROM scene_projects ORDER BY name',
     )
     const [sourceRows] = await connection.query(
       'SELECT id, name, type, host, database_name, owner, status, updated_at FROM data_sources ORDER BY name',
     )
     const [datasetRows] = await connection.query(
-      'SELECT id, name, source_name, table_name, refresh_mode, field_count, updated_at FROM datasets ORDER BY name',
+      'SELECT id, name, data_source_id, source_name, table_name, refresh_mode, field_count, updated_at FROM datasets ORDER BY name',
     )
 
     return {
@@ -480,6 +481,7 @@ const readStateFromMysql = async (): Promise<PlatformState> => {
           status: row.status as ScreenProject['status'],
           publishedVersion: String(row.published_version),
           tags: parseJson<string[]>(row.tags, []),
+          screenNodes: parseJson<ScreenNode[]>(row.screen_nodes, []),
           updatedAt: String(row.updated_at),
         }),
       ),
@@ -492,6 +494,7 @@ const readStateFromMysql = async (): Promise<PlatformState> => {
           modelCount: Number(row.model_count),
           status: row.status as SceneProject['status'],
           engine: String(row.engine),
+          sceneNodes: parseJson<any[]>(row.scene_nodes, []),
           updatedAt: String(row.updated_at),
         }),
       ),
@@ -511,6 +514,7 @@ const readStateFromMysql = async (): Promise<PlatformState> => {
         (row): Dataset => ({
           id: String(row.id),
           name: String(row.name),
+          dataSourceId: String(row.data_source_id),
           sourceName: String(row.source_name),
           tableName: String(row.table_name),
           refreshMode: row.refresh_mode as Dataset['refreshMode'],
@@ -576,7 +580,7 @@ const writeStateToMysql = async (state: PlatformState) => {
     await replaceTable(
       connection,
       'screen_projects',
-      ['id', 'name', 'project_group', 'scene', 'owner', 'status', 'published_version', 'tags', 'updated_at'],
+      ['id', 'name', 'project_group', 'scene', 'owner', 'status', 'published_version', 'tags', 'screen_nodes', 'updated_at'],
       state.screenProjects,
       (item) => [
         item.id,
@@ -587,6 +591,7 @@ const writeStateToMysql = async (state: PlatformState) => {
         item.status,
         item.publishedVersion,
         JSON.stringify(item.tags),
+        JSON.stringify(item.screenNodes),
         item.updatedAt,
       ],
     )
@@ -594,7 +599,7 @@ const writeStateToMysql = async (state: PlatformState) => {
     await replaceTable(
       connection,
       'scene_projects',
-      ['id', 'name', 'project_group', 'owner', 'model_count', 'status', 'engine', 'updated_at'],
+      ['id', 'name', 'project_group', 'owner', 'model_count', 'status', 'engine', 'scene_nodes', 'updated_at'],
       state.sceneProjects,
       (item) => [
         item.id,
@@ -604,6 +609,7 @@ const writeStateToMysql = async (state: PlatformState) => {
         item.modelCount,
         item.status,
         item.engine,
+        JSON.stringify((item as any).sceneNodes || []),
         item.updatedAt,
       ],
     )
@@ -628,11 +634,12 @@ const writeStateToMysql = async (state: PlatformState) => {
     await replaceTable(
       connection,
       'datasets',
-      ['id', 'name', 'source_name', 'table_name', 'refresh_mode', 'field_count', 'updated_at'],
+      ['id', 'name', 'data_source_id', 'source_name', 'table_name', 'refresh_mode', 'field_count', 'updated_at'],
       state.datasets,
       (item) => [
         item.id,
         item.name,
+        item.dataSourceId,
         item.sourceName,
         item.tableName,
         item.refreshMode,
@@ -1048,7 +1055,7 @@ const mysqlAdapter: StorageAdapter = {
     const connection = await createMysqlConnection(true)
     try {
       const [rows] = await connection.query(
-        'SELECT id, name, project_group, scene, owner, status, published_version, tags, updated_at FROM screen_projects ORDER BY name',
+        'SELECT id, name, project_group, scene, owner, status, published_version, tags, screen_nodes, updated_at FROM screen_projects ORDER BY name',
       )
       return (rows as Array<Record<string, unknown>>).map(
         (row): ScreenProject => ({
@@ -1060,6 +1067,7 @@ const mysqlAdapter: StorageAdapter = {
           status: row.status as ScreenProject['status'],
           publishedVersion: String(row.published_version),
           tags: parseJson<string[]>(row.tags, []),
+          screenNodes: parseJson<ScreenNode[]>(row.screen_nodes, []),
           updatedAt: String(row.updated_at),
         }),
       )
@@ -1071,7 +1079,7 @@ const mysqlAdapter: StorageAdapter = {
     const connection = await createMysqlConnection(true)
     try {
       await connection.query(
-        'INSERT INTO screen_projects (id, name, project_group, scene, owner, status, published_version, tags, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO screen_projects (id, name, project_group, scene, owner, status, published_version, tags, screen_nodes, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           project.id,
           project.name,
@@ -1081,6 +1089,7 @@ const mysqlAdapter: StorageAdapter = {
           project.status,
           project.publishedVersion,
           JSON.stringify(project.tags),
+          JSON.stringify(project.screenNodes),
           project.updatedAt,
         ],
       )
@@ -1098,7 +1107,7 @@ const mysqlAdapter: StorageAdapter = {
     const connection = await createMysqlConnection(true)
     try {
       await connection.query(
-        'UPDATE screen_projects SET name = ?, project_group = ?, scene = ?, owner = ?, status = ?, published_version = ?, tags = ?, updated_at = ? WHERE id = ?',
+        'UPDATE screen_projects SET name = ?, project_group = ?, scene = ?, owner = ?, status = ?, published_version = ?, tags = ?, screen_nodes = ?, updated_at = ? WHERE id = ?',
         [
           next.name,
           next.group,
@@ -1107,6 +1116,7 @@ const mysqlAdapter: StorageAdapter = {
           next.status,
           next.publishedVersion,
           JSON.stringify(next.tags),
+          JSON.stringify(next.screenNodes),
           next.updatedAt,
           id,
         ],
@@ -1129,7 +1139,7 @@ const mysqlAdapter: StorageAdapter = {
     const connection = await createMysqlConnection(true)
     try {
       const [rows] = await connection.query(
-        'SELECT id, name, project_group, owner, model_count, status, engine, updated_at FROM scene_projects ORDER BY name',
+        'SELECT id, name, project_group, owner, model_count, status, engine, scene_nodes, updated_at FROM scene_projects ORDER BY name',
       )
       return (rows as Array<Record<string, unknown>>).map(
         (row): SceneProject => ({
@@ -1140,6 +1150,7 @@ const mysqlAdapter: StorageAdapter = {
           modelCount: Number(row.model_count),
           status: row.status as SceneProject['status'],
           engine: String(row.engine),
+          sceneNodes: parseJson<any[]>(row.scene_nodes, []),
           updatedAt: String(row.updated_at),
         }),
       )
@@ -1151,8 +1162,18 @@ const mysqlAdapter: StorageAdapter = {
     const connection = await createMysqlConnection(true)
     try {
       await connection.query(
-        'INSERT INTO scene_projects (id, name, project_group, owner, model_count, status, engine, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [project.id, project.name, project.group, project.owner, project.modelCount, project.status, project.engine, project.updatedAt],
+        'INSERT INTO scene_projects (id, name, project_group, owner, model_count, status, engine, scene_nodes, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          project.id,
+          project.name,
+          project.group,
+          project.owner,
+          project.modelCount,
+          project.status,
+          project.engine,
+          JSON.stringify(project.sceneNodes || []),
+          project.updatedAt
+        ],
       )
       return project
     } finally {
@@ -1168,8 +1189,18 @@ const mysqlAdapter: StorageAdapter = {
     const connection = await createMysqlConnection(true)
     try {
       await connection.query(
-        'UPDATE scene_projects SET name = ?, project_group = ?, owner = ?, model_count = ?, status = ?, engine = ?, updated_at = ? WHERE id = ?',
-        [next.name, next.group, next.owner, next.modelCount, next.status, next.engine, next.updatedAt, id],
+        'UPDATE scene_projects SET name = ?, project_group = ?, owner = ?, model_count = ?, status = ?, engine = ?, scene_nodes = ?, updated_at = ? WHERE id = ?',
+        [
+          next.name,
+          next.group,
+          next.owner,
+          next.modelCount,
+          next.status,
+          next.engine,
+          JSON.stringify(next.sceneNodes || []),
+          next.updatedAt,
+          id
+        ],
       )
       return next
     } finally {
@@ -1249,12 +1280,13 @@ const mysqlAdapter: StorageAdapter = {
     const connection = await createMysqlConnection(true)
     try {
       const [rows] = await connection.query(
-        'SELECT id, name, source_name, table_name, refresh_mode, field_count, updated_at FROM datasets ORDER BY name',
+        'SELECT id, name, data_source_id, source_name, table_name, refresh_mode, field_count, updated_at FROM datasets ORDER BY name',
       )
       return (rows as Array<Record<string, unknown>>).map(
         (row): Dataset => ({
           id: String(row.id),
           name: String(row.name),
+          dataSourceId: String(row.data_source_id),
           sourceName: String(row.source_name),
           tableName: String(row.table_name),
           refreshMode: row.refresh_mode as Dataset['refreshMode'],
@@ -1270,10 +1302,11 @@ const mysqlAdapter: StorageAdapter = {
     const connection = await createMysqlConnection(true)
     try {
       await connection.query(
-        'INSERT INTO datasets (id, name, source_name, table_name, refresh_mode, field_count, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO datasets (id, name, data_source_id, source_name, table_name, refresh_mode, field_count, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         [
           dataset.id,
           dataset.name,
+          dataset.dataSourceId,
           dataset.sourceName,
           dataset.tableName,
           dataset.refreshMode,
@@ -1295,8 +1328,8 @@ const mysqlAdapter: StorageAdapter = {
     const connection = await createMysqlConnection(true)
     try {
       await connection.query(
-        'UPDATE datasets SET name = ?, source_name = ?, table_name = ?, refresh_mode = ?, field_count = ?, updated_at = ? WHERE id = ?',
-        [next.name, next.sourceName, next.tableName, next.refreshMode, next.fieldCount, next.updatedAt, id],
+        'UPDATE datasets SET name = ?, data_source_id = ?, source_name = ?, table_name = ?, refresh_mode = ?, field_count = ?, updated_at = ? WHERE id = ?',
+        [next.name, next.dataSourceId, next.sourceName, next.tableName, next.refreshMode, next.fieldCount, next.updatedAt, id],
       )
       return next
     } finally {

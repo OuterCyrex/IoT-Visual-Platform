@@ -84,10 +84,10 @@ npm run api:mysql:init
 - `roles`：角色与权限定义
 - `users`：账号信息与密码摘要
 - `projects`：全局项目
-- `screen_projects`：2D 大屏项目元数据
+- `screen_projects`：2D 大屏项目元数据与画布内容快照（`screen_nodes` JSON 文本）
 - `scene_projects`：3D 场景项目元数据
 - `data_sources`：数据源元数据
-- `datasets`：数据集元数据
+- `datasets`：数据集元数据，已通过 `data_source_id` 关联数据源
 - `project_memberships`：项目级授权关系
 
 ## 当前后端能力矩阵
@@ -240,6 +240,12 @@ npm run api:mysql:init
 - `POST /api/datasets`
 - `PUT /api/datasets/:id`
 - `DELETE /api/datasets/:id`
+
+当前约束：
+
+- `dataset` 必须关联已存在的数据源
+- 当前仅允许关联 `MySQL` 类型的数据源
+- 已被 `dataset` 引用的 `dataSource` 不允许删除
 
 ### 系统与调试
 

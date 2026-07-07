@@ -2,6 +2,16 @@ export type ProjectStatus = 'draft' | 'editing' | 'published' | 'archived'
 export type ConnectionStatus = 'connected' | 'warning' | 'failed'
 export type UserStatus = 'active' | 'disabled'
 
+export interface ScreenNode {
+  id: string
+  x: number
+  y: number
+  w: number
+  h: number
+  component: string
+  props: Record<string, unknown>
+}
+
 export interface ScreenProject {
   id: string
   name: string
@@ -12,6 +22,7 @@ export interface ScreenProject {
   status: ProjectStatus
   publishedVersion: string
   tags: string[]
+  screenNodes: ScreenNode[]
 }
 
 export interface SceneProject {
@@ -23,6 +34,7 @@ export interface SceneProject {
   updatedAt: string
   status: ProjectStatus
   engine: string
+  sceneNodes: any[]
 }
 
 export interface DataSource {
@@ -39,6 +51,7 @@ export interface DataSource {
 export interface Dataset {
   id: string
   name: string
+  dataSourceId: string
   sourceName: string
   tableName: string
   refreshMode: 'manual' | '5 min' | 'real-time'

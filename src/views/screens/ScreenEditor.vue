@@ -10,9 +10,9 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <el-button>预览</el-button>
-        <el-button>保存</el-button>
-        <el-button type="primary">发布</el-button>
+        <el-button @click="handlePreview">预览</el-button>
+        <el-button :loading="saving" @click="handleSave">保存</el-button>
+        <el-button type="primary" :loading="publishing" @click="handlePublish">发布</el-button>
       </div>
     </header>
 
@@ -67,11 +67,11 @@
               @resizing="(x: number, y: number, w: number, h: number) => updateSize(node.id, x, y, w, h)"
             >
               <div class="screen-node" :class="[node.component, { selected: selectedId === node.id }]">
-              <component
-                :is="componentMap[node.component]"
-                v-bind="node.props"
-                @click.stop="selectedId = node.id"
-              />
+                <component
+                  :is="componentMap[node.component]"
+                  v-bind="node.props"
+                  @click.stop="selectedId = node.id"
+                />
               </div>
             </vue-draggable-resizable>
           </div>
@@ -105,7 +105,88 @@
                 <el-input-number v-model="selectedNode.y" :min="0" class="w-full" />
               </el-form-item>
             </div>
-            <el-button class="w-full" type="danger" plain @click="removeSelected">
+            <!-- Data Binding Section -->
+            <el-divider><span class="text-xs text-slate-400">数据配置</span></el-divider>
+
+            <el-form-item label="绑定数据集">
+              <el-select
+                v-model="selectedNode.props.datasetId"
+                placeholder="选择关联的数据集"
+                clearable
+                class="w-full"
+                @change="handleDatasetChange"
+              >
+                <el-option
+                  v-for="ds in datasetOptions"
+                  :key="ds.id"
+                  :label="ds.name"
+                  :value="ds.id"
+                />
+              </el-select>
+            </el-form-item>
+
+            <template v-if="selectedNode.props.datasetId">
+              <!-- Chart widget: bind X and Y axes -->
+              <template v-if="selectedNode.component === 'chart'">
+                <el-form-item label="维度字段 (X轴/分类)">
+                  <el-select
+                    v-model="selectedNode.props.xField"
+                    placeholder="选择X轴维度列"
+                    class="w-full"
+                  >
+                    <el-option
+                      v-for="col in datasetColumns"
+                      :key="col"
+                      :label="col"
+                      :value="col"
+                    />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="指标字段 (Y轴/数值)">
+                  <el-select
+                    v-model="selectedNode.props.yField"
+                    placeholder="选择Y轴数值列"
+                    class="w-full"
+                  >
+                    <el-option
+                      v-for="col in datasetColumns"
+                      :key="col"
+                      :label="col"
+                      :value="col"
+                    />
+                  </el-select>
+                </el-form-item>
+              </template>
+
+              <!-- Text widget: bind single display column -->
+              <template v-else-if="selectedNode.component === 'text'">
+                <el-form-item label="展示数值列">
+                  <el-select
+                    v-model="selectedNode.props.yField"
+                    placeholder="选择要展示的数值列"
+                    class="w-full"
+                  >
+                    <el-option
+                      v-for="col in datasetColumns"
+                      :key="col"
+                      :label="col"
+                      :value="col"
+                    />
+                  </el-select>
+                </el-form-item>
+              </template>
+
+              <el-form-item label="自动刷新策略">
+                <el-select v-model="selectedNode.props.refreshInterval" class="w-full">
+                  <el-option label="手动刷新" :value="0" />
+                  <el-option label="每 5 秒" :value="5000" />
+                  <el-option label="每 10 秒" :value="10000" />
+                  <el-option label="每 30 秒" :value="30000" />
+                </el-select>
+              </el-form-item>
+            </template>
+
+            <el-button class="w-full mt-4" type="danger" plain @click="removeSelected">
               删除元素
             </el-button>
           </el-form>
@@ -118,12 +199,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import VueDraggableResizable from 'vue-draggable-resizable'
 import 'vue-draggable-resizable/style.css'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import request from '../../utils/request'
 import { PaletteList, type PaletteItem } from '../../types/palette-item'
 import type { ScreenNode } from '../../types/screen-node'
+import type { ScreenProject, Dataset } from '../../types/platform'
 import WidgetRect from '../../components/screen-widgets/WidgetRect.vue'
 import WidgetCircle from '../../components/screen-widgets/WidgetCircle.vue'
 import WidgetChart from '../../components/screen-widgets/WidgetChart.vue'
@@ -131,13 +215,19 @@ import WidgetText from '../../components/screen-widgets/WidgetText.vue'
 
 const router = useRouter()
 const route = useRoute()
+const projectId = String(route.params.id)
 const canvasRef = ref<HTMLElement | null>(null)
 const stageRef = ref<HTMLElement | null>(null)
 const selectedId = ref<string | null>(null)
 
+const projectDetail = ref<ScreenProject | null>(null)
+const nodes = ref<ScreenNode[]>([])
+
+const saving = ref(false)
+const publishing = ref(false)
+
 const screenTitle = computed(() => {
-  const id = String(route.params.id ?? 'unknown')
-  return `大屏项目 ${id}`
+  return projectDetail.value?.name || `加载中... (${projectId})`
 })
 
 const palette = PaletteList
@@ -149,7 +239,6 @@ const componentMap: Record<PaletteItem['component'], unknown> = {
   text: WidgetText,
 }
 
-const nodes = ref<ScreenNode[]>([])
 const selectedNode = computed(() => nodes.value.find((node) => node.id === selectedId.value) ?? null)
 
 function backToList() {
@@ -207,4 +296,125 @@ function removeSelected() {
   nodes.value = nodes.value.filter((node) => node.id !== selectedId.value)
   selectedId.value = null
 }
+
+async function loadProject() {
+  try {
+    const res: any = await request.get('/api/screenProjects')
+    const detail = res.items?.find((item: any) => item.id === projectId)
+    if (!detail) {
+      ElMessage.error('未找到该大屏项目')
+      return
+    }
+    projectDetail.value = detail
+    nodes.value = (detail as any).screenNodes || []
+  } catch (err) {
+    console.error('加载大屏数据失败:', err)
+  }
+}
+
+async function handleSave() {
+  if (!projectDetail.value) return
+  saving.value = true
+  try {
+    await request.put(`/api/screenProjects/${projectId}`, {
+      ...projectDetail.value,
+      screenNodes: nodes.value,
+      status: 'editing',
+    })
+    ElMessage.success('保存成功')
+    await loadProject()
+  } catch (err) {
+    console.error('保存失败:', err)
+  } finally {
+    saving.value = false
+  }
+}
+
+async function handlePublish() {
+  if (!projectDetail.value) return
+  const currentVer = projectDetail.value.publishedVersion || '未发布'
+  ElMessageBox.prompt(
+    `请输入发布版本号（留空则系统自动递增。当前版本：${currentVer}）`,
+    '发布大屏',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputPlaceholder: '如: 1.0.0 或 0.2',
+    }
+  ).then(async ({ value }) => {
+    publishing.value = true
+    try {
+      // Save first
+      await request.put(`/api/screenProjects/${projectId}`, {
+        ...projectDetail.value,
+        screenNodes: nodes.value,
+      })
+      // Then publish
+      await request.post(`/api/screenProjects/${projectId}/publish`, {
+        version: value ? value.trim() : undefined,
+      })
+      ElMessage.success('发布成功')
+      await loadProject()
+    } catch (err) {
+      console.error('发布失败:', err)
+    } finally {
+      publishing.value = false
+    }
+  }).catch(() => {})
+}
+
+async function handlePreview() {
+  await handleSave()
+  router.push(`/screens/${projectId}/preview`)
+}
+
+const datasetOptions = ref<Dataset[]>([])
+const datasetColumns = ref<string[]>([])
+
+async function loadDatasetOptions() {
+  try {
+    const res: any = await request.get('/api/datasets')
+    datasetOptions.value = res.items || []
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+async function handleDatasetChange(datasetId: string) {
+  if (selectedNode.value) {
+    selectedNode.value.props.xField = ''
+    selectedNode.value.props.yField = ''
+    selectedNode.value.props.refreshInterval = 0
+  }
+  datasetColumns.value = []
+  if (!datasetId) return
+  
+  try {
+    const res: any = await request.get(`/api/datasets/${datasetId}/preview`)
+    datasetColumns.value = res.columns || []
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+watch(
+  () => selectedNode.value,
+  async (newNode) => {
+    datasetColumns.value = []
+    if (newNode && newNode.props.datasetId) {
+      try {
+        const res: any = await request.get(`/api/datasets/${newNode.props.datasetId}/preview`)
+        datasetColumns.value = res.columns || []
+      } catch (err) {
+        console.error(err)
+      }
+    }
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  loadProject()
+  loadDatasetOptions()
+})
 </script>

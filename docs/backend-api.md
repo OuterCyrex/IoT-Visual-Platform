@@ -75,6 +75,7 @@ POST /api/debug/reset
 ### 大屏项目
 
 - `GET /api/screenProjects`
+- `GET /api/screenProjects/:id`
 - `POST /api/screenProjects`
 - `PUT /api/screenProjects/:id`
 - `DELETE /api/screenProjects/:id`
@@ -84,6 +85,7 @@ POST /api/debug/reset
 ### 三维场景
 
 - `GET /api/sceneProjects`
+- `GET /api/sceneProjects/:id`
 - `POST /api/sceneProjects`
 - `PUT /api/sceneProjects/:id`
 - `DELETE /api/sceneProjects/:id`
@@ -92,6 +94,7 @@ POST /api/debug/reset
 ### 数据源
 
 - `GET /api/dataSources`
+- `GET /api/dataSources/:id`
 - `POST /api/dataSources`
 - `PUT /api/dataSources/:id`
 - `DELETE /api/dataSources/:id`
@@ -100,13 +103,31 @@ POST /api/debug/reset
 ### 数据集
 
 - `GET /api/datasets`
+- `GET /api/datasets/:id`
 - `POST /api/datasets`
 - `PUT /api/datasets/:id`
 - `DELETE /api/datasets/:id`
 
+## 数据接入约束
+
+当前后端已经将 `dataset` 与 `dataSource` 建立真实关联：
+
+- `dataset.dataSourceId`：关联的数据源主键
+- `dataset.sourceName`：冗余展示字段，创建/更新时由后端按数据源名称回填
+
+当前版本只支持基于 `MySQL` 类型数据源创建或更新数据集：
+
+- `POST /api/datasets`
+- `PUT /api/datasets/:id`
+
+如果引用的数据源不存在，或数据源类型不是 `MySQL`，接口会返回 `400`。
+
+如果某个数据源已被数据集引用，`DELETE /api/dataSources/:id` 会返回 `409`。
+
 ### 用户
 
 - `GET /api/users`
+- `GET /api/users/:id`
 - `POST /api/users`
 - `PUT /api/users/:id`
 - `DELETE /api/users/:id`
@@ -115,6 +136,7 @@ POST /api/debug/reset
 ### 项目管理
 
 - `GET /api/projects`
+- `GET /api/projects/:id`
 - `POST /api/projects`
 - `PUT /api/projects/:id`
 - `DELETE /api/projects/:id`
@@ -123,6 +145,7 @@ POST /api/debug/reset
 ### RBAC
 
 - `GET /api/roles`
+- `GET /api/roles/:id`
 - `POST /api/roles`
 - `PUT /api/roles/:id`
 - `DELETE /api/roles/:id`
@@ -130,9 +153,51 @@ POST /api/debug/reset
 ### 项目成员授权
 
 - `GET /api/project-memberships?projectId=...`
+- `GET /api/project-memberships/:id`
 - `POST /api/project-memberships`
 - `PUT /api/project-memberships/:id`
 - `DELETE /api/project-memberships/:id`
+
+## 大屏内容模型
+
+`screenProjects` 新增 `screenNodes` 字段，接口层返回结构化数组，数据库层存储为 `screen_projects.screen_nodes` 的 JSON 文本。
+
+```json
+{
+  "id": "scr-001",
+  "name": "厂区能耗总览",
+  "group": "能源中心",
+  "scene": "园区驾驶舱",
+  "owner": "李工",
+  "status": "published",
+  "publishedVersion": "v1.8.0",
+  "tags": ["能耗", "实时监控"],
+  "screenNodes": [
+    {
+      "id": "node-1",
+      "x": 120,
+      "y": 80,
+      "w": 280,
+      "h": 160,
+      "component": "rect",
+      "props": {
+        "text": "矩形容器"
+      }
+    }
+  ],
+  "updatedAt": "2026-07-05 18:30"
+}
+```
+
+`screenNodes` 每项结构：
+
+- `id: string`
+- `x: number`
+- `y: number`
+- `w: number`
+- `h: number`
+- `component: string`
+- `props: object`
 
 ## 查询约定
 
