@@ -43,8 +43,10 @@
         </div>
 
         <div ref="canvasRef"
-          class="relative min-h-0 flex-1 overflow-auto rounded-2xl border border-slate-200 bg-white shadow-sm"
-          @dragover.prevent @drop="onCanvasDrop" @pointerdown.self="selectedId = null">
+          class="relative min-h-0 flex-1 overflow-auto rounded-2xl border border-slate-200 bg-white shadow-sm cursor-grab select-none"
+          :class="{ 'cursor-grabbing': isPanning }"
+          @dragover.prevent @drop="onCanvasDrop" @pointerdown="onCanvasPointerDown"
+          @pointermove="onCanvasPointerMove" @pointerup="endCanvasPan" @pointercancel="endCanvasPan">
           <div ref="stageRef" class="screen-stage">
             <div class="screen-stage-grid"></div>
 
@@ -143,7 +145,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import VueDraggableResizable from 'vue-draggable-resizable'
 import 'vue-draggable-resizable/style.css'
@@ -160,6 +162,8 @@ const projectId = String(route.params.id)
 const canvasRef = ref<HTMLElement | null>(null)
 const stageRef = ref<HTMLElement | null>(null)
 const selectedId = ref<string | null>(null)
+const isPanning = ref(false)
+const panStart = ref({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
 
 const projectDetail = ref<ScreenProject | null>(null)
 const nodes = ref<ScreenNode[]>([])
@@ -184,6 +188,42 @@ function onPaletteDragStart(e: DragEvent, item: PaletteItem) {
 }
 
 function onPaletteDragEnd() { }
+
+function onCanvasPointerDown(event: PointerEvent) {
+  const target = event.target as HTMLElement | null
+  if (target?.closest('.vdr')) return
+  if (!canvasRef.value) return
+
+  isPanning.value = true
+  panStart.value = {
+    x: event.clientX,
+    y: event.clientY,
+    scrollLeft: canvasRef.value.scrollLeft,
+    scrollTop: canvasRef.value.scrollTop,
+  }
+  canvasRef.value.setPointerCapture(event.pointerId)
+  selectedId.value = null
+}
+
+function onCanvasPointerMove(event: PointerEvent) {
+  if (!isPanning.value || !canvasRef.value) return
+
+  const dx = event.clientX - panStart.value.x
+  const dy = event.clientY - panStart.value.y
+  canvasRef.value.scrollLeft = panStart.value.scrollLeft - dx
+  canvasRef.value.scrollTop = panStart.value.scrollTop - dy
+}
+
+function endCanvasPan(event?: PointerEvent) {
+  if (canvasRef.value && event) {
+    try {
+      canvasRef.value.releasePointerCapture(event.pointerId)
+    } catch {
+      // ignore if capture already ended
+    }
+  }
+  isPanning.value = false
+}
 
 function updatePos(id: string, x: number, y: number) {
   const n = nodes.value.find((node) => node.id === id)
@@ -350,5 +390,10 @@ watch(
 onMounted(() => {
   loadProject()
   loadDatasetOptions()
+  window.addEventListener('pointerup', endCanvasPan as EventListener)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('pointerup', endCanvasPan as EventListener)
 })
 </script>
