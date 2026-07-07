@@ -1,0 +1,85 @@
+CREATE DATABASE IF NOT EXISTS iot_visual_platform
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE iot_visual_platform;
+
+CREATE TABLE IF NOT EXISTS roles (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  description TEXT NOT NULL,
+  permissions TEXT NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR(64) PRIMARY KEY,
+  username VARCHAR(128) NOT NULL UNIQUE,
+  display_name VARCHAR(128) NOT NULL,
+  role VARCHAR(128) NOT NULL,
+  phone VARCHAR(32) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  status VARCHAR(32) NOT NULL,
+  updated_at VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS projects (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  type VARCHAR(16) NOT NULL,
+  project_group VARCHAR(128) NOT NULL,
+  owner VARCHAR(128) NOT NULL,
+  status VARCHAR(32) NOT NULL,
+  updated_at VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS screen_projects (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  project_group VARCHAR(128) NOT NULL,
+  scene VARCHAR(128) NOT NULL,
+  owner VARCHAR(128) NOT NULL,
+  status VARCHAR(32) NOT NULL,
+  published_version VARCHAR(64) NOT NULL,
+  tags TEXT NOT NULL,
+  updated_at VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS scene_projects (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  project_group VARCHAR(128) NOT NULL,
+  owner VARCHAR(128) NOT NULL,
+  model_count INT NOT NULL,
+  status VARCHAR(32) NOT NULL,
+  engine VARCHAR(64) NOT NULL,
+  updated_at VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS data_sources (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  type VARCHAR(32) NOT NULL,
+  host VARCHAR(255) NOT NULL,
+  database_name VARCHAR(255) NOT NULL,
+  owner VARCHAR(128) NOT NULL,
+  status VARCHAR(32) NOT NULL,
+  updated_at VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS datasets (
+  id VARCHAR(64) PRIMARY KEY,
+  name VARCHAR(128) NOT NULL,
+  source_name VARCHAR(128) NOT NULL,
+  table_name VARCHAR(255) NOT NULL,
+  refresh_mode VARCHAR(32) NOT NULL,
+  field_count INT NOT NULL,
+  updated_at VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS project_memberships (
+  id VARCHAR(64) PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL,
+  project_id VARCHAR(64) NOT NULL,
+  access_level VARCHAR(16) NOT NULL
+);
