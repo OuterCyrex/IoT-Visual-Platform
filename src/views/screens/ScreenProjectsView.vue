@@ -15,13 +15,12 @@
         </el-select>
         <div class="flex justify-end gap-3">
           <el-button @click="reset">重置</el-button>
-          <el-button type="primary" @click="handleCreate">新建大屏</el-button>
+          <el-button type="primary" @click="openCreateDialog">新建大屏</el-button>
         </div>
       </div>
     </el-card>
 
     <div class="p-4 bg-white">
-
       <el-table v-loading="loading" :data="filteredProjects" border>
         <el-table-column prop="name" label="大屏名称" min-width="220" />
         <el-table-column prop="group" label="分组" min-width="120" />
@@ -46,25 +45,82 @@
         </el-table-column>
       </el-table>
     </div>
+
+    <el-dialog v-model="createDialogVisible" title="新建大屏" width="480px" destroy-on-close>
+      <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
+        <el-form-item label="大屏名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入大屏名称" />
+        </el-form-item>
+        <el-form-item label="项目分组" prop="group">
+          <el-input v-model="form.group" placeholder="如：运营中心、设备看板" />
+        </el-form-item>
+        <el-form-item label="关联三维场景" prop="scene">
+          <el-select v-model="form.scene" placeholder="请选择三维场景" class="w-full" filterable>
+            <el-option
+              v-for="item in sceneOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.name"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="负责人" prop="owner">
+          <el-select v-model="form.owner" placeholder="请选择负责人" class="w-full" filterable>
+            <el-option
+              v-for="item in ownerOptions"
+              :key="item.id"
+              :label="item.displayName"
+              :value="item.displayName"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <el-button @click="createDialogVisible = false">取消</el-button>
+          <el-button type="primary" :loading="submitting" @click="submitCreate">确定</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import request from '../../utils/request'
-import type { ScreenProject, ProjectStatus } from '../../types/platform'
+import type { PlatformUser, ProjectStatus, SceneProject, ScreenProject } from '../../types/platform'
 
 const router = useRouter()
 const projects = ref<ScreenProject[]>([])
+const sceneOptions = ref<SceneProject[]>([])
+const ownerOptions = ref<PlatformUser[]>([])
 const loading = ref(false)
+const submitting = ref(false)
 
 const keyword = ref('')
 const status = ref<'all' | ProjectStatus>('all')
 const group = ref<'all' | string>('all')
 
-const groups = computed(() => [...new Set(projects.value.map((item) => item.group))])
+const createDialogVisible = ref(false)
+const formRef = ref<FormInstance>()
+const form = ref({
+  name: '',
+  group: '',
+  scene: '',
+  owner: 'Admin',
+})
+
+const rules = {
+  name: [{ required: true, message: '请输入大屏名称', trigger: 'blur' }],
+  group: [{ required: true, message: '请输入项目分组', trigger: 'blur' }],
+  scene: [{ required: true, message: '请选择三维场景', trigger: 'change' }],
+  owner: [{ required: true, message: '请选择负责人', trigger: 'change' }],
+}
+
+const groups = computed(() => [...new Set(projects.value.map((item) => item.group).filter(Boolean))])
 
 const statusLabelMap: Record<ProjectStatus, string> = {
   draft: '草稿',
@@ -80,12 +136,12 @@ const tagTypeMap: Record<ProjectStatus, 'success' | 'warning' | 'info' | 'primar
   archived: 'info',
 }
 
-function getStatusLabel(status: ProjectStatus) {
-  return statusLabelMap[status]
+function getStatusLabel(value: ProjectStatus) {
+  return statusLabelMap[value]
 }
 
-function getTagType(status: ProjectStatus) {
-  return tagTypeMap[status]
+function getTagType(value: ProjectStatus) {
+  return tagTypeMap[value]
 }
 
 async function fetchProjects() {
@@ -100,32 +156,59 @@ async function fetchProjects() {
   }
 }
 
-async function handleCreate() {
-  ElMessageBox.prompt('请输入大屏项目名称', '新建大屏', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    inputPattern: /\S+/,
-    inputErrorMessage: '名称不能为空',
-  }).then(async ({ value }) => {
-    try {
-      const userStr = localStorage.getItem('auth_user')
-      const user = userStr ? JSON.parse(userStr) : null
-      const owner = user?.displayName || 'Admin'
+async function fetchSceneOptions() {
+  try {
+    const res: any = await request.get('/api/sceneProjects')
+    sceneOptions.value = res.items || []
+  } catch (err) {
+    console.error(err)
+  }
+}
 
+async function fetchOwnerOptions() {
+  try {
+    const res: any = await request.get('/api/users')
+    ownerOptions.value = res.items || []
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+function openCreateDialog() {
+  const userStr = localStorage.getItem('auth_user')
+  const user = userStr ? JSON.parse(userStr) : null
+  form.value = {
+    name: '',
+    group: '',
+    scene: '',
+    owner: user?.displayName || 'Admin',
+  }
+  createDialogVisible.value = true
+}
+
+async function submitCreate() {
+  if (!formRef.value) return
+  await formRef.value.validate(async (valid) => {
+    if (!valid) return
+    submitting.value = true
+    try {
       await request.post('/api/screenProjects', {
-        name: value,
-        group: '默认分组',
-        scene: '无',
-        owner: owner,
+        name: form.value.name,
+        group: form.value.group,
+        scene: form.value.scene,
+        owner: form.value.owner,
         status: 'draft',
         publishedVersion: '未发布',
         tags: [],
         screenNodes: [],
       })
       ElMessage.success('创建成功')
-      fetchProjects()
+      createDialogVisible.value = false
+      await fetchProjects()
     } catch (err) {
       console.error(err)
+    } finally {
+      submitting.value = false
     }
   })
 }
@@ -139,7 +222,7 @@ async function handleDelete(id: string) {
     try {
       await request.delete(`/api/screenProjects/${id}`)
       ElMessage.success('删除成功')
-      fetchProjects()
+      await fetchProjects()
     } catch (err) {
       console.error(err)
     }
@@ -148,25 +231,23 @@ async function handleDelete(id: string) {
 
 async function handlePublish(row: ScreenProject) {
   const currentVer = row.publishedVersion || '未发布'
-  ElMessageBox.prompt(
-    `请输入发布版本号（留空则系统自动递增。当前版本：${currentVer}）`,
-    '发布大屏',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      inputPlaceholder: '如: 1.0.0 或 0.2',
-    }
-  ).then(async ({ value }) => {
-    try {
-      await request.post(`/api/screenProjects/${row.id}/publish`, {
-        version: value ? value.trim() : undefined,
-      })
-      ElMessage.success('发布成功')
-      fetchProjects()
-    } catch (err) {
-      console.error(err)
-    }
-  }).catch(() => { })
+  ElMessageBox.prompt(`请输入发布版本号（留空则系统自动递增。当前版本：${currentVer}）`, '发布大屏', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputPlaceholder: '如：1.0.0 或 0.2',
+  })
+    .then(async ({ value }) => {
+      try {
+        await request.post(`/api/screenProjects/${row.id}/publish`, {
+          version: value ? value.trim() : undefined,
+        })
+        ElMessage.success('发布成功')
+        await fetchProjects()
+      } catch (err) {
+        console.error(err)
+      }
+    })
+    .catch(() => {})
 }
 
 const filteredProjects = computed(() => {
@@ -197,5 +278,7 @@ function openPreview(id: string) {
 
 onMounted(() => {
   fetchProjects()
+  fetchSceneOptions()
+  fetchOwnerOptions()
 })
 </script>

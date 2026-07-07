@@ -109,7 +109,13 @@ router.beforeEach((to, from, next) => {
 
   if (to.name !== 'login' && !token) {
     next({ name: 'login' })
-  } else if (to.meta.permission && !userPermissions.includes(to.meta.permission as string)) {
+  } else if (
+    to.meta.permission &&
+    !(
+      userPermissions.includes(to.meta.permission as string) ||
+      (to.meta.permission === 'scene:read' && userPermissions.includes('scene:write'))
+    )
+  ) {
     ElMessage.error('您没有权限访问该页面！')
     if (from.name) {
       next(false)
