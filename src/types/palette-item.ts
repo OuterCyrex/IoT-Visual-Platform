@@ -86,6 +86,42 @@ export const PaletteList: PaletteGroup[] = [
           refreshInterval: 0,
         },
       },
+      {
+        label: '折线图',
+        desc: '趋势变化展示',
+        nodeType: 'chart',
+        dotClass: 'bg-cyan-500',
+        component: 'lineChart',
+        defaultSize: {
+          w: 420,
+          h: 240,
+        },
+        defaultProps: {
+          text: '折线趋势图',
+          datasetId: '',
+          xField: '',
+          yField: '',
+          refreshInterval: 0,
+        },
+      },      
+      {
+        label: '饼状图',
+        desc: '比例展示',
+        nodeType: 'chart',
+        dotClass: 'bg-cyan-500',
+        component: 'pieChart',
+        defaultSize: {
+          w: 420,
+          h: 240,
+        },
+        defaultProps: {
+          text: '饼状图',
+          datasetId: '',
+          xField: '',
+          yField: '',
+          refreshInterval: 0,
+        },
+      },
     ],
   },
 ]

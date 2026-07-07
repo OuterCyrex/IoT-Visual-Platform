@@ -37,11 +37,13 @@
       <main class="flex min-w-0 min-h-0 flex-col bg-slate-100 p-4">
         <div class="mb-3 flex items-center justify-between">
           <div class="text-sm text-slate-500">画布</div>
-          <div class="text-xs text-slate-400">支持拖拽、缩放、选中</div>
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span>支持拖拽、缩放、选中</span>
+          </div>
         </div>
 
         <div ref="canvasRef"
-          class="relative min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+          class="relative min-h-0 flex-1 overflow-auto rounded-2xl border border-slate-200 bg-white shadow-sm"
           @dragover.prevent @drop="onCanvasDrop" @pointerdown.self="selectedId = null">
           <div ref="stageRef" class="screen-stage">
             <div class="screen-stage-grid"></div>
@@ -50,7 +52,7 @@
               :h="node.h" :parent="false" @dragging="(x: number, y: number) => updatePos(node.id, x, y)"
               @resizing="(x: number, y: number, w: number, h: number) => updateSize(node.id, x, y, w, h)">
               <div class="screen-node" :class="[node.component, { selected: selectedId === node.id }]">
-                <component :is="componentMap[node.component]" v-bind="node.props" @click.stop="selectedId = node.id" />
+                <component :is="screenComponentMap[node.component as keyof typeof screenComponentMap]" v-bind="node.props" @click.stop="selectedId = node.id" />
               </div>
             </vue-draggable-resizable>
           </div>
@@ -96,7 +98,7 @@
 
             <template v-if="selectedNode.props.datasetId">
               <!-- Chart widget: bind X and Y axes -->
-              <template v-if="selectedNode.component === 'chart'">
+              <template v-if="selectedNode.component === 'chart' || selectedNode.component === 'lineChart' || selectedNode.component === 'pieChart'">
                 <el-form-item label="维度字段 (X轴/分类)">
                   <el-select v-model="selectedNode.props.xField" placeholder="选择X轴维度列" class="w-full">
                     <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
@@ -150,10 +152,7 @@ import request from '../../utils/request'
 import { PaletteList, type PaletteItem } from '../../types/palette-item'
 import type { ScreenNode } from '../../types/screen-node'
 import type { ScreenProject, Dataset } from '../../types/platform'
-import WidgetRect from '../../components/screen-widgets/WidgetRect.vue'
-import WidgetCircle from '../../components/screen-widgets/WidgetCircle.vue'
-import WidgetChart from '../../components/screen-widgets/WidgetChart.vue'
-import WidgetText from '../../components/screen-widgets/WidgetText.vue'
+import { screenComponentMap } from '../../components/screen-widgets/config'
 
 const router = useRouter()
 const route = useRoute()
@@ -173,13 +172,6 @@ const screenTitle = computed(() => {
 })
 
 const SidebarActiveNames = ref<string[]>([])
-
-const componentMap: Record<PaletteItem['component'], unknown> = {
-  rect: WidgetRect,
-  circle: WidgetCircle,
-  chart: WidgetChart,
-  text: WidgetText,
-}
 
 const selectedNode = computed(() => nodes.value.find((node) => node.id === selectedId.value) ?? null)
 

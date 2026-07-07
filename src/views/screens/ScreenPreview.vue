@@ -1,71 +1,35 @@
 <template>
-  <div class="relative h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col items-center justify-center">
+  <div
+    class="relative h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col items-center justify-center">
     <!-- Top Floating Toolbar -->
-    <div class="absolute top-4 left-4 z-50 flex items-center gap-3 rounded-lg bg-slate-900/90 px-4 py-2 backdrop-blur border border-slate-800 shadow-xl">
+    <div
+      class="absolute top-4 left-4 z-50 flex items-center gap-3 rounded-lg bg-slate-900/90 px-4 py-2 backdrop-blur border border-slate-800 shadow-xl">
       <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
       <div class="text-sm font-semibold tracking-wide text-slate-200">{{ screenTitle }}</div>
-      <el-tag size="small" type="info" effect="dark" class="border-slate-700 bg-slate-800">{{ publishedVersion }}</el-tag>
-      <el-button size="small" type="info" plain class="ml-2 hover:bg-slate-800 border-slate-700" @click="backToEditor">返回编辑</el-button>
+      <el-tag size="small" type="info" effect="dark" class="border-slate-700 bg-slate-800">{{ publishedVersion
+      }}</el-tag>
+      <el-button size="small" type="info" plain class="ml-2 hover:bg-slate-800 border-slate-700"
+        @click="backToEditor">返回编辑</el-button>
     </div>
 
     <!-- Canvas Wrapper with Scale to Fit (1920x1080 resolution simulation) -->
-    <div
-      class="relative bg-slate-900 border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.8)] rounded overflow-hidden"
-      :style="canvasStyle"
-    >
+    <div class="relative bg-slate-900 border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.8)] rounded overflow-hidden"
+      :style="canvasStyle">
       <!-- Grid lines to make it look premium -->
-      <div class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-10"></div>
-      
-      <!-- Render Nodes -->
       <div
-        v-for="node in nodes"
-        :key="node.id"
-        class="absolute select-none overflow-hidden transition-all duration-300"
+        class="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:40px_40px] opacity-10">
+      </div>
+
+      <!-- Render Nodes -->
+      <div v-for="node in nodes" :key="node.id" class="absolute select-none overflow-hidden transition-all duration-300"
         :style="{
           left: `${node.x}px`,
           top: `${node.y}px`,
           width: `${node.w}px`,
           height: `${node.h}px`
-        }"
-      >
-        <!-- Rect Component -->
-        <div
-          v-if="node.component === 'rect'"
-          class="h-full w-full rounded border border-blue-500/30 bg-blue-500/5 flex items-center justify-center"
-        >
-          <span class="text-xs text-blue-400 font-mono">{{ node.props?.text || '矩形' }}</span>
-        </div>
+        }">
 
-        <!-- Circle Component -->
-        <div
-          v-else-if="node.component === 'circle'"
-          class="h-full w-full rounded-full border border-purple-500/30 bg-purple-500/5 flex items-center justify-center"
-        >
-          <span class="text-xs text-purple-400 font-mono">{{ node.props?.text || '圆形' }}</span>
-        </div>
-
-        <!-- Text Component -->
-        <div
-          v-else-if="node.component === 'text'"
-          class="h-full w-full flex flex-col items-center justify-center p-2 text-center"
-        >
-          <span class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-            {{ getDisplayText(node) }}
-          </span>
-          <span v-if="node.props.datasetId" class="text-[10px] text-slate-500 mt-1 uppercase font-semibold">
-            {{ node.props.yField }}
-          </span>
-        </div>
-
-        <!-- Chart Component using real ECharts widget -->
-        <WidgetChart
-          v-else-if="node.component === 'chart'"
-          :text="node.props.text"
-          :datasetId="node.props.datasetId"
-          :xField="node.props.xField"
-          :yField="node.props.yField"
-          :rows="node.props.datasetId ? datasetData[node.props.datasetId]?.rows : []"
-        />
+        <component :is="screenComponentMap[node.component as keyof typeof screenComponentMap]" v-bind="buildComponentProps(node)" />
       </div>
     </div>
   </div>
@@ -76,7 +40,7 @@ import { computed, onMounted, ref, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import request from '../../utils/request'
 import type { ScreenNode } from '../../types/screen-node'
-import WidgetChart from '../../components/screen-widgets/WidgetChart.vue'
+import { screenComponentMap } from '../../components/screen-widgets/config'
 
 const route = useRoute()
 const router = useRouter()
@@ -101,6 +65,17 @@ const canvasStyle = computed(() => ({
   transform: `scale(${scale.value})`,
   transformOrigin: 'center center',
 }))
+
+function buildComponentProps(node: ScreenNode) {
+  return {
+    ...node.props,
+    ...(node.component === 'chart' || node.component === 'lineChart' || node.component === 'pieChart'
+      ? {
+          rows: node.props.datasetId ? datasetData.value[node.props.datasetId]?.rows || [] : [],
+        }
+      : {}),
+  }
+}
 
 function handleResize() {
   const windowWidth = window.innerWidth
@@ -161,7 +136,7 @@ async function loadProject() {
       screenTitle.value = item.name
       publishedVersion.value = item.publishedVersion || '未发布'
       nodes.value = typeof item.screenNodes === 'string' ? JSON.parse(item.screenNodes) : (item.screenNodes || [])
-      
+
       await fetchAllDatasetData()
       setupRefreshTimers()
     }
