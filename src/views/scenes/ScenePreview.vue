@@ -1,4 +1,11 @@
 <template>
+    <div></div>
+</template>
+
+<script lang="ts" setup>
+
+</script>
+<template>
   <div class="relative h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col items-center justify-center font-sans">
     <!-- Top Floating Toolbar -->
     <div class="absolute top-4 left-4 z-50 flex items-center gap-3 rounded-lg bg-slate-900/90 px-4 py-2 backdrop-blur border border-slate-800 shadow-xl select-none">
