@@ -15,6 +15,7 @@
       </div>
     </el-card>
 
+    <div class="p-4 bg-white">
     <el-table v-loading="loading" :data="filteredUsers" border>
       <el-table-column prop="username" label="账号" min-width="140" />
       <el-table-column prop="displayName" label="姓名" min-width="120" />
@@ -37,7 +38,7 @@
           </div>
         </template>
       </el-table-column>
-    </el-table>
+    </el-table></div>
 
     <!-- Create/Edit User Dialog -->
     <el-dialog

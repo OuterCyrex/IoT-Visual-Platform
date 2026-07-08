@@ -1,14 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import DashboardLayout from '../layouts/DashboardLayout.vue'
-import OverviewHome from '../views/overview/OverviewHome.vue'
 import ScreenProjectsView from '../views/screens/ScreenProjectsView.vue'
 import ScreenEditor from '../views/screens/ScreenEditor.vue'
 import SceneProjectsView from '../views/scenes/SceneProjectsView.vue'
 import DataSourcesView from '../views/data/DataSourcesView.vue'
 import DatasetsView from '../views/data/DatasetsView.vue'
 import UserManagementView from '../views/system/UserManagementView.vue'
-import ProjectManagementView from '../views/system/ProjectManagementView.vue'
+import ProjectManagementView from '../views/overview/ProjectManagementView.vue'
 import SystemSettingsView from '../views/system/SystemSettingsView.vue'
 
 const router = createRouter({
@@ -28,8 +27,8 @@ const router = createRouter({
         {
           path: 'overview',
           name: 'overview',
-          component: OverviewHome,
-          meta: { title: '平台概览', section: 'overview' },
+          component: ProjectManagementView,
+          meta: { title: '项目管理', section: 'overview', permission: 'project:read' },
         },
         {
           path: 'screens',
@@ -87,9 +86,8 @@ const router = createRouter({
         },
         {
           path: 'projects',
-          name: 'projects',
-          component: ProjectManagementView,
-          meta: { title: '项目管理', section: 'system-management', permission: 'project:read' },
+          redirect: '/overview',
+          meta: { title: '项目管理', section: 'overview', permission: 'project:read' },
         },
         {
           path: 'settings',
@@ -116,7 +114,7 @@ router.beforeEach((to, from, next) => {
       (to.meta.permission === 'scene:read' && userPermissions.includes('scene:write'))
     )
   ) {
-    ElMessage.error('您没有权限访问该页面！')
+    ElMessage.error('您没有权限访问该页面')
     if (from.name) {
       next(false)
     } else {
@@ -128,4 +126,3 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
-

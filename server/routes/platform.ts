@@ -241,7 +241,7 @@ const resourceRouteCollection = <T extends { id: string; updatedAt: string }>(op
   list: () => Promise<T[] | undefined>
   create: (item: T) => Promise<T | undefined>
   update: (id: string, patch: Partial<T>) => Promise<T | null | undefined>
-  remove: (id: string) => Promise<boolean | undefined>
+  remove?: (id: string) => Promise<boolean | undefined>
   fields: Array<(item: T) => string>
   buildCreateItem: (body: Record<string, unknown>) => Promise<T> | T
   normalizePatch?: (id: string, body: Record<string, unknown>) => Promise<Partial<T>> | Partial<T>
@@ -381,28 +381,30 @@ const resourceRouteCollection = <T extends { id: string; updatedAt: string }>(op
     },
   }
 
-  const deleteRouteDef: RouteDefinition = {
-    method: 'DELETE',
-    pattern: detailPattern,
-    permission: createRoute.permission,
-    handler: async ({ res, params }) => {
-      let ok: boolean | undefined
-      try {
-        ok = await options.remove(params.id)
-      } catch (error) {
-        if (error instanceof RouteValidationError) {
-          return sendJson(res, 400, { message: error.message })
-        }
-        throw error
+  const deleteRouteDef: RouteDefinition | null = options.remove
+    ? {
+        method: 'DELETE',
+        pattern: detailPattern,
+        permission: createRoute.permission,
+        handler: async ({ res, params }) => {
+          let ok: boolean | undefined
+          try {
+            ok = await options.remove!(params.id)
+          } catch (error) {
+            if (error instanceof RouteValidationError) {
+              return sendJson(res, 400, { message: error.message })
+            }
+            throw error
+          }
+          if (!ok) {
+            return sendJson(res, 404, { message: 'Item not found' })
+          }
+          sendNoContent(res)
+        },
       }
-      if (!ok) {
-        return sendJson(res, 404, { message: 'Item not found' })
-      }
-      sendNoContent(res)
-    },
-  }
+    : null
 
-  return [listRoute, detailRoute, createRoute, updateRouteDef, deleteRouteDef]
+  return [listRoute, detailRoute, createRoute, updateRouteDef, ...(deleteRouteDef ? [deleteRouteDef] : [])]
 }
 
 const authLoginRoute: RouteDefinition = {
@@ -1222,7 +1224,6 @@ export const routes: RouteDefinition[] = [
     list: () => listDataSources(),
     create: (item) => createDataSource(item),
     update: (id, patch) => updateDataSource(id, patch),
-    remove: () => undefined,
     fields: [(item) => item.name, (item) => item.host, (item) => item.owner, (item) => item.type],
     buildCreateItem: (body) => ({
       id: createId('ds'),

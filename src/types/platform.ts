@@ -34,7 +34,19 @@ export interface SceneProject {
   updatedAt: string
   status: ProjectStatus
   engine: string
-  sceneNodes: any[]
+  sceneNodes: SceneNodeData[]
+}
+
+export interface SceneNodeData {
+  id: string
+  name: string
+  type: string
+  sourceType?: 'procedural' | 'imported'
+  sourceUrl?: string
+  position: { x: number; y: number; z: number }
+  rotation: { x: number; y: number; z: number }
+  scale: { x: number; y: number; z: number }
+  props: Record<string, unknown>
 }
 
 export interface DataSource {

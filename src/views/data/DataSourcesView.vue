@@ -22,48 +22,40 @@
       </div>
     </el-card>
 
-    <el-table v-loading="loading" :data="filteredSources" border>
-      <el-table-column prop="name" label="数据源名称" min-width="180" />
-      <el-table-column prop="type" label="类型" min-width="100" />
-      <el-table-column prop="host" label="连接地址" min-width="220" />
-      <el-table-column prop="database" label="数据库 / Topic / Path" min-width="180" />
-      <el-table-column prop="owner" label="负责人" min-width="100" />
-      <el-table-column prop="updatedAt" label="最近更新" min-width="160" />
-      <el-table-column label="状态" min-width="100">
-        <template #default="{ row }">
-          <el-tag :type="getStatusTag(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" min-width="280" fixed="right">
-        <template #default="{ row }">
-          <div class="flex gap-2">
-            <el-button size="small" type="primary" @click="handleTest(row)">测试连接</el-button>
-            <el-button size="small" @click="openEditDialog(row)">编辑</el-button>
-            <el-button size="small" type="danger" plain @click="handleDelete(row)">删除</el-button>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div class="p-4 bg-white">
+      <el-table v-loading="loading" :data="filteredSources" border>
+        <el-table-column prop="name" label="数据源名称" min-width="180" />
+        <el-table-column prop="type" label="类型" min-width="100" />
+        <el-table-column prop="host" label="连接地址" min-width="220" />
+        <el-table-column prop="database" label="数据库 / Topic / Path" min-width="180" />
+        <el-table-column prop="owner" label="负责人" min-width="100" />
+        <el-table-column prop="updatedAt" label="最近更新" min-width="160" />
+        <el-table-column label="状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag :type="getStatusTag(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" min-width="280" fixed="right">
+          <template #default="{ row }">
+            <div class="flex gap-2">
+              <el-button size="small" type="primary" @click="handleTest(row)">测试连接</el-button>
+              <el-button size="small" @click="openEditDialog(row)">编辑</el-button>
+              <el-button size="small" type="danger" plain @click="handleDelete(row)">删除</el-button>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
     <!-- Create/Edit Data Source Dialog -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="isEdit ? '编辑数据源' : '新增数据源'"
-      width="520px"
-      destroy-on-close
-    >
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑数据源' : '新增数据源'" width="520px" destroy-on-close>
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
         <el-form-item label="数据源名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入数据源名称" />
         </el-form-item>
         <el-form-item label="数据源类型" prop="type">
-          <el-select
-            v-model="form.type"
-            placeholder="请选择类型"
-            :disabled="isEdit"
-            class="w-full"
-            @change="handleTypeChange"
-          >
+          <el-select v-model="form.type" placeholder="请选择类型" :disabled="isEdit" class="w-full"
+            @change="handleTypeChange">
             <el-option label="MySQL 数据库" value="MySQL" />
             <el-option label="MQTT 消息队列" value="MQTT" />
             <el-option label="REST API 接口" value="REST" />

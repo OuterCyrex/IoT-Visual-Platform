@@ -8,6 +8,7 @@
           <el-option label="草稿" value="draft" />
           <el-option label="编辑中" value="editing" />
           <el-option label="已发布" value="published" />
+          <el-option label="已归档" value="archived" />
         </el-select>
         <el-select v-model="group" placeholder="大屏分组">
           <el-option label="全部分组" value="all" />
@@ -33,11 +34,12 @@
             <el-tag :type="getTagType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="280" fixed="right">
+        <el-table-column label="操作" min-width="320" fixed="right">
           <template #default="{ row }">
             <div class="flex gap-2">
               <el-button size="small" type="success" plain @click="openPreview(row.id)">预览</el-button>
               <el-button size="small" type="primary" @click="openEditor(row.id)">编辑</el-button>
+              <el-button size="small" @click="handleClone(row)">克隆</el-button>
               <el-button size="small" @click="handlePublish(row)">发布</el-button>
               <el-button size="small" type="danger" plain @click="handleDelete(row.id)">删除</el-button>
             </div>
@@ -52,7 +54,7 @@
           <el-input v-model="form.name" placeholder="请输入大屏名称" />
         </el-form-item>
         <el-form-item label="项目分组" prop="group">
-          <el-input v-model="form.group" placeholder="如：运营中心、设备看板" />
+          <el-input v-model="form.group" placeholder="例如：运营中心、设备看板" />
         </el-form-item>
         <el-form-item label="关联三维场景" prop="scene">
           <el-select v-model="form.scene" placeholder="请选择三维场景" class="w-full" filterable>
@@ -65,14 +67,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="负责人" prop="owner">
-          <el-select v-model="form.owner" placeholder="请选择负责人" class="w-full" filterable>
-            <el-option
-              v-for="item in ownerOptions"
-              :key="item.id"
-              :label="item.displayName"
-              :value="item.displayName"
-            />
-          </el-select>
+          <el-input v-model="form.owner" placeholder="请输入负责人姓名" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -91,12 +86,11 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import request from '../../utils/request'
-import type { PlatformUser, ProjectStatus, SceneProject, ScreenProject } from '../../types/platform'
+import type { ProjectStatus, SceneProject, ScreenProject } from '../../types/platform'
 
 const router = useRouter()
 const projects = ref<ScreenProject[]>([])
 const sceneOptions = ref<SceneProject[]>([])
-const ownerOptions = ref<PlatformUser[]>([])
 const loading = ref(false)
 const submitting = ref(false)
 
@@ -117,7 +111,7 @@ const rules = {
   name: [{ required: true, message: '请输入大屏名称', trigger: 'blur' }],
   group: [{ required: true, message: '请输入项目分组', trigger: 'blur' }],
   scene: [{ required: true, message: '请选择三维场景', trigger: 'change' }],
-  owner: [{ required: true, message: '请选择负责人', trigger: 'change' }],
+  owner: [{ required: true, message: '请输入负责人', trigger: 'blur' }],
 }
 
 const groups = computed(() => [...new Set(projects.value.map((item) => item.group).filter(Boolean))])
@@ -137,11 +131,11 @@ const tagTypeMap: Record<ProjectStatus, 'success' | 'warning' | 'info' | 'primar
 }
 
 function getStatusLabel(value: ProjectStatus) {
-  return statusLabelMap[value]
+  return statusLabelMap[value] || value
 }
 
 function getTagType(value: ProjectStatus) {
-  return tagTypeMap[value]
+  return tagTypeMap[value] || 'info'
 }
 
 async function fetchProjects() {
@@ -160,15 +154,6 @@ async function fetchSceneOptions() {
   try {
     const res: any = await request.get('/api/sceneProjects')
     sceneOptions.value = res.items || []
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-async function fetchOwnerOptions() {
-  try {
-    const res: any = await request.get('/api/users')
-    ownerOptions.value = res.items || []
   } catch (err) {
     console.error(err)
   }
@@ -213,28 +198,39 @@ async function submitCreate() {
   })
 }
 
+async function handleClone(row: ScreenProject) {
+  try {
+    await request.post(`/api/screenProjects/${row.id}/clone`)
+    ElMessage.success('克隆成功')
+    await fetchProjects()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 async function handleDelete(id: string) {
-  ElMessageBox.confirm('确定要删除该大屏项目吗？此操作不可恢复！', '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  }).then(async () => {
-    try {
-      await request.delete(`/api/screenProjects/${id}`)
-      ElMessage.success('删除成功')
-      await fetchProjects()
-    } catch (err) {
+  try {
+    await ElMessageBox.confirm('确定要删除该大屏项目吗？此操作不可恢复！', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+    await request.delete(`/api/screenProjects/${id}`)
+    ElMessage.success('删除成功')
+    await fetchProjects()
+  } catch (err) {
+    if (err !== 'cancel' && err !== 'close') {
       console.error(err)
     }
-  })
+  }
 }
 
 async function handlePublish(row: ScreenProject) {
   const currentVer = row.publishedVersion || '未发布'
-  ElMessageBox.prompt(`请输入发布版本号（留空则系统自动递增。当前版本：${currentVer}）`, '发布大屏', {
+  ElMessageBox.prompt(`请输入发布版本号，留空则系统自动递增。当前版本：${currentVer}`, '发布大屏', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    inputPlaceholder: '如：1.0.0 或 0.2',
+    inputPlaceholder: '例如：1.0.0 或 1.0.2',
   })
     .then(async ({ value }) => {
       try {
@@ -279,6 +275,5 @@ function openPreview(id: string) {
 onMounted(() => {
   fetchProjects()
   fetchSceneOptions()
-  fetchOwnerOptions()
 })
 </script>
