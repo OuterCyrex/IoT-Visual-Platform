@@ -27,8 +27,8 @@
         </linearGradient>
 
         <linearGradient id="goldOreGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stop-color="#eab308" stop-opacity="0.8" />
-          <stop offset="100%" stop-color="#ca8a04" stop-opacity="0.2" />
+          <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="#d97706" stop-opacity="0.2" />
         </linearGradient>
 
         <!-- Filters for Neon Glow -->
@@ -45,198 +45,140 @@
         </filter>
       </defs>
 
-      <!-- 1. Equipment Ground Shadows & Concrete Bases -->
-      <!-- Shadow under Cave -->
-      <ellipse cx="160" cy="370" rx="90" ry="30" fill="black" opacity="0.4" />
-      <!-- Shadow under Tower -->
-      <ellipse cx="400" cy="275" rx="85" ry="25" fill="black" opacity="0.5" />
-      <!-- Concrete Base under Sifter Tower -->
-      <g transform="translate(320, 240)">
-        <path d="M 0 15 L 80 0 L 160 15 L 80 30 Z" fill="#334155" stroke="#1e293b" />
-        <path d="M 0 15 L 80 30 L 80 40 L 0 25 Z" fill="#1e293b" />
-        <path d="M 160 15 L 80 30 L 80 40 L 160 25 Z" fill="#0f172a" />
-      </g>
-      
-      <!-- Shadows under Silos -->
-      <ellipse cx="650" cy="180" rx="55" ry="18" fill="black" opacity="0.4" />
-      <ellipse cx="585" cy="350" rx="50" ry="16" fill="black" opacity="0.4" />
+      <!-- 1. Equipment Shadows -->
+      <ellipse cx="300" cy="190" rx="35" ry="12" fill="black" opacity="0.4" /> <!-- 竖井原煤仓 shadow -->
+      <ellipse cx="150" cy="380" rx="40" ry="15" fill="black" opacity="0.4" /> <!-- 采矿区 shadow -->
+      <ellipse cx="430" cy="285" rx="30" ry="10" fill="black" opacity="0.4" /> <!-- 筛分中仓 shadow -->
+      <ellipse cx="510" cy="275" rx="30" ry="10" fill="black" opacity="0.4" /> <!-- 地面原煤仓 shadow -->
+      <ellipse cx="680" cy="300" rx="30" ry="10" fill="black" opacity="0.4" /> <!-- 精矿仓 shadow -->
+      <ellipse cx="740" cy="350" rx="25" ry="8" fill="black" opacity="0.4" />  <!-- 混煤仓 shadow -->
 
-      <!-- 2. Conveyor Pipes with Flowing Particles -->
-      <!-- Pipe 1: Cave to Sifter -->
-      <g>
-        <path d="M 200 325 L 360 215" stroke="rgba(15, 23, 42, 0.8)" stroke-width="8" stroke-linecap="round" />
-        <path d="M 200 325 L 360 215" stroke="#334155" stroke-width="6" stroke-linecap="round" />
-        <!-- Glowing Inner Core -->
-        <path d="M 200 325 L 360 215" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" opacity="0.6" />
-        <!-- Flowing dots -->
-        <path d="M 200 325 L 360 215" stroke="#38bdf8" stroke-width="3" stroke-dasharray="8 20" class="pipe-flow-1" stroke-linecap="round" filter="url(#laserGlow)" />
-      </g>
+      <!-- 2. Conveyor Belt Network (Flowing Lines) -->
+      <!-- Cave -> Plate Feeder -->
+      <path d="M 180 340 L 290 270" stroke="#334155" stroke-width="4" stroke-linecap="round" />
+      <path d="M 180 340 L 290 270" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6 14" class="pipe-flow-1" stroke-linecap="round" filter="url(#laserGlow)" />
 
-      <!-- Ray 2: Sifter to Silo A -->
-      <g>
-        <path d="M 440 210 L 610 155" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5 15" class="laser-beam-1" filter="url(#laserGlow)" />
-        <path d="M 440 210 L 610 155" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="2 30" class="laser-beam-2" filter="url(#laserGlow)" />
-      </g>
+      <!-- Plate Feeder -> Sifter -->
+      <path d="M 330 240 L 400 200" stroke="#334155" stroke-width="4" stroke-linecap="round" />
+      <path d="M 330 240 L 400 200" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 14" class="pipe-flow-1" stroke-linecap="round" />
 
-      <!-- Ray 3: Sifter to Silo B -->
-      <g>
-        <path d="M 430 220 L 550 310" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5 15" class="laser-beam-1" filter="url(#laserGlow)" />
-        <path d="M 430 220 L 550 310" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="2 30" class="laser-beam-2" filter="url(#laserGlow)" />
-      </g>
+      <!-- Sifter -> Middle Silo -->
+      <path d="M 430 200 L 510 240" stroke="#334155" stroke-width="4.5" stroke-linecap="round" />
+      <path d="M 430 200 L 510 240" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6 14" class="pipe-flow-1" stroke-linecap="round" />
+
+      <!-- Middle Silo -> Silo A -->
+      <path d="M 520 250 L 660 300" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5 15" class="laser-beam-1" filter="url(#laserGlow)" />
+      <!-- Middle Silo -> Silo B -->
+      <path d="M 520 250 L 720 340" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5 15" class="laser-beam-1" filter="url(#laserGlow)" />
 
 
-      <!-- 3. NODE 1: 采矿区 101 工作面 (Left) -->
-      <g class="iso-node-group" filter="url(#softShadow)">
-        <!-- Hoverable Zone -->
-        <g transform="translate(70, 260)">
-          <!-- Cave Rock Structure -->
-          <path d="M 10 70 L 30 20 L 90 0 L 150 20 L 170 70 Z" fill="#1e293b" stroke="#334155" stroke-width="2" />
-          <!-- Cave Entrance (Dark Interior) -->
-          <path d="M 40 70 L 55 35 L 125 35 L 140 70 Z" fill="#020617" />
-          <!-- Support Steel Beam struts -->
-          <path d="M 37 70 L 52 32 L 128 32 L 143 70" fill="none" stroke="#64748b" stroke-width="4" stroke-linejoin="round" />
-          <path d="M 47 70 L 59 38 L 121 38 L 133 70" fill="none" stroke="#475569" stroke-width="3" stroke-linejoin="round" />
-          <!-- Spiral Drill Shaft (Rotating) -->
-          <g transform="translate(90, 52)">
-            <ellipse cx="0" cy="0" rx="14" ry="5" fill="#334155" stroke="#475569" />
-            <path d="M -14 0 L -4 18 L 4 18 L 14 0 Z" fill="#94a3b8" class="spinning-drill" />
-            <line x1="0" y1="-10" x2="0" y2="18" stroke="#cbd5e1" stroke-width="3" />
-          </g>
-        </g>
+      <!-- 3. DETAILED MODELS -->
 
-        <!-- Hovering Glowing Cone -->
-        <g transform="translate(160, 205)">
-          <polygon points="0,0 -16,-45 16,-45" fill="url(#neonCyanGrad)" opacity="0.35" class="cone-glow" filter="url(#laserGlow)" />
-          <ellipse cx="0" cy="-45" rx="16" ry="5" fill="#38bdf8" opacity="0.6" filter="url(#laserGlow)" />
-          <circle cx="0" cy="0" r="4" fill="#38bdf8" filter="url(#laserGlow)" class="drill-led" />
-        </g>
-
+      <!-- 采矿区 101 工作面 -->
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(100, 290)">
+        <path d="M 10 50 L 25 15 L 75 0 L 125 15 L 140 50 Z" fill="#334155" stroke="#475569" stroke-width="1.5" />
+        <path d="M 30 50 L 45 25 L 105 25 L 120 50 Z" fill="#020617" />
+        <!-- Glowing light indicator -->
+        <polygon points="75,-10 60,-35 90,-35" fill="url(#neonCyanGrad)" opacity="0.3" filter="url(#laserGlow)" class="cone-glow" />
+        <circle cx="75" cy="-10" r="3.5" fill="#38bdf8" class="drill-led" />
         <!-- Labels -->
-        <g transform="translate(160, 365)">
-          <rect x="-70" y="-12" width="140" height="24" rx="4" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
-          <text x="0" y="4" class="lbl-name">采矿区 101 工作面</text>
-        </g>
-        <g transform="translate(160, 395)">
-          <rect x="-45" y="-10" width="90" height="20" rx="3" fill="#0f172a" stroke="#0ea5e9" stroke-width="1" />
-          <text x="0" y="4" class="lbl-val font-mono text-cyan-400">{{ miningRate }} Hz</text>
-        </g>
+        <rect x="15" y="58" width="120" height="20" rx="3" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
+        <text x="75" y="72" class="lbl-name">采矿区 101 工作面</text>
+        <rect x="35" y="82" width="80" height="16" rx="2" fill="#0f172a" stroke="#0ea5e9" stroke-width="1" />
+        <text x="75" y="94" class="lbl-val font-mono text-cyan-400">{{ miningRate }} Hz</text>
       </g>
 
-
-      <!-- 4. NODE 2: 重力分选分析塔 (Center) -->
-      <g class="iso-node-group" filter="url(#softShadow)">
-        <g transform="translate(340, 80)">
-          <!-- Main Sifter Tower Body (Metal gradient) -->
-          <rect x="30" y="40" width="60" height="110" fill="url(#metalCylinder)" stroke="#1e293b" />
-          <!-- Tower Cap Dome -->
-          <path d="M 30 40 C 30 20, 90 20, 90 40 Z" fill="#475569" stroke="#334155" />
-          
-          <!-- Suspended Glowing Ring Halo above sifter dome -->
-          <ellipse cx="60" cy="15" rx="32" ry="9" fill="none" stroke="#38bdf8" stroke-width="3" filter="url(#laserGlow)" class="neon-ring" />
-          <ellipse cx="60" cy="15" rx="32" ry="9" fill="none" stroke="#0ea5e9" stroke-width="1.5" />
-
-          <!-- Left Side Bypass Pipes -->
-          <path d="M 30 60 L 15 60 L 15 120 L 30 120" fill="none" stroke="#334155" stroke-width="6" stroke-linejoin="round" />
-          <path d="M 30 60 L 15 60 L 15 120 L 30 120" fill="none" stroke="#0284c7" stroke-width="2" stroke-linejoin="round" />
-          <!-- Valve wheel details -->
-          <circle cx="15" cy="90" r="7" fill="#64748b" stroke="#334155" />
-          <line x1="15" y1="83" x2="15" y2="97" stroke="#0f172a" />
-          <line x1="8" y1="90" x2="22" y2="90" stroke="#0f172a" />
-
-          <!-- Window with rotating internal blades -->
-          <circle cx="60" cy="75" r="14" fill="#0f172a" stroke="#1e293b" stroke-width="2.5" />
-          <g transform="translate(60, 75)" class="fan-spin">
-            <path d="M -12 0 L 12 0 M 0 -12 L 0 12" stroke="#38bdf8" stroke-width="2.5" />
-            <circle cx="0" cy="0" r="3" fill="#cbd5e1" />
-          </g>
-
-          <!-- Window 2 -->
-          <circle cx="60" cy="115" r="14" fill="#0f172a" stroke="#1e293b" stroke-width="2.5" />
-          <g transform="translate(60, 115)" class="fan-spin">
-            <path d="M -12 0 L 12 0 M 0 -12 L 0 12" stroke="#38bdf8" stroke-width="2.5" />
-            <circle cx="0" cy="0" r="3" fill="#cbd5e1" />
-          </g>
-
-          <!-- Status Indicator LEDs -->
-          <circle cx="45" cy="140" r="3" fill="#10b981" class="led-blink-1" />
-          <circle cx="60" cy="140" r="3" fill="#10b981" class="led-blink-2" />
-          <circle cx="75" cy="140" r="3" fill="#10b981" class="led-blink-3" />
-        </g>
-
-        <!-- Labels -->
-        <g transform="translate(400, 248)">
-          <rect x="-65" y="-12" width="130" height="24" rx="4" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
-          <text x="0" y="4" class="lbl-name">重力分选分析塔</text>
-        </g>
-        <g transform="translate(400, 276)">
-          <rect x="-55" y="-10" width="110" height="20" rx="3" fill="#0f172a" stroke="#10b981" stroke-width="1" />
-          <text x="0" y="4" class="lbl-val text-emerald-400">运行良好 (96%)</text>
-        </g>
+      <!-- 振动放矿机2号 & 竖井矿石仓 -->
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(240, 100)">
+        <!-- Cylinder 1 -->
+        <ellipse cx="40" cy="12" rx="25" ry="10" fill="#475569" stroke="#334155" />
+        <path d="M 15 12 A 25 10 0 0 0 65 12 L 65 50 A 25 10 0 0 1 15 50 Z" fill="url(#metalCylinder)" stroke="#1e293b" />
+        <path d="M 15 50 A 25 10 0 0 0 65 50 L 40 68 Z" fill="#1e293b" stroke="#334155" />
+        <!-- Text labels -->
+        <rect x="-10" y="75" width="100" height="20" rx="3" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
+        <text x="40" y="89" class="lbl-name">竖井矿石仓</text>
+        <rect x="15" y="98" width="50" height="15" rx="2" fill="#0f172a" stroke="#38bdf8" stroke-width="0.8" />
+        <text x="40" y="109" class="lbl-val font-mono text-sky-400">64 m</text>
       </g>
 
-
-      <!-- 5. NODE 3: 精矿筒仓 A (Right Top) -->
-      <g class="iso-node-group" filter="url(#softShadow)">
-        <g transform="translate(610, 80)">
-          <!-- Silo Dome Roof -->
-          <ellipse cx="40" cy="15" rx="30" ry="12" fill="#475569" stroke="#334155" />
-          <!-- Inspection Hatch cap -->
-          <circle cx="40" cy="10" r="6" fill="#1e293b" stroke="#475569" />
-          <!-- Main Cylinder body -->
-          <path d="M 10 15 A 30 12 0 0 0 70 15 L 70 70 A 30 12 0 0 1 10 70 Z" fill="url(#metalCylinder)" stroke="#1e293b" />
-          <!-- Conical discharge bottom -->
-          <path d="M 10 70 A 30 12 0 0 0 70 70 L 40 95 Z" fill="#1e293b" stroke="#334155" />
-
-          <!-- Transparent Level Gauge Glass Window -->
-          <rect x="37" y="25" width="6" height="35" rx="1.5" fill="#020617" />
-          <!-- Level fill percentage -->
-          <rect x="38" y="32" width="4" height="27" rx="1" fill="#38bdf8" filter="url(#laserGlow)" class="gauge-fluid" />
-
-          <!-- Scale ticks on the window -->
-          <line x1="34" y1="30" x2="37" y2="30" stroke="#cbd5e1" stroke-width="1" />
-          <line x1="34" y1="40" x2="37" y2="40" stroke="#cbd5e1" stroke-width="1" />
-          <line x1="34" y1="50" x2="37" y2="50" stroke="#cbd5e1" stroke-width="1" />
+      <!-- 重力分选分析塔 (中央塔身) -->
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(370, 90)">
+        <rect x="20" y="30" width="50" height="90" fill="url(#metalCylinder)" stroke="#1e293b" />
+        <path d="M 20 30 C 20 15, 70 15, 70 30 Z" fill="#475569" stroke="#334155" />
+        <ellipse cx="45" cy="10" rx="26" ry="8" fill="none" stroke="#38bdf8" stroke-width="2" class="neon-ring" filter="url(#laserGlow)" />
+        <!-- Valve bypassed pipe -->
+        <path d="M 20 50 L 8 50 L 8 95 L 20 95" fill="none" stroke="#334155" stroke-width="4.5" />
+        <circle cx="8" cy="72" r="5" fill="#64748b" />
+        <!-- Sifter fan blade windows -->
+        <circle cx="45" cy="55" r="11" fill="#020617" stroke="#1e293b" />
+        <g transform="translate(45, 55)" class="fan-spin">
+          <path d="M -9 0 L 9 0 M 0 -9 L 0 9" stroke="#38bdf8" stroke-width="2" />
         </g>
-
-        <!-- Labels -->
-        <g transform="translate(650, 192)">
-          <rect x="-45" y="-12" width="90" height="24" rx="4" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
-          <text x="0" y="4" class="lbl-name">精矿筒仓 A</text>
+        <!-- Windows 2 -->
+        <circle cx="45" cy="85" r="11" fill="#020617" stroke="#1e293b" />
+        <g transform="translate(45, 85)" class="fan-spin">
+          <path d="M -9 0 L 9 0 M 0 -9 L 0 9" stroke="#38bdf8" stroke-width="2" />
         </g>
-        <g transform="translate(650, 220)">
-          <rect x="-35" y="-10" width="70" height="20" rx="3" fill="#0f172a" stroke="#0ea5e9" stroke-width="1" />
-          <text x="0" y="4" class="lbl-val font-mono text-sky-400">{{ siloALevel }}%</text>
-        </g>
+        <!-- Text badges -->
+        <rect x="-15" y="130" width="120" height="20" rx="3" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
+        <text x="45" y="144" class="lbl-name">重力分选分析塔</text>
+        <rect x="-5" y="153" width="100" height="16" rx="2" fill="#0f172a" stroke="#10b981" stroke-width="0.8" />
+        <text x="45" y="165" class="lbl-val text-emerald-400">运行良好 (96%)</text>
       </g>
 
-
-      <!-- 6. NODE 4: 副矿筒仓 B (Right Bottom) -->
-      <!-- Dotted Wireframe showing interior ore pile structure -->
-      <g class="iso-node-group" filter="url(#softShadow)">
-        <g transform="translate(550, 255)">
-          <!-- Top dome hatch -->
-          <ellipse cx="35" cy="12" rx="25" ry="10" fill="#1e293b" stroke="#0284c7" stroke-dasharray="2 2" />
-          
-          <!-- Outer Wireframe Cylinder -->
-          <path d="M 10 12 A 25 10 0 0 0 60 12 L 60 60 A 25 10 0 0 1 10 60 Z" fill="rgba(15, 23, 42, 0.7)" stroke="#0ea5e9" stroke-width="1.5" stroke-dasharray="3 3" />
-          <!-- Cone bottom -->
-          <path d="M 10 60 A 25 10 0 0 0 60 60 L 35 80 Z" fill="rgba(2, 6, 23, 0.8)" stroke="#0284c7" stroke-dasharray="3 3" />
-
-          <!-- Golden/Cyan internal pile aggregate -->
-          <path d="M 18 55 Q 35 30, 52 55 Z" fill="url(#goldOreGrad)" stroke="#ca8a04" stroke-width="1" />
-          <ellipse cx="35" cy="55" rx="17" ry="5" fill="#ca8a04" opacity="0.5" />
-        </g>
-
-        <!-- Labels -->
-        <g transform="translate(585, 355)">
-          <rect x="-45" y="-12" width="90" height="24" rx="4" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
-          <text x="0" y="4" class="lbl-name">副矿筒仓 B</text>
-        </g>
-        <g transform="translate(585, 383)">
-          <rect x="-35" y="-10" width="70" height="20" rx="3" fill="#0f172a" stroke="#ca8a04" stroke-width="1" />
-          <text x="0" y="4" class="lbl-val font-mono text-yellow-500">54.2%</text>
-        </g>
+      <!-- 筛分及配煤中仓 -->
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(480, 150)">
+        <ellipse cx="30" cy="10" rx="20" ry="8" fill="#475569" stroke="#334155" />
+        <path d="M 10 10 A 20 8 0 0 0 50 10 L 50 40 A 20 8 0 0 1 10 40 Z" fill="url(#metalCylinder)" stroke="#1e293b" />
+        <path d="M 10 40 A 20 8 0 0 0 50 40 L 30 55 Z" fill="#1e293b" />
+        <!-- Badges -->
+        <rect x="-20" y="65" width="100" height="20" rx="3" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
+        <text x="30" y="79" class="lbl-name">筛分及配煤中仓</text>
+        <rect x="5" y="88" width="50" height="15" rx="2" fill="#0f172a" stroke="#38bdf8" stroke-width="0.8" />
+        <text x="30" y="99" class="lbl-val text-sky-400">64 m</text>
       </g>
+
+      <!-- 地面原煤仓 -->
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(560, 180)">
+        <ellipse cx="30" cy="10" rx="20" ry="8" fill="#475569" stroke="#334155" />
+        <path d="M 10 10 A 20 8 0 0 0 50 10 L 50 42 A 20 8 0 0 1 10 42 Z" fill="url(#metalCylinder)" stroke="#1e293b" />
+        <path d="M 10 42 A 20 8 0 0 0 50 42 L 30 58 Z" fill="#1e293b" />
+        <!-- Badges -->
+        <rect x="-20" y="65" width="100" height="20" rx="3" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
+        <text x="30" y="79" class="lbl-name">地面原煤仓</text>
+        <rect x="5" y="88" width="50" height="15" rx="2" fill="#0f172a" stroke="#38bdf8" stroke-width="0.8" />
+        <text x="30" y="99" class="lbl-val text-sky-400">64 m</text>
+      </g>
+
+      <!-- 精矿筒仓 A (上方较大) -->
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(640, 220)">
+        <ellipse cx="35" cy="12" rx="22" ry="9" fill="#475569" stroke="#334155" />
+        <path d="M 13 12 A 22 9 0 0 0 57 12 L 57 52 A 22 9 0 0 1 13 52 Z" fill="url(#metalCylinder)" stroke="#1e293b" />
+        <path d="M 13 52 A 22 9 0 0 0 57 52 L 35 70 Z" fill="#1e293b" />
+        <!-- Fluid gauge -->
+        <rect x="33" y="20" width="4" height="25" rx="1" fill="#020617" />
+        <rect x="34" y="24" width="2" height="20" rx="0.5" fill="#38bdf8" class="gauge-fluid" />
+        <!-- Badges -->
+        <rect x="-10" y="80" width="90" height="20" rx="3" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
+        <text x="35" y="94" class="lbl-name">精矿筒仓 A</text>
+        <rect x="10" y="103" width="50" height="15" rx="2" fill="#0f172a" stroke="#0ea5e9" stroke-width="0.8" />
+        <text x="35" y="114" class="lbl-val font-mono text-sky-400">{{ siloALevel }}%</text>
+      </g>
+
+      <!-- 副矿筒仓 B (下方较小) -->
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(710, 275)">
+        <ellipse cx="25" cy="9" rx="17" ry="7" fill="#1e293b" stroke="#0ea5e9" stroke-dasharray="2 2" />
+        <path d="M 8 9 A 17 7 0 0 0 42 9 L 42 38 A 17 7 0 0 1 8 38 Z" fill="rgba(15, 23, 42, 0.7)" stroke="#0ea5e9" stroke-dasharray="3 3" />
+        <path d="M 8 38 A 17 7 0 0 0 42 38 L 25 52 Z" stroke="#0284c7" stroke-dasharray="3 3" />
+        <!-- Gold ore heap -->
+        <path d="M 12 36 Q 25 18, 38 36 Z" fill="url(#goldOreGrad)" stroke="#ca8a04" />
+        <!-- Badges -->
+        <rect x="-20" y="62" width="90" height="20" rx="3" fill="#020617" fill-opacity="0.8" stroke="#1e293b" />
+        <text x="25" y="76" class="lbl-name">副矿筒仓 B</text>
+        <rect x="0" y="85" width="50" height="15" rx="2" fill="#0f172a" stroke="#ca8a04" stroke-width="0.8" />
+        <text x="25" y="96" class="lbl-val font-mono text-yellow-500">54.2%</text>
+      </g>
+
     </svg>
 
     <!-- Overlay process summary details -->
@@ -245,11 +187,11 @@
       <div class="legend-grid">
         <div class="legend-item">
           <span class="indicator bg-cyan-500 shadow-[0_0_8px_#38bdf8]"></span>
-          <span>工作面采集管道 (发光流)</span>
+          <span>输送皮带流 (发光传输)</span>
         </div>
         <div class="legend-item">
           <span class="indicator bg-blue-600 shadow-[0_0_8px_#2563eb]"></span>
-          <span>重力选分输送线 (脉冲能线)</span>
+          <span>物料分流射线 (脉冲流)</span>
         </div>
       </div>
     </div>
@@ -280,16 +222,16 @@ const firstRow = computed(() => {
   return {}
 })
 
-// Dynamic values
+// Dynamic rates and readings
 const miningRate = computed(() => {
   if (hasData.value) {
     const val = firstRow.value[props.yField!]
     if (typeof val === 'number') {
       return val.toFixed(1)
     }
-    return String(val ?? '50.0')
+    return String(val ?? '62.0')
   }
-  return '50.0'
+  return '62.0'
 })
 
 const siloALevel = computed(() => {
@@ -299,14 +241,13 @@ const siloALevel = computed(() => {
       return Math.min(100, Math.max(10, Math.round(temp * 1.2)))
     }
   }
-  return '82'
+  return '64'
 })
 
-// Dynamic generator for random floating dust coordinates
 function getDustStyle(n: number) {
-  const delays = [0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.6, 4.0, 4.4]
-  const lefts = [12, 28, 42, 58, 72, 85, 18, 35, 52, 66, 80, 92]
-  const tops = [25, 45, 15, 65, 30, 75, 80, 20, 50, 85, 35, 60]
+  const delays = [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5]
+  const lefts = [15, 30, 45, 60, 75, 88, 22, 38, 54, 70, 82, 94]
+  const tops = [20, 40, 18, 62, 28, 70, 78, 24, 48, 82, 32, 58]
   return {
     left: `${lefts[n - 1]}%`,
     top: `${tops[n - 1]}%`,
@@ -321,14 +262,14 @@ function getDustStyle(n: number) {
   position: relative;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 50%, rgba(17, 24, 39, 0.95) 0%, rgba(2, 6, 23, 0.98) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.15);
+  background: radial-gradient(circle at 50% 50%, rgba(13, 27, 56, 0.95) 0%, rgba(2, 6, 23, 0.98) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
   border-radius: 16px;
   backdrop-filter: blur(12px);
   overflow: hidden;
   box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.8),
-    inset 0 0 40px rgba(56, 189, 248, 0.08);
+    0 25px 50px -12px rgba(0, 0, 0, 0.9),
+    inset 0 0 45px rgba(56, 189, 248, 0.12);
 }
 
 /* Grid Backdrop */
@@ -346,24 +287,24 @@ function getDustStyle(n: number) {
 /* Volumetric light effects */
 .volumetric-light {
   position: absolute;
-  width: 350px;
-  height: 400px;
-  background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.06) 0%, transparent 70%);
+  width: 400px;
+  height: 450px;
+  background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
   transform: rotate(-25deg);
   pointer-events: none;
   z-index: 1;
-  filter: blur(20px);
+  filter: blur(25px);
 }
 
 .volumetric-light.light-1 {
-  top: -100px;
-  left: 80px;
+  top: -120px;
+  left: 90px;
 }
 
 .volumetric-light.light-2 {
-  bottom: -50px;
-  right: 50px;
-  background: radial-gradient(ellipse at center, rgba(37, 99, 235, 0.04) 0%, transparent 70%);
+  bottom: -60px;
+  right: 60px;
+  background: radial-gradient(ellipse at center, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
 }
 
 /* Floating Dust System */
@@ -381,22 +322,18 @@ function getDustStyle(n: number) {
   background: #38bdf8;
   border-radius: 50%;
   filter: blur(0.5px);
-  animation: float-particle 7s linear infinite;
+  animation: float-particle 8s linear infinite;
 }
 
 @keyframes float-particle {
   0% {
-    transform: translate(0, 20px) scale(0.6);
+    transform: translate(0, 30px) scale(0.5);
     opacity: 0;
   }
-  20% {
-    opacity: 0.6;
-  }
-  80% {
-    opacity: 0.4;
-  }
+  20% { opacity: 0.7; }
+  80% { opacity: 0.5; }
   100% {
-    transform: translate(30px, -60px) scale(1.1);
+    transform: translate(40px, -80px) scale(1.2);
     opacity: 0;
   }
 }
@@ -411,33 +348,19 @@ function getDustStyle(n: number) {
 
 /* Flow Line conveyor belts */
 .pipe-flow-1 {
-  animation: pipe-shuttle 2s linear infinite;
+  animation: pipe-shuttle 1.8s linear infinite;
 }
 
 @keyframes pipe-shuttle {
-  to {
-    stroke-dashoffset: -28;
-  }
+  to { stroke-dashoffset: -32; }
 }
 
 .laser-beam-1 {
-  animation: laser-pulse-1 1s linear infinite;
-}
-
-.laser-beam-2 {
-  animation: laser-pulse-2 0.7s linear infinite;
+  animation: laser-pulse-1 1.2s linear infinite;
 }
 
 @keyframes laser-pulse-1 {
-  to {
-    stroke-dashoffset: -20;
-  }
-}
-
-@keyframes laser-pulse-2 {
-  to {
-    stroke-dashoffset: -32;
-  }
+  to { stroke-dashoffset: -20; }
 }
 
 /* Typography styles for labels */
@@ -451,26 +374,15 @@ function getDustStyle(n: number) {
 }
 
 .lbl-val {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: bold;
   text-anchor: middle;
   pointer-events: none;
 }
 
 /* Element Spinning Animations */
-.spinning-drill {
-  animation: twist 1s linear infinite;
-  transform-origin: 0px 10px;
-}
-
-@keyframes twist {
-  0% { transform: scaleX(1); }
-  50% { transform: scaleX(-1); }
-  100% { transform: scaleX(1); }
-}
-
 .fan-spin {
-  animation: rotate-blade 1.8s linear infinite;
+  animation: rotate-blade 2s linear infinite;
   transform-origin: 0px 0px;
 }
 
@@ -481,33 +393,25 @@ function getDustStyle(n: number) {
 /* Hover Cone indicator pulse */
 .cone-glow {
   animation: float-cone 1.5s ease-in-out infinite alternate;
+  transform-origin: center;
 }
 
 @keyframes float-cone {
   from { transform: translateY(0); opacity: 0.25; }
-  to { transform: translateY(-4px); opacity: 0.45; }
+  to { transform: translateY(-4px); opacity: 0.5; }
 }
 
 .drill-led {
-  animation: led-flash 1s steps(2, start) infinite;
+  animation: led-flash 1.2s steps(2, start) infinite;
 }
 
 @keyframes led-flash {
   to { visibility: hidden; }
 }
 
-/* LED Indicator lights on sifter tower */
-.led-blink-1 { animation: pulse-led 1s infinite alternate; }
-.led-blink-2 { animation: pulse-led 1.2s infinite alternate 0.2s; }
-.led-blink-3 { animation: pulse-led 0.8s infinite alternate 0.4s; }
-
-@keyframes pulse-led {
-  from { fill: #047857; opacity: 0.6; }
-  to { fill: #10b981; opacity: 1; filter: drop-shadow(0 0 3px #10b981); }
-}
-
 .neon-ring {
   animation: ring-pulse 2s ease-in-out infinite alternate;
+  transform-origin: center;
 }
 
 @keyframes ring-pulse {
@@ -520,8 +424,8 @@ function getDustStyle(n: number) {
   position: absolute;
   top: 16px;
   left: 16px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(56, 189, 248, 0.15);
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.2);
   padding: 10px 14px;
   border-radius: 8px;
   backdrop-filter: blur(8px);
