@@ -6,7 +6,6 @@
         <el-select v-model="typeFilter" placeholder="数据源类型">
           <el-option label="全部类型" value="all" />
           <el-option label="MySQL" value="MySQL" />
-          <el-option label="MQTT" value="MQTT" />
           <el-option label="REST" value="REST" />
         </el-select>
         <el-select v-model="statusFilter" placeholder="连接状态">
@@ -57,7 +56,6 @@
           <el-select v-model="form.type" placeholder="请选择类型" :disabled="isEdit" class="w-full"
             @change="handleTypeChange">
             <el-option label="MySQL 数据库" value="MySQL" />
-            <el-option label="MQTT 消息队列" value="MQTT" />
             <el-option label="REST API 接口" value="REST" />
           </el-select>
         </el-form-item>

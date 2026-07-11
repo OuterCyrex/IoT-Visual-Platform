@@ -62,14 +62,49 @@ export const PaletteList: PaletteGroup[] = [
           text: '文本标题',
         },
       },
+      {
+        label: '数据卡',
+        desc: '单值指标卡片',
+        nodeType: 'basic',
+        dotClass: 'bg-cyan-500',
+        component: 'metricCard',
+        defaultSize: {
+          w: 320,
+          h: 180,
+        },
+        defaultProps: {
+          text: '核心指标',
+          datasetId: '',
+          xField: '',
+          yField: '',
+          refreshInterval: 0,
+        },
+      },
+      {
+        label: '进度条',
+        desc: '进度状态展示',
+        nodeType: 'basic',
+        dotClass: 'bg-orange-500',
+        component: 'progressBar',
+        defaultSize: {
+          w: 320,
+          h: 160,
+        },
+        defaultProps: {
+          text: '执行进度',
+          datasetId: '',
+          xField: '',
+          yField: '',
+          refreshInterval: 0,
+        },
+      },
     ],
   },
-
   {
     label: '图表',
     items: [
       {
-        label: '条形图',
+        label: '柱状图',
         desc: '数据统计图表',
         nodeType: 'chart',
         dotClass: 'bg-violet-500',
@@ -79,7 +114,7 @@ export const PaletteList: PaletteGroup[] = [
           h: 240,
         },
         defaultProps: {
-          text: '条形图',
+          text: '柱状图',
           datasetId: '',
           xField: '',
           yField: '',
@@ -103,9 +138,9 @@ export const PaletteList: PaletteGroup[] = [
           yField: '',
           refreshInterval: 0,
         },
-      },      
+      },
       {
-        label: '饼状图',
+        label: '饼图',
         desc: '比例展示',
         nodeType: 'chart',
         dotClass: 'bg-cyan-500',
@@ -115,7 +150,43 @@ export const PaletteList: PaletteGroup[] = [
           h: 240,
         },
         defaultProps: {
-          text: '饼状图',
+          text: '饼图',
+          datasetId: '',
+          xField: '',
+          yField: '',
+          refreshInterval: 0,
+        },
+      },
+      {
+        label: '排行榜',
+        desc: 'TOP 列表展示',
+        nodeType: 'chart',
+        dotClass: 'bg-fuchsia-500',
+        component: 'rankingList',
+        defaultSize: {
+          w: 360,
+          h: 320,
+        },
+        defaultProps: {
+          text: '排行看板',
+          datasetId: '',
+          xField: '',
+          yField: '',
+          refreshInterval: 0,
+        },
+      },
+      {
+        label: '告警列表',
+        desc: '事件告警展示',
+        nodeType: 'chart',
+        dotClass: 'bg-rose-500',
+        component: 'alertList',
+        defaultSize: {
+          w: 360,
+          h: 320,
+        },
+        defaultProps: {
+          text: '告警列表',
           datasetId: '',
           xField: '',
           yField: '',

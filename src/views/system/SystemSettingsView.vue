@@ -14,7 +14,6 @@
           <el-form-item label="默认数据源类型">
             <el-select model-value="MySQL">
               <el-option label="MySQL" value="MySQL" />
-              <el-option label="MQTT" value="MQTT" />
               <el-option label="REST" value="REST" />
             </el-select>
           </el-form-item>

@@ -2,6 +2,10 @@ CREATE DATABASE IF NOT EXISTS iot_visual_platform
   DEFAULT CHARACTER SET utf8mb4
   DEFAULT COLLATE utf8mb4_unicode_ci;
 
+CREATE DATABASE IF NOT EXISTS factory_prod
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_unicode_ci;
+
 USE iot_visual_platform;
 
 CREATE TABLE IF NOT EXISTS roles (
@@ -87,12 +91,177 @@ CREATE TABLE IF NOT EXISTS project_memberships (
   access_level VARCHAR(16) NOT NULL
 );
 
--- Create separate IoT database for physical connection simulation
-CREATE DATABASE IF NOT EXISTS factory_prod
-  DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
+DELETE FROM project_memberships;
+DELETE FROM datasets;
+DELETE FROM data_sources;
+DELETE FROM scene_projects;
+DELETE FROM screen_projects;
+DELETE FROM projects;
+DELETE FROM users;
+DELETE FROM roles;
+
+INSERT INTO roles (id, name, description, permissions) VALUES
+('role-001', 'Super Admin', '拥有平台全部管理权限。', '["screen:read","screen:write","scene:read","scene:write","data-source:read","data-source:write","dataset:read","dataset:write","user:read","user:write","project:read","project:write","system:write"]'),
+('role-002', 'Screen Designer', '负责 2D 大屏项目的设计、预览和发布。', '["screen:read","screen:write","dataset:read","project:read"]'),
+('role-003', 'Scene Editor', '负责 3D 场景与模型管理。', '["scene:read","scene:write","dataset:read","project:read"]'),
+('role-004', 'Data Operator', '负责数据源维护、连通性测试和数据集建模。', '["data-source:read","data-source:write","dataset:read","dataset:write"]');
+
+INSERT INTO users (id, username, display_name, role, phone, password_hash, status, updated_at) VALUES
+('usr-001', 'admin', '系统管理员', 'Super Admin', '13800000001', 'ee67c8d3f753192541a3e283979305c41558b35d96be11b8cc81d34adbd9d42b', 'active', '2026-07-11 10:00'),
+('usr-002', 'li.gong', '李工', 'Screen Designer', '13800000012', '41de2a99c36bc303624da6c74b5e742684e1507369d09b6382e2cf9e35a14355', 'active', '2026-07-11 10:00'),
+('usr-003', 'zhou.xuan', '周璇', 'Scene Editor', '13800000029', '9cdbb103d71a92e1dfbe43cb716babc677fa7a01c6d166fe1d184529610f7aad', 'active', '2026-07-11 10:00');
+
+INSERT INTO projects (id, name, type, project_group, owner, status, updated_at) VALUES
+('prj-ev-001', '电驱总成装配 2D 大屏', '2D', '智能装配车间', '李工', 'published', '2026-07-11 10:00'),
+('prj-ev-002', '智慧工厂三维巡检', '3D', '数字孪生中心', '周璇', 'editing', '2026-07-11 10:00'),
+('prj-ev-003', '厂务能源中心总览', '2D', '能源管理中心', '系统管理员', 'draft', '2026-07-11 10:00');
+
+INSERT INTO screen_projects (id, name, project_group, scene, owner, status, published_version, tags, screen_nodes, updated_at) VALUES
+(
+  'scr-ev-001',
+  '新能源汽车电驱总成装配运营大屏',
+  '智能装配车间',
+  '总装生产运营',
+  '李工',
+  'published',
+  'v1.0.0',
+  '["工业制造","电驱装配","OEE","Andon"]',
+  '[{"id":"node-title","component":"text","x":642,"y":26,"w":640,"h":54,"props":{"text":"新能源汽车电驱总成装配车间运营总览"}},{"id":"node-kpi-output","component":"metricCard","x":36,"y":104,"w":260,"h":150,"props":{"text":"本班产出","datasetId":"set-ev-001","xField":"shift_name","yField":"actual_qty","refreshInterval":5000}},{"id":"node-kpi-oee","component":"metricCard","x":314,"y":104,"w":260,"h":150,"props":{"text":"产线 OEE","datasetId":"set-ev-001","xField":"shift_name","yField":"oee_rate","refreshInterval":5000}},{"id":"node-kpi-quality","component":"metricCard","x":592,"y":104,"w":260,"h":150,"props":{"text":"一次合格率","datasetId":"set-ev-001","xField":"shift_name","yField":"first_pass_rate","refreshInterval":5000}},{"id":"node-kpi-energy","component":"metricCard","x":870,"y":104,"w":260,"h":150,"props":{"text":"单台能耗","datasetId":"set-ev-001","xField":"shift_name","yField":"unit_energy_kwh","refreshInterval":5000}},{"id":"node-order-progress","component":"progressBar","x":1148,"y":104,"w":736,"h":150,"props":{"text":"工单达成率","datasetId":"set-ev-002","xField":"work_order_no","yField":"completion_rate","refreshInterval":5000}},{"id":"node-output-chart","component":"chart","x":36,"y":286,"w":610,"h":330,"props":{"text":"产线小时产出对比","datasetId":"set-ev-003","xField":"line_name","yField":"output_qty","refreshInterval":10000}},{"id":"node-quality-line","component":"lineChart","x":668,"y":286,"w":610,"h":330,"props":{"text":"质量趋势","datasetId":"set-ev-004","xField":"period_label","yField":"pass_rate","refreshInterval":10000}},{"id":"node-status-pie","component":"pieChart","x":1300,"y":286,"w":584,"h":330,"props":{"text":"设备状态分布","datasetId":"set-ev-005","xField":"status_name","yField":"device_count","refreshInterval":10000}},{"id":"node-oee-ranking","component":"rankingList","x":36,"y":646,"w":420,"h":380,"props":{"text":"线体 OEE 排行","datasetId":"set-ev-006","xField":"line_name","yField":"oee_rate","refreshInterval":10000}},{"id":"node-alert-list","component":"alertList","x":478,"y":646,"w":700,"h":380,"props":{"text":"Andon 告警事件","datasetId":"set-ev-007","xField":"alarm_message","yField":"alarm_level","refreshInterval":5000}},{"id":"node-cycle-chart","component":"chart","x":1200,"y":646,"w":684,"h":380,"props":{"text":"关键工位节拍监控","datasetId":"set-ev-008","xField":"station_name","yField":"cycle_seconds","refreshInterval":10000}}]',
+  '2026-07-11 10:00'
+),
+(
+  'scr-ev-002',
+  '厂务能源中心总览',
+  '能源管理中心',
+  '园区能源驾驶舱',
+  '系统管理员',
+  'draft',
+  '未发布',
+  '["能源","厂务"]',
+  '[]',
+  '2026-07-11 10:00'
+);
+
+INSERT INTO scene_projects (id, name, project_group, owner, model_count, status, engine, scene_nodes, updated_at) VALUES
+(
+  'scn-ev-001',
+  '智慧工厂三维巡检',
+  '数字孪生中心',
+  '周璇',
+  8,
+  'editing',
+  'Three.js',
+  '[]',
+  '2026-07-11 10:00'
+);
+
+INSERT INTO data_sources (id, name, type, host, database_name, owner, status, updated_at) VALUES
+('ds-ev-mysql', '生产 MySQL 主库', 'MySQL', '127.0.0.1:3306', 'factory_prod', '系统管理员', 'connected', '2026-07-11 10:00'),
+('ds-ev-rest', '设备主数据 REST 服务', 'REST', 'http://localhost:5000', '/api', '系统管理员', 'connected', '2026-07-11 10:00');
+
+INSERT INTO datasets (id, name, data_source_id, source_name, table_name, refresh_mode, field_count, updated_at) VALUES
+('set-ev-001', '班次核心指标', 'ds-ev-mysql', '生产 MySQL 主库', 'assembly_shift_kpi', 'real-time', 10, '2026-07-11 10:00'),
+('set-ev-002', '工单执行进度', 'ds-ev-mysql', '生产 MySQL 主库', 'work_order_progress', 'real-time', 8, '2026-07-11 10:00'),
+('set-ev-003', '产线实时产出', 'ds-ev-mysql', '生产 MySQL 主库', 'line_output_hourly', 'real-time', 7, '2026-07-11 10:00'),
+('set-ev-004', '质量趋势', 'ds-ev-mysql', '生产 MySQL 主库', 'quality_trend_daily', '5 min', 6, '2026-07-11 10:00'),
+('set-ev-005', '设备状态统计', 'ds-ev-mysql', '生产 MySQL 主库', 'equipment_status_distribution', '5 min', 5, '2026-07-11 10:00'),
+('set-ev-006', '线体 OEE 排行', 'ds-ev-mysql', '生产 MySQL 主库', 'line_oee_ranking', '5 min', 6, '2026-07-11 10:00'),
+('set-ev-007', 'Andon 告警事件', 'ds-ev-mysql', '生产 MySQL 主库', 'andon_alarm_events', 'real-time', 8, '2026-07-11 10:00'),
+('set-ev-008', '关键工位节拍', 'ds-ev-mysql', '生产 MySQL 主库', 'station_cycle_monitor', 'real-time', 7, '2026-07-11 10:00'),
+('set-ev-009', '设备资产台账', 'ds-ev-mysql', '生产 MySQL 主库', 'device_assets', 'manual', 7, '2026-07-11 10:00');
+
+INSERT INTO project_memberships (id, user_id, project_id, access_level) VALUES
+('pm-ev-001', 'usr-002', 'prj-ev-001', 'owner'),
+('pm-ev-002', 'usr-003', 'prj-ev-002', 'owner'),
+('pm-ev-003', 'usr-001', 'prj-ev-003', 'owner');
 
 USE factory_prod;
+
+CREATE TABLE IF NOT EXISTS assembly_shift_kpi (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  shift_date DATE NOT NULL,
+  shift_name VARCHAR(32) NOT NULL,
+  work_center VARCHAR(64) NOT NULL,
+  plan_qty INT NOT NULL,
+  actual_qty INT NOT NULL,
+  completion_rate DECIMAL(6, 2) NOT NULL,
+  oee_rate DECIMAL(6, 2) NOT NULL,
+  first_pass_rate DECIMAL(6, 2) NOT NULL,
+  unit_energy_kwh DECIMAL(8, 2) NOT NULL,
+  alarm_count INT NOT NULL,
+  updated_at DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS work_order_progress (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  work_order_no VARCHAR(64) NOT NULL,
+  product_name VARCHAR(128) NOT NULL,
+  line_name VARCHAR(64) NOT NULL,
+  plan_qty INT NOT NULL,
+  completed_qty INT NOT NULL,
+  completion_rate DECIMAL(6, 2) NOT NULL,
+  due_time DATETIME NOT NULL,
+  status VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS line_output_hourly (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  stat_time DATETIME NOT NULL,
+  line_name VARCHAR(64) NOT NULL,
+  output_qty INT NOT NULL,
+  target_qty INT NOT NULL,
+  running_workers INT NOT NULL,
+  online_devices INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS quality_trend_daily (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  period_label VARCHAR(32) NOT NULL,
+  pass_rate DECIMAL(6, 2) NOT NULL,
+  defect_rate DECIMAL(6, 2) NOT NULL,
+  rework_qty INT NOT NULL,
+  scrap_qty INT NOT NULL,
+  audit_score DECIMAL(6, 2) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS equipment_status_distribution (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  status_name VARCHAR(32) NOT NULL,
+  device_count INT NOT NULL,
+  total_minutes INT NOT NULL,
+  utilization_rate DECIMAL(6, 2) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS line_oee_ranking (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  line_name VARCHAR(64) NOT NULL,
+  oee_rate DECIMAL(6, 2) NOT NULL,
+  availability_rate DECIMAL(6, 2) NOT NULL,
+  performance_rate DECIMAL(6, 2) NOT NULL,
+  quality_rate DECIMAL(6, 2) NOT NULL,
+  updated_at DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS andon_alarm_events (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  alarm_time DATETIME NOT NULL,
+  line_name VARCHAR(64) NOT NULL,
+  station_name VARCHAR(64) NOT NULL,
+  alarm_level VARCHAR(16) NOT NULL,
+  alarm_message VARCHAR(255) NOT NULL,
+  duration_seconds INT NOT NULL,
+  status VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS station_cycle_monitor (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  station_name VARCHAR(64) NOT NULL,
+  line_name VARCHAR(64) NOT NULL,
+  cycle_seconds DECIMAL(8, 2) NOT NULL,
+  takt_seconds DECIMAL(8, 2) NOT NULL,
+  deviation_rate DECIMAL(6, 2) NOT NULL,
+  station_status VARCHAR(32) NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS energy_realtime_view (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -122,3 +291,119 @@ CREATE TABLE IF NOT EXISTS device_assets (
   location VARCHAR(128) NOT NULL,
   status VARCHAR(32) NOT NULL
 );
+
+DELETE FROM assembly_shift_kpi;
+DELETE FROM work_order_progress;
+DELETE FROM line_output_hourly;
+DELETE FROM quality_trend_daily;
+DELETE FROM equipment_status_distribution;
+DELETE FROM line_oee_ranking;
+DELETE FROM andon_alarm_events;
+DELETE FROM station_cycle_monitor;
+DELETE FROM energy_realtime_view;
+DELETE FROM device_alarm_stream;
+DELETE FROM device_assets;
+
+INSERT INTO assembly_shift_kpi
+  (shift_date, shift_name, work_center, plan_qty, actual_qty, completion_rate, oee_rate, first_pass_rate, unit_energy_kwh, alarm_count, updated_at)
+VALUES
+  ('2026-07-11', '白班', '电驱总成装配车间', 480, 452, 94.17, 87.60, 98.42, 12.80, 4, '2026-07-11 10:00:00'),
+  ('2026-07-11', '夜班', '电驱总成装配车间', 460, 438, 95.22, 85.40, 97.95, 13.20, 6, '2026-07-11 10:00:00');
+
+INSERT INTO work_order_progress
+  (work_order_no, product_name, line_name, plan_qty, completed_qty, completion_rate, due_time, status)
+VALUES
+  ('WO-EDU-20260711-01', 'EDU 180kW 电驱总成', 'A线装配', 300, 268, 89.33, '2026-07-11 18:00:00', 'running'),
+  ('WO-EDU-20260711-02', 'EDU 220kW 电驱总成', 'B线装配', 180, 172, 95.56, '2026-07-11 20:00:00', 'running'),
+  ('WO-EDU-20260711-03', '减速器子总成', 'C线预装', 120, 118, 98.33, '2026-07-11 16:30:00', 'running');
+
+INSERT INTO line_output_hourly
+  (stat_time, line_name, output_qty, target_qty, running_workers, online_devices)
+VALUES
+  ('2026-07-11 08:00:00', 'A线装配', 62, 60, 18, 12),
+  ('2026-07-11 08:00:00', 'B线装配', 54, 55, 16, 10),
+  ('2026-07-11 08:00:00', 'C线预装', 39, 40, 12, 8),
+  ('2026-07-11 09:00:00', 'A线装配', 66, 60, 18, 12),
+  ('2026-07-11 09:00:00', 'B线装配', 57, 55, 16, 10),
+  ('2026-07-11 09:00:00', 'C线预装', 41, 40, 12, 8),
+  ('2026-07-11 10:00:00', 'A线装配', 69, 60, 18, 12),
+  ('2026-07-11 10:00:00', 'B线装配', 61, 55, 16, 10),
+  ('2026-07-11 10:00:00', 'C线预装', 45, 40, 12, 8);
+
+INSERT INTO quality_trend_daily
+  (period_label, pass_rate, defect_rate, rework_qty, scrap_qty, audit_score)
+VALUES
+  ('07-05', 97.86, 2.14, 12, 2, 92.50),
+  ('07-06', 98.02, 1.98, 10, 1, 93.80),
+  ('07-07', 98.21, 1.79, 9, 1, 94.60),
+  ('07-08', 98.36, 1.64, 8, 1, 95.10),
+  ('07-09', 98.27, 1.73, 9, 2, 94.80),
+  ('07-10', 98.42, 1.58, 7, 1, 95.60),
+  ('07-11', 98.55, 1.45, 6, 1, 96.20);
+
+INSERT INTO equipment_status_distribution
+  (status_name, device_count, total_minutes, utilization_rate)
+VALUES
+  ('运行', 26, 9360, 72.80),
+  ('待机', 7, 2110, 16.40),
+  ('告警', 2, 640, 4.90),
+  ('保养', 1, 750, 5.90);
+
+INSERT INTO line_oee_ranking
+  (line_name, oee_rate, availability_rate, performance_rate, quality_rate, updated_at)
+VALUES
+  ('A线装配', 88.90, 92.60, 95.20, 99.05, '2026-07-11 10:00:00'),
+  ('B线装配', 86.40, 90.80, 94.10, 98.72, '2026-07-11 10:00:00'),
+  ('C线预装', 83.75, 89.30, 92.45, 98.10, '2026-07-11 10:00:00'),
+  ('转子压装线', 81.60, 87.90, 91.80, 97.85, '2026-07-11 10:00:00'),
+  ('总成测试线', 79.85, 86.50, 90.60, 97.40, '2026-07-11 10:00:00');
+
+INSERT INTO andon_alarm_events
+  (alarm_time, line_name, station_name, alarm_level, alarm_message, duration_seconds, status)
+VALUES
+  ('2026-07-11 09:42:00', 'A线装配', '定子压装工位', 'Critical', '压装力偏离上限，设备自动停机待检', 480, 'active'),
+  ('2026-07-11 09:55:00', 'B线装配', '视觉检测工位', 'Warning', '相机识别成功率下降至 92.4%', 260, 'active'),
+  ('2026-07-11 08:36:00', 'C线预装', '螺栓锁附工位', 'Warning', '电批扭矩波动超阈值', 190, 'resolved'),
+  ('2026-07-11 08:15:00', '总成测试线', 'NVH 测试工位', 'Info', '测试程序版本已切换到 V2.7', 60, 'resolved'),
+  ('2026-07-11 09:12:00', 'A线装配', 'AGV 上料口', 'Warning', '物料配送延时超过 5 分钟', 310, 'active');
+
+INSERT INTO station_cycle_monitor
+  (station_name, line_name, cycle_seconds, takt_seconds, deviation_rate, station_status)
+VALUES
+  ('定子压装工位', 'A线装配', 74.50, 68.00, 9.56, 'warning'),
+  ('转子装配工位', 'A线装配', 66.20, 68.00, -2.65, 'running'),
+  ('端盖锁附工位', 'B线装配', 63.80, 60.00, 6.33, 'warning'),
+  ('气密测试工位', 'B线装配', 58.90, 60.00, -1.83, 'running'),
+  ('EOL 测试工位', '总成测试线', 82.40, 75.00, 9.87, 'warning'),
+  ('NVH 测试工位', '总成测试线', 71.60, 75.00, -4.53, 'running');
+
+INSERT INTO energy_realtime_view
+  (timestamp, workshop_name, electricity_kwh, water_m3, gas_m3)
+VALUES
+  ('2026-07-11 08:00:00', '电驱总成装配车间', 1580.40, 22.30, 85.10),
+  ('2026-07-11 08:00:00', '机加车间', 2145.80, 18.20, 42.50),
+  ('2026-07-11 08:00:00', '总成测试车间', 1294.60, 8.20, 0.00),
+  ('2026-07-11 09:00:00', '电驱总成装配车间', 1668.70, 24.10, 90.30),
+  ('2026-07-11 09:00:00', '机加车间', 2236.90, 19.00, 44.10),
+  ('2026-07-11 09:00:00', '总成测试车间', 1348.50, 8.60, 0.00),
+  ('2026-07-11 10:00:00', '电驱总成装配车间', 1712.30, 25.40, 93.80),
+  ('2026-07-11 10:00:00', '机加车间', 2298.20, 19.50, 45.90),
+  ('2026-07-11 10:00:00', '总成测试车间', 1386.70, 8.90, 0.00);
+
+INSERT INTO device_alarm_stream
+  (timestamp, device_id, device_name, alarm_level, alarm_message, status)
+VALUES
+  ('2026-07-11 09:42:00', 'EQ-A-012', '定子压装机', 'Critical', '主轴压装力偏离上限', 'Active'),
+  ('2026-07-11 09:55:00', 'EQ-B-021', '视觉检测站', 'Warning', '图像识别成功率下降', 'Active'),
+  ('2026-07-11 09:12:00', 'AGV-007', 'AGV 配送车', 'Warning', '物料配送任务超时', 'Active'),
+  ('2026-07-11 08:15:00', 'TEST-003', 'NVH 测试机', 'Info', '测试程序已升级', 'Resolved');
+
+INSERT INTO device_assets
+  (asset_code, name, type, model, location, status)
+VALUES
+  ('AST-EDU-001', '定子压装机', '装配设备', 'PRS-450', 'A线装配-工位 01', 'Running'),
+  ('AST-EDU-002', '转子装配机', '装配设备', 'ROT-320', 'A线装配-工位 02', 'Running'),
+  ('AST-EDU-003', '端盖锁附机', '装配设备', 'LCK-280', 'B线装配-工位 03', 'Standby'),
+  ('AST-EDU-004', 'EOL 综合测试台', '测试设备', 'EOL-900', '总成测试线-工位 01', 'Running'),
+  ('AST-EDU-005', '冷却液循环站', '公辅设备', 'CHW-75', '动力站房', 'Maintenance'),
+  ('AST-EDU-006', '视觉检测站', '检测设备', 'VIS-6C', 'B线装配-工位 05', 'Alarm');

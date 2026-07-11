@@ -69,7 +69,7 @@ const canvasStyle = computed(() => ({
 function buildComponentProps(node: ScreenNode) {
   return {
     ...node.props,
-    ...(node.component === 'chart' || node.component === 'lineChart' || node.component === 'pieChart'
+    ...(['chart', 'lineChart', 'pieChart', 'metricCard', 'progressBar', 'rankingList', 'alertList'].includes(node.component)
       ? {
           rows: node.props.datasetId ? datasetData.value[node.props.datasetId]?.rows || [] : [],
         }
