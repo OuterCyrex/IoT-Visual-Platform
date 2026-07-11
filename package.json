@@ -4,8 +4,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "api": "tsx server/index.ts",
-    "api:mysql:init": "tsx server/scripts/init-mysql.ts",
+    "api": "node --experimental-strip-types server/index.ts",
+    "api:mysql:init": "node --experimental-strip-types server/scripts/init-mysql.ts",
+    "mock": "node mock-rest-server.js",
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"

@@ -10,6 +10,8 @@
       }}</el-tag>
       <el-button size="small" type="info" plain class="ml-2 hover:bg-slate-800 border-slate-700"
         @click="backToEditor">返回编辑</el-button>
+      <el-button size="small" type="info" plain class="hover:bg-slate-800 border-slate-700"
+        @click="backToList">返回列表</el-button>
     </div>
 
     <!-- Canvas Wrapper with Scale to Fit (1920x1080 resolution simulation) -->
@@ -38,9 +40,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import request from '../../utils/request'
 import type { ScreenNode } from '../../types/screen-node'
 import { screenComponentMap } from '../../components/screen-widgets/config'
+import { useScreenPreviewData } from '../../composables/screens/useScreenPreviewData'
+import { useScreenProject } from '../../composables/screens/useScreenProject'
+import { getNodeDatasetId, supportsDatasetRows } from '../../utils/screen-node'
 
 const route = useRoute()
 const router = useRouter()
@@ -48,11 +52,9 @@ const projectId = route.params.id as string
 
 const screenTitle = ref('大屏画布')
 const publishedVersion = ref('未发布')
-const nodes = ref<ScreenNode[]>([])
+const { nodes, loadProject: loadProjectDetail } = useScreenProject(projectId)
 
-// Reactive database dataset rows storage
-const datasetData = ref<Record<string, { columns: string[], rows: any[] }>>({})
-const timers: any[] = []
+const { datasetData, fetchAllDatasetData, setupRefreshTimers } = useScreenPreviewData()
 
 // Auto-scaling logic to fit screen
 const scale = ref(1)
@@ -67,11 +69,13 @@ const canvasStyle = computed(() => ({
 }))
 
 function buildComponentProps(node: ScreenNode) {
+  const datasetId = getNodeDatasetId(node)
+
   return {
     ...node.props,
-    ...(['chart', 'lineChart', 'pieChart', 'metricCard', 'progressBar', 'rankingList', 'alertList'].includes(node.component)
+    ...(supportsDatasetRows(node.component)
       ? {
-          rows: node.props.datasetId ? datasetData.value[node.props.datasetId]?.rows || [] : [],
+          rows: datasetId ? datasetData.value[datasetId]?.rows || [] : [],
         }
       : {}),
   }
@@ -85,61 +89,13 @@ function handleResize() {
   scale.value = Math.min(scaleX, scaleY, 1)
 }
 
-async function fetchDatasetData(dsId: string) {
-  try {
-    const res: any = await request.get(`/api/datasets/${dsId}/preview`)
-    datasetData.value[dsId] = {
-      columns: res.columns || [],
-      rows: res.rows || []
-    }
-  } catch (err) {
-    console.error(`Failed to fetch dataset ${dsId}:`, err)
-  }
-}
-
-async function fetchAllDatasetData() {
-  const datasetIds = [...new Set(nodes.value.map(n => n.props.datasetId).filter(Boolean))] as string[]
-  await Promise.all(datasetIds.map(id => fetchDatasetData(id)))
-}
-
-function setupRefreshTimers() {
-  timers.forEach(t => clearInterval(t))
-  timers.length = 0
-
-  nodes.value.forEach(node => {
-    const interval = Number(node.props.refreshInterval || 0)
-    const dsId = node.props.datasetId
-    if (dsId && interval > 0) {
-      const timer = setInterval(() => {
-        fetchDatasetData(dsId)
-      }, interval)
-      timers.push(timer)
-    }
-  })
-}
-
-function getDisplayText(node: ScreenNode) {
-  const dsId = node.props.datasetId
-  const field = node.props.yField
-  if (dsId && field && datasetData.value[dsId]) {
-    const val = datasetData.value[dsId].rows?.[0]?.[field]
-    return val !== undefined ? String(val) : '无数据'
-  }
-  return node.props.text || '文本区域'
-}
-
 async function loadProject() {
   try {
-    const res: any = await request.get(`/api/screenProjects/${projectId}`)
-    const item = res.item
-    if (item) {
-      screenTitle.value = item.name
-      publishedVersion.value = item.publishedVersion || '未发布'
-      nodes.value = typeof item.screenNodes === 'string' ? JSON.parse(item.screenNodes) : (item.screenNodes || [])
-
-      await fetchAllDatasetData()
-      setupRefreshTimers()
-    }
+    const item = await loadProjectDetail()
+    screenTitle.value = item.name
+    publishedVersion.value = item.publishedVersion || '未发布'
+    await fetchAllDatasetData(nodes.value)
+    setupRefreshTimers(nodes.value)
   } catch (err) {
     console.error(err)
   }
@@ -147,6 +103,10 @@ async function loadProject() {
 
 function backToEditor() {
   router.push(`/screens/${projectId}/editor`)
+}
+
+function backToList() {
+  router.push({ name: 'screens' })
 }
 
 onMounted(() => {
@@ -157,7 +117,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
-  timers.forEach(t => clearInterval(t))
 })
 </script>
 

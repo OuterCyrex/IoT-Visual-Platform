@@ -1,14 +1,10 @@
 <template>
-    <div v-if="hasData"
-        class="relative w-full h-full flex flex-col p-3 rounded bg-slate-900 border border-slate-800/80 text-slate-200 overflow-hidden">
-        <div class="text-xs font-semibold text-cyan-400 mb-2 border-b border-slate-800/60 pb-1.5">
-            {{ text || '占比分析' }}
+    <div class="relative w-full h-full flex flex-col p-3 rounded bg-slate-900 border border-slate-800/80 text-slate-200 overflow-hidden">
+        <div class="text-xs font-semibold text-cyan-400 mb-2 border-b border-slate-800/60 pb-1.5 flex justify-between items-center select-none">
+            <span>{{ text || '占比分析' }}</span>
+            <span v-if="!hasData" class="text-[9px] text-slate-500">(演示数据)</span>
         </div>
         <div ref="chartRef" class="flex-1 w-full min-h-0"></div>
-    </div>
-
-    <div v-else class="widget widget-chart">
-        <span>{{ text || '饼图占位' }}</span>
     </div>
 </template>
 
@@ -42,11 +38,20 @@ const hasData = computed(() =>
 )
 
 function updateChart() {
-    if (!chartRef.value || !hasData.value) return
+    if (!chartRef.value) return
 
     if (!chartInstance) {
         chartInstance = echarts.init(chartRef.value, 'dark')
     }
+
+    const xFieldToUse = hasData.value ? props.xField! : 'name'
+    const yFieldToUse = hasData.value ? props.yField! : 'val'
+    const rowsToUse = hasData.value ? props.rows! : [
+        { name: '类别一', val: 40 },
+        { name: '类别二', val: 30 },
+        { name: '类别三', val: 20 },
+        { name: '类别四', val: 10 }
+    ]
 
     chartInstance.setOption({
         backgroundColor: 'transparent',
@@ -69,9 +74,9 @@ function updateChart() {
                 type: 'pie',
                 radius: ['35%', '65%'],
                 center: ['50%', '45%'],
-                data: props.rows!.map(row => ({
-                    name: String(row[props.xField!] ?? ''),
-                    value: Number(row[props.yField!]) || 0
+                data: rowsToUse.map(row => ({
+                    name: String(row[xFieldToUse] ?? ''),
+                    value: Number(row[yFieldToUse]) || 0
                 })),
                 label: {
                     color: '#cbd5e1'

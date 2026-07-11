@@ -1,9 +1,7 @@
 <template>
-  <!-- Real ECharts canvas container -->
   <div class="relative w-full h-full flex flex-col p-3 rounded bg-slate-900 border border-slate-800/80 text-slate-200 overflow-hidden">
     <div class="text-xs font-semibold text-cyan-400 mb-2 border-b border-slate-800/60 pb-1.5 flex justify-between items-center select-none">
-      <span>{{ text || '数据监控图表' }}</span>
-      <span v-if="loading" class="text-[9px] text-slate-500 animate-pulse">更新中...</span>
+      <span>{{ text || '横向排行图表' }}</span>
       <span v-if="!hasData" class="text-[9px] text-slate-500">(演示数据)</span>
     </div>
     <div ref="chartRef" class="flex-1 w-full min-h-0"></div>
@@ -38,13 +36,8 @@ const hasData = computed(() => {
 
 function initChart() {
   if (!chartRef.value) return
-  
-  chartInstance = echarts.init(chartRef.value, 'dark', {
-    renderer: 'canvas',
-  })
+  chartInstance = echarts.init(chartRef.value, 'dark', { renderer: 'canvas' })
   updateChartOptions()
-
-  // Set up resize observer to keep canvas responsive
   resizeObserver = new ResizeObserver(() => {
     chartInstance?.resize()
   })
@@ -53,24 +46,22 @@ function initChart() {
 
 function updateChartOptions() {
   if (!chartInstance && chartRef.value) {
-    chartInstance = echarts.init(chartRef.value, 'dark', {
-      renderer: 'canvas',
-    })
+    chartInstance = echarts.init(chartRef.value, 'dark', { renderer: 'canvas' })
   }
-
   if (!chartInstance) return
 
-  const xFieldToUse = hasData.value ? props.xField! : 'item'
-  const yFieldToUse = hasData.value ? props.yField! : 'val'
+  const xFieldToUse = hasData.value ? props.xField! : 'label'
+  const yFieldToUse = hasData.value ? props.yField! : 'value'
   const rowsToUse = hasData.value ? props.rows : [
-    { item: '项目A', val: 120 },
-    { item: '项目B', val: 200 },
-    { item: '项目C', val: 150 },
-    { item: '项目D', val: 80 }
+    { label: '车间 A', value: 85 },
+    { label: '车间 B', value: 72 },
+    { label: '车间 C', value: 90 },
+    { label: '车间 D', value: 64 }
   ]
 
-  const xData = rowsToUse.map((row) => String(row[xFieldToUse] ?? ''))
-  const yData = rowsToUse.map((row) => Number(row[yFieldToUse]) || 0)
+  // Reverse lists for horizontal bar chart so top ranks appear at the top
+  const yData = rowsToUse.map((row) => String(row[xFieldToUse] ?? '')).reverse()
+  const xData = rowsToUse.map((row) => Number(row[yFieldToUse]) || 0).reverse()
 
   chartInstance.setOption({
     backgroundColor: 'transparent',
@@ -81,49 +72,42 @@ function updateChartOptions() {
       borderWidth: 1,
       textStyle: { color: '#f8fafc', fontSize: 11 },
     },
-    grid: { left: '3%', right: '3%', top: '15%', bottom: '5%', containLabel: true },
+    grid: { left: '3%', right: '7%', top: '5%', bottom: '5%', containLabel: true },
     xAxis: {
-      type: 'category',
-      data: xData,
-      axisLine: { lineStyle: { color: '#334155' } },
-      axisLabel: { color: '#94a3b8', fontSize: 9, rotate: 15 },
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: '#1e293b', type: 'dashed' } },
+      axisLabel: { color: '#94a3b8', fontSize: 9 },
     },
     yAxis: {
-      type: 'value',
-      splitLine: { lineStyle: { color: '#1e293b', type: 'dashed' } },
+      type: 'category',
+      data: yData,
+      axisLine: { lineStyle: { color: '#334155' } },
       axisLabel: { color: '#94a3b8', fontSize: 9 },
     },
     series: [
       {
-        name: props.yField,
-        data: yData,
+        name: props.yField || '数值',
+        data: xData,
         type: 'bar',
-        barMaxWidth: '30px',
+        barMaxWidth: '16px',
         itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: '#06b6d4' },
-            { offset: 1, color: '#0891b2' },
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+            { offset: 0, color: '#3b82f6' },
+            { offset: 1, color: '#06b6d4' },
           ]),
-          borderRadius: [4, 4, 0, 0],
+          borderRadius: [0, 4, 4, 0],
         },
       },
     ],
   })
 }
 
-// Watch props and data changes
 watch(
   () => [props.rows, props.xField, props.yField, props.text],
   async () => {
-    if (hasData.value) {
-      await nextTick()
-      updateChartOptions()
-    } else {
-      if (chartInstance) {
-        chartInstance.dispose()
-        chartInstance = null
-      }
-    }
+    await nextTick()
+    updateChartOptions()
   },
   { deep: true }
 )

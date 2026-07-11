@@ -17,7 +17,7 @@
     </header>
 
     <div class="grid h-[calc(100vh-4rem)] min-h-0 grid-cols-[280px_1fr_300px]">
-      <aside class="border-r border-slate-200 bg-white p-4">
+      <aside class="border-r border-slate-200 bg-white p-4 overflow-y-auto">
         <el-collapse v-model="sidebarActiveNames">
           <el-collapse-item
             v-for="group in PaletteList"
@@ -87,7 +87,7 @@
         </div>
       </main>
 
-      <aside class="border-l border-slate-200 bg-white p-4">
+      <aside class="border-l border-slate-200 bg-white p-4 overflow-y-auto">
         <div class="mb-4">
           <div class="text-sm font-medium text-slate-900">属性面板</div>
           <div class="mt-1 text-xs text-slate-500">选中画布元素后编辑其属性与数据绑定</div>
@@ -195,11 +195,16 @@ import { useRoute, useRouter } from 'vue-router'
 import VueDraggableResizable from 'vue-draggable-resizable'
 import 'vue-draggable-resizable/style.css'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import request from '../../utils/request'
 import { PaletteList, type PaletteItem } from '../../types/palette-item'
-import type { ScreenNode } from '../../types/screen-node'
-import type { Dataset, ScreenProject } from '../../types/platform'
 import { screenComponentMap } from '../../components/screen-widgets/config'
+import { useScreenDatasetBinding } from '../../composables/screens/useScreenDatasetBinding'
+import { useScreenProject } from '../../composables/screens/useScreenProject'
+import {
+  createScreenNode,
+  DUAL_FIELD_COMPONENTS,
+  LABEL_FIELD_COMPONENTS,
+  SINGLE_VALUE_COMPONENTS,
+} from '../../utils/screen-node'
 
 const router = useRouter()
 const route = useRoute()
@@ -211,18 +216,22 @@ const selectedId = ref<string | null>(null)
 const isPanning = ref(false)
 const panStart = ref({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
 
-const projectDetail = ref<ScreenProject | null>(null)
-const nodes = ref<ScreenNode[]>([])
+const { projectDetail, nodes, loadProject, saveProject, publishProject } = useScreenProject(projectId)
+const {
+  datasetOptions,
+  datasetColumns,
+  loadDatasetOptions,
+  changeNodeDataset,
+  syncColumnsForNode,
+} = useScreenDatasetBinding()
 const saving = ref(false)
 const publishing = ref(false)
 
-const datasetOptions = ref<Dataset[]>([])
-const datasetColumns = ref<string[]>([])
 const sidebarActiveNames = ref<string[]>(PaletteList.map((group) => group.label))
 
-const dualFieldComponents = ['chart', 'lineChart', 'pieChart', 'rankingList', 'alertList']
-const singleValueComponents = ['text', 'metricCard', 'progressBar']
-const labelFieldComponents = ['metricCard', 'progressBar']
+const dualFieldComponents: readonly string[] = DUAL_FIELD_COMPONENTS
+const singleValueComponents: readonly string[] = SINGLE_VALUE_COMPONENTS
+const labelFieldComponents: readonly string[] = LABEL_FIELD_COMPONENTS
 
 const screenTitle = computed(() => projectDetail.value?.name || `加载中... (${projectId})`)
 const selectedNode = computed(() => nodes.value.find((node) => node.id === selectedId.value) ?? null)
@@ -289,18 +298,6 @@ function updateSize(id: string, x: number, y: number, w: number, h: number) {
   node.h = h
 }
 
-function createNode(template: PaletteItem, x: number, y: number): ScreenNode {
-  return {
-    id: crypto.randomUUID(),
-    component: template.component,
-    x,
-    y,
-    w: template.defaultSize.w,
-    h: template.defaultSize.h,
-    props: structuredClone(template.defaultProps),
-  }
-}
-
 function onCanvasDrop(event: DragEvent) {
   const raw = event.dataTransfer?.getData('application/json')
   if (!raw || !stageRef.value) return
@@ -310,7 +307,7 @@ function onCanvasDrop(event: DragEvent) {
   const x = event.clientX - rect.left
   const y = event.clientY - rect.top
 
-  nodes.value.push(createNode(template, x, y))
+  nodes.value.push(createScreenNode(template, x, y))
 }
 
 function removeSelected() {
@@ -319,33 +316,13 @@ function removeSelected() {
   selectedId.value = null
 }
 
-async function loadProject() {
-  try {
-    const res: any = await request.get('/api/screenProjects')
-    const detail = res.items?.find((item: any) => item.id === projectId)
-    if (!detail) {
-      ElMessage.error('未找到该大屏项目')
-      return
-    }
-    projectDetail.value = detail
-    nodes.value = detail.screenNodes || []
-  } catch (err) {
-    console.error('加载大屏数据失败:', err)
-  }
-}
-
 async function handleSave() {
   if (!projectDetail.value) return
 
   saving.value = true
   try {
-    await request.put(`/api/screenProjects/${projectId}`, {
-      ...projectDetail.value,
-      screenNodes: nodes.value,
-      status: 'editing',
-    })
+    await saveProject()
     ElMessage.success('保存成功')
-    await loadProject()
   } catch (err) {
     console.error('保存失败:', err)
   } finally {
@@ -369,15 +346,8 @@ async function handlePublish() {
     .then(async ({ value }) => {
       publishing.value = true
       try {
-        await request.put(`/api/screenProjects/${projectId}`, {
-          ...projectDetail.value,
-          screenNodes: nodes.value,
-        })
-        await request.post(`/api/screenProjects/${projectId}/publish`, {
-          version: value ? value.trim() : undefined,
-        })
+        await publishProject(value)
         ElMessage.success('发布成功')
-        await loadProject()
       } catch (err) {
         console.error('发布失败:', err)
       } finally {
@@ -392,28 +362,9 @@ async function handlePreview() {
   router.push(`/screens/${projectId}/preview`)
 }
 
-async function loadDatasetOptions() {
-  try {
-    const res: any = await request.get('/api/datasets')
-    datasetOptions.value = res.items || []
-  } catch (err) {
-    console.error(err)
-  }
-}
-
 async function handleDatasetChange(datasetId: string) {
-  if (selectedNode.value) {
-    selectedNode.value.props.xField = ''
-    selectedNode.value.props.yField = ''
-    selectedNode.value.props.refreshInterval = 0
-  }
-
-  datasetColumns.value = []
-  if (!datasetId) return
-
   try {
-    const res: any = await request.get(`/api/datasets/${datasetId}/preview`)
-    datasetColumns.value = res.columns || []
+    await changeNodeDataset(selectedNode.value, datasetId)
   } catch (err) {
     console.error(err)
   }
@@ -422,12 +373,8 @@ async function handleDatasetChange(datasetId: string) {
 watch(
   () => selectedNode.value,
   async (newNode) => {
-    datasetColumns.value = []
-    if (!newNode?.props.datasetId) return
-
     try {
-      const res: any = await request.get(`/api/datasets/${newNode.props.datasetId}/preview`)
-      datasetColumns.value = res.columns || []
+      await syncColumnsForNode(newNode)
     } catch (err) {
       console.error(err)
     }

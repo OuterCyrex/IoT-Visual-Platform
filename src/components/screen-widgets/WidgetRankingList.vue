@@ -69,13 +69,21 @@ const props = withDefaults(
   }
 )
 
-const rankedRows = computed<RankedItem[]>(() => {
-  if (!props.xField || !props.yField) return []
+const hasData = computed(() => Boolean(props.xField && props.yField && props.rows && props.rows.length > 0))
 
-  const items = props.rows
+const rankedRows = computed<RankedItem[]>(() => {
+  const xFieldToUse = hasData.value ? props.xField! : 'name'
+  const yFieldToUse = hasData.value ? props.yField! : 'val'
+  const rowsToUse = hasData.value ? props.rows : [
+    { name: '高能耗设备 #1', val: 95 },
+    { name: '中能耗设备 #2', val: 70 },
+    { name: '低能耗设备 #3', val: 45 }
+  ]
+
+  const items = rowsToUse
     .map((row) => ({
-      label: String(row[props.xField!] ?? 'Unknown'),
-      value: Number(row[props.yField!]) || 0,
+      label: String(row[xFieldToUse] ?? 'Unknown'),
+      value: Number(row[yFieldToUse]) || 0,
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 5)
