@@ -100,7 +100,7 @@
             </el-form-item>
 
             <!-- Custom topology device settings -->
-            <template v-slot v-if="selectedNode.component === 'topologyDevice'">
+            <template v-if="selectedNode.component === 'topologyDevice'">
               <el-form-item label="设备类型">
                 <el-select v-model="selectedNode.props.deviceType" placeholder="选择设备类型" class="w-full">
                   <el-option label="变压器" value="transformer" />
