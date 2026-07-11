@@ -378,7 +378,95 @@
         <circle cx="180" cy="62" r="6" fill="url(#metalCylinder)" stroke="#0f172a" stroke-width="1.5" />
       </g>
 
-      <!-- TYPE 7: DUST_COLLECTOR (点式除尘器) -->
+      <!-- TYPE 7: FEEDER_PLATE (重型板式给料机) -->
+      <g v-if="deviceType === 'feeder_plate'" class="isometric-group">
+        <!-- Shadows -->
+        <ellipse cx="100" cy="180" rx="65" ry="14" fill="black" opacity="0.4" />
+
+        <!-- Heavy Support Base Frame -->
+        <polygon points="40,165 60,135 140,135 160,165" fill="#334155" stroke="#1e293b" />
+        <line x1="50" y1="145" x2="50" y2="170" stroke="#475569" stroke-width="3.5" />
+        <line x1="150" y1="145" x2="150" y2="170" stroke="#475569" stroke-width="3.5" />
+
+        <!-- Apron Feeder Body (Overlapping metal plates/pans) -->
+        <path d="M 30 135 L 170 85" stroke="#1e293b" stroke-width="12" stroke-linecap="round" />
+        <!-- Individual overlapping heavy steel pans -->
+        <path d="M 40 132 L 40 138 M 60 125 L 60 131 M 80 118 L 80 124 M 100 111 L 100 117 M 120 104 L 120 110 M 140 97 L 140 103 M 160 90 L 160 96" stroke="#475569" stroke-width="2.5" />
+
+        <!-- Rocks / Ore chunks riding on plates (随着给料机移动) -->
+        <g class="pipe-flow-1" style="stroke-dasharray: none;">
+          <polygon points="50,118 62,112 58,124" fill="url(#metalCylinder)" stroke="#0f172a" />
+          <polygon points="90,104 102,98 98,110" fill="url(#metalCylinder)" stroke="#0f172a" />
+          <polygon points="130,90 142,84 138,96" fill="url(#metalCylinder)" stroke="#0f172a" />
+        </g>
+
+        <!-- Dynamic ore spill / chute connector -->
+        <polygon points="20,135 5,145 10,160 35,145" fill="#0f172a" stroke="#475569" />
+      </g>
+
+      <!-- TYPE 8: IRON_REMOVER (悬挂除铁器) -->
+      <g v-else-if="deviceType === 'iron_remover'" class="isometric-group">
+        <!-- Shadows -->
+        <ellipse cx="100" cy="180" rx="60" ry="12" fill="black" opacity="0.3" />
+
+        <!-- Gantry / Suspension Steel Support Structure (悬挂架) -->
+        <line x1="45" y1="170" x2="45" y2="85" stroke="#475569" stroke-width="3" />
+        <line x1="155" y1="170" x2="155" y2="85" stroke="#475569" stroke-width="3" />
+        <line x1="45" y1="85" x2="155" y2="85" stroke="#475569" stroke-width="3" />
+        <!-- Corner gussets -->
+        <line x1="45" y1="105" x2="65" y2="85" stroke="#334155" stroke-width="2" />
+        <line x1="155" y1="105" x2="135" y2="85" stroke="#334155" stroke-width="2" />
+
+        <!-- 4 Suspension Chains -->
+        <line x1="75" y1="85" x2="75" y2="120" stroke="#94a3b8" stroke-dasharray="2 2" stroke-width="1.5" />
+        <line x1="125" y1="85" x2="125" y2="120" stroke="#94a3b8" stroke-dasharray="2 2" stroke-width="1.5" />
+        <line x1="85" y1="85" x2="85" y2="123" stroke="#64748b" stroke-dasharray="2 2" stroke-width="1" />
+        <line x1="115" y1="85" x2="115" y2="123" stroke="#64748b" stroke-dasharray="2 2" stroke-width="1" />
+
+        <!-- Main Rectangular Electromagnet Box (除铁主箱体) -->
+        <polygon points="70,135 130,120 140,135 80,150" fill="url(#metalCylinder)" stroke="#0f172a" stroke-width="1.2" />
+        <path d="M 70 135 L 70 142 L 80 157 L 140 142 L 140 135 Z" fill="#334155" stroke="#0f172a" />
+        
+        <!-- Cross scraper conveyor belt (废铁排出小皮带) -->
+        <path d="M 60 144 L 148 128" stroke="#ca8a04" stroke-width="2" stroke-linecap="round" />
+
+        <!-- Magnetic Field Pulsing Glow underneath (除铁器磁场发光) -->
+        <polygon points="75,148 125,135 140,165 90,180" fill="rgba(56, 189, 248, 0.22)" class="cone-glow" :filter="'url(#laserGlow-' + id + ')'" />
+      </g>
+
+      <!-- TYPE 9: BAGHOUSE_FILTER (脉冲布袋除尘器) -->
+      <g v-else-if="deviceType === 'baghouse_filter'" class="isometric-group">
+        <!-- Shadows -->
+        <ellipse cx="100" cy="188" rx="65" ry="16" fill="black" opacity="0.55" />
+
+        <!-- Heavy Structural Columns -->
+        <line x1="55" y1="130" x2="55" y2="182" stroke="#475569" stroke-width="3" />
+        <line x1="145" y1="130" x2="145" y2="182" stroke="#475569" stroke-width="3" />
+        <line x1="100" y1="130" x2="100" y2="175" stroke="#334155" stroke-width="2" />
+
+        <!-- 3 Pyramidal Hopper Bottoms (除尘灰斗组) -->
+        <polygon points="50,130 80,130 70,155 45,155" fill="#1e293b" stroke="#334155" />
+        <polygon points="80,130 110,130 100,155 75,155" fill="#1e293b" stroke="#334155" />
+        <polygon points="110,130 140,130 130,155 105,155" fill="#1e293b" stroke="#334155" />
+
+        <!-- Main Rectangular Filtering Chamber (箱体大室) -->
+        <rect x="50" y="55" width="94" height="75" :fill="'url(#towerMetal-' + id + ')'" stroke="#1e293b" stroke-width="1.5" />
+        <polygon points="45,55 97,42 149,55 97,68" fill="#475569" stroke="#1e293b" />
+
+        <!-- Pulse Valve manifold pipes along the top (脉冲喷吹管) -->
+        <line x1="55" y1="62" x2="138" y2="62" stroke="#cbd5e1" stroke-width="2.5" />
+        <circle cx="70" cy="62" r="1.8" fill="#ef4444" />
+        <circle cx="95" cy="62" r="1.8" fill="#ef4444" />
+        <circle cx="120" cy="62" r="1.8" fill="#ef4444" />
+
+        <!-- Clean air exhaust fan & stack (排风管与烟囱) -->
+        <path d="M 144 80 L 165 80 L 165 30" fill="none" stroke="#64748b" stroke-width="4.5" stroke-linecap="round" />
+        <!-- Vent cap -->
+        <polygon points="160,30 170,30 175,25 155,25" fill="#1e293b" />
+        <circle cx="165" cy="40" r="3.5" fill="#10b981" class="drill-led" />
+      </g>
+
+      <!-- TYPE 10: DUST_COLLECTOR (点式除尘器) -->
       <g v-else class="isometric-group">
         <!-- Shadows -->
         <ellipse cx="100" cy="185" rx="40" ry="12" fill="black" opacity="0.45" />
@@ -445,6 +533,18 @@
             <span class="lbl">当前有效重:</span>
             <span class="val">8,240 吨</span>
           </div>
+          <div v-if="deviceType === 'feeder_plate'" class="tooltip-row">
+            <span class="lbl">给料板板速:</span>
+            <span class="val">0.85 m/s</span>
+          </div>
+          <div v-if="deviceType === 'iron_remover'" class="tooltip-row">
+            <span class="lbl">励磁线圈流:</span>
+            <span class="val">24.5 A</span>
+          </div>
+          <div v-if="deviceType === 'baghouse_filter'" class="tooltip-row">
+            <span class="lbl">脉冲滤袋数:</span>
+            <span class="val">180 条</span>
+          </div>
           <div class="tooltip-row">
             <span class="lbl">系统温度:</span>
             <span class="val">28.4 °C</span>
@@ -462,7 +562,7 @@ const props = withDefaults(
   defineProps<{
     id?: string
     text?: string
-    deviceType?: 'shaft' | 'silo_metal' | 'silo_concrete' | 'crusher_jaw' | 'sifter_vibratory' | 'conveyor_belt' | 'dust_collector'
+    deviceType?: 'shaft' | 'silo_metal' | 'silo_concrete' | 'crusher_jaw' | 'sifter_vibratory' | 'conveyor_belt' | 'dust_collector' | 'feeder_plate' | 'iron_remover' | 'baghouse_filter'
     status?: 'running' | 'warning' | 'stopped'
     value?: string | number
     unit?: string
@@ -528,6 +628,9 @@ function getDefaultStaticValue() {
   if (props.deviceType === 'sifter_vibratory') return '48'
   if (props.deviceType === 'conveyor_belt') return '62'
   if (props.deviceType === 'dust_collector') return '19'
+  if (props.deviceType === 'feeder_plate') return '62.0'
+  if (props.deviceType === 'iron_remover') return '正常'
+  if (props.deviceType === 'baghouse_filter') return '1.25'
   return '--'
 }
 </script>
