@@ -61,7 +61,7 @@
           @pointerup="endCanvasPan"
           @pointercancel="endCanvasPan"
         >
-          <div ref="stageRef" class="screen-stage">
+          <div ref="stageRef" class="screen-stage" :style="stageStyle">
             <div class="screen-stage-grid"></div>
 
             <vue-draggable-resizable
@@ -255,6 +255,14 @@ const saving = ref(false)
 const publishing = ref(false)
 
 const { datasetData, fetchDatasetData } = useScreenPreviewData()
+
+const stageStyle = computed(() => {
+  const isMining = projectId === 'scr-005'
+  return {
+    width: isMining ? '2560px' : '1920px',
+    height: isMining ? '1440px' : '1080px'
+  }
+})
 
 function buildComponentProps(node: ScreenNode) {
   const datasetId = getNodeDatasetId(node)

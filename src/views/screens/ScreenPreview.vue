@@ -58,12 +58,12 @@ const { datasetData, fetchAllDatasetData, setupRefreshTimers } = useScreenPrevie
 
 // Auto-scaling logic to fit screen
 const scale = ref(1)
-const canvasWidth = 1920
-const canvasHeight = 1080
+const canvasWidth = computed(() => (projectId === 'scr-005' ? 2560 : 1920))
+const canvasHeight = computed(() => (projectId === 'scr-005' ? 1440 : 1080))
 
 const canvasStyle = computed(() => ({
-  width: `${canvasWidth}px`,
-  height: `${canvasHeight}px`,
+  width: `${canvasWidth.value}px`,
+  height: `${canvasHeight.value}px`,
   transform: `scale(${scale.value})`,
   transformOrigin: 'center center',
 }))
@@ -84,8 +84,8 @@ function buildComponentProps(node: ScreenNode) {
 function handleResize() {
   const windowWidth = window.innerWidth
   const windowHeight = window.innerHeight
-  const scaleX = (windowWidth * 0.95) / canvasWidth
-  const scaleY = (windowHeight * 0.90) / canvasHeight
+  const scaleX = (windowWidth * 0.95) / canvasWidth.value
+  const scaleY = (windowHeight * 0.90) / canvasHeight.value
   scale.value = Math.min(scaleX, scaleY, 1)
 }
 
