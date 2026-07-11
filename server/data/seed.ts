@@ -365,6 +365,7 @@ export const seedState: PlatformState = {
           component: 'scrollTable',
           props: { text: '各机架集群温度与负荷清单', datasetId: 'set-workshop-oee', xField: 'workshop', yField: 'oee', refreshInterval: 5000 }
         }
+      ],
     },
     {
       id: 'scr-005',
