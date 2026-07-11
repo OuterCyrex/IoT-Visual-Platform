@@ -106,7 +106,8 @@ const userRole = computed(() => user?.role || '访客')
 const avatarText = computed(() => (user?.displayName || 'U').slice(0, 1).toUpperCase())
 
 function goToMqttSimulator() {
-  router.push('/mqtt-simulator')
+  const routeData = router.resolve({ path: '/mqtt-simulator' })
+  window.open(routeData.href, '_blank')
 }
 
 interface NavItem {
