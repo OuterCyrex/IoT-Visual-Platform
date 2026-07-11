@@ -13,6 +13,9 @@ export interface DetailResponse<T> {
 export interface DatasetPreview {
   columns: string[]
   rows: Record<string, unknown>[]
+  sourceType?: string
+  sourceHost?: string
+  tableName?: string
 }
 
 export interface PublishScreenPayload {

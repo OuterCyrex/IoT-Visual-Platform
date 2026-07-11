@@ -31,8 +31,6 @@ let chartInstance: echarts.ECharts | null = null
 const hasData = computed(() =>
     Boolean(
         props.datasetId &&
-        props.xField &&
-        props.yField &&
         props.rows?.length
     )
 )
@@ -44,8 +42,9 @@ function updateChart() {
         chartInstance = echarts.init(chartRef.value, 'dark')
     }
 
-    const xFieldToUse = hasData.value ? props.xField! : 'name'
-    const yFieldToUse = hasData.value ? props.yField! : 'val'
+    const keys = props.rows && props.rows.length > 0 ? Object.keys(props.rows[0]) : []
+    const xFieldToUse = hasData.value ? (props.xField || keys[0] || 'name') : 'name'
+    const yFieldToUse = hasData.value ? (props.yField || keys[1] || 'val') : 'val'
     const rowsToUse = hasData.value ? props.rows! : [
         { name: '类别一', val: 40 },
         { name: '类别二', val: 30 },

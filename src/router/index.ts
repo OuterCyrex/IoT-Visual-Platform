@@ -79,6 +79,12 @@ const router = createRouter({
           meta: { title: '数据集管理', section: 'data-management', permission: 'dataset:read' },
         },
         {
+          path: 'mqtt-simulator',
+          name: 'mqtt-simulator',
+          component: () => import('../views/data/MqttSimulatorView.vue'),
+          meta: { title: 'MQTT 模拟器', section: 'data-management', fullscreen: true, permission: 'dataset:read' },
+        },
+        {
           path: 'users',
           name: 'users',
           component: UserManagementView,

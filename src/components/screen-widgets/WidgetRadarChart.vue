@@ -32,7 +32,7 @@ let chartInstance: echarts.ECharts | null = null
 let resizeObserver: ResizeObserver | null = null
 
 const hasData = computed(() => {
-  return Boolean(props.datasetId && props.xField && props.yField && props.rows && props.rows.length >= 3)
+  return Boolean(props.datasetId && props.rows && props.rows.length >= 3)
 })
 
 function initChart() {
@@ -51,8 +51,9 @@ function updateChartOptions() {
   }
   if (!chartInstance) return
 
-  const xFieldToUse = hasData.value ? props.xField! : 'name'
-  const yFieldToUse = hasData.value ? props.yField! : 'val'
+  const keys = props.rows && props.rows.length > 0 ? Object.keys(props.rows[0]) : []
+  const xFieldToUse = hasData.value ? (props.xField || keys[0] || 'name') : 'name'
+  const yFieldToUse = hasData.value ? (props.yField || keys[1] || 'val') : 'val'
   const rowsToUse = hasData.value ? props.rows! : [
     { name: '设备温度', val: 60 },
     { name: '物理振动', val: 80 },
