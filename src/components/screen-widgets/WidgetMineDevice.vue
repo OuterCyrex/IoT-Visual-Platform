@@ -119,31 +119,67 @@
         <ellipse cx="100" cy="45" rx="30" ry="12" fill="none" stroke="#38bdf8" stroke-width="2.5" class="neon-ring" :filter="'url(#laserGlow-' + id + ')'" />
       </g>
 
-      <!-- TYPE 2: SILO_METAL (高反光金属原煤仓) -->
-      <g v-else-if="deviceType === 'silo_metal'" class="isometric-group">
+      <!-- TYPE 2: SILO_METAL (高反光金属原煤仓 - 深度优化版本) -->
+      <g v-if="deviceType === 'silo_metal'" class="isometric-group">
         <!-- Shadows -->
-        <ellipse cx="100" cy="185" rx="50" ry="18" fill="black" opacity="0.45" />
+        <ellipse cx="100" cy="186" rx="55" ry="16" fill="black" opacity="0.45" />
         
-        <!-- Base concrete structure -->
-        <polygon points="70,180 80,165 120,165 130,180" fill="#334155" stroke="#1e293b" />
-        <!-- Structural columns -->
-        <line x1="75" y1="130" x2="75" y2="175" stroke="#475569" stroke-width="3" />
-        <line x1="125" y1="130" x2="125" y2="175" stroke="#475569" stroke-width="3" />
-        <line x1="100" y1="130" x2="100" y2="170" stroke="#334155" stroke-width="2" />
+        <!-- Base concrete foundation block -->
+        <polygon points="68,180 76,166 124,166 132,180" fill="#334155" stroke="#1e293b" stroke-width="1.2" />
+        <polygon points="68,180 132,180 125,186 61,186" fill="#0f172a" opacity="0.7" />
+
+        <!-- Structural Columns with Black/Yellow Safety Chevron Bases (微缩安全斑马线) -->
+        <!-- Left Leg -->
+        <line x1="75" y1="125" x2="75" y2="175" stroke="#475569" stroke-width="3.5" />
+        <rect x="73" y="160" width="4" height="15" fill="#ca8a04" />
+        <line x1="73" y1="163" x2="77" y2="167" stroke="#000000" stroke-width="1.2" />
+        <line x1="73" y1="169" x2="77" y2="173" stroke="#000000" stroke-width="1.2" />
+
+        <!-- Right Leg -->
+        <line x1="125" y1="125" x2="125" y2="175" stroke="#475569" stroke-width="3.5" />
+        <rect x="123" y="160" width="4" height="15" fill="#ca8a04" />
+        <line x1="123" y1="163" x2="127" y2="167" stroke="#000000" stroke-width="1.2" />
+        <line x1="123" y1="169" x2="127" y2="173" stroke="#000000" stroke-width="1.2" />
+
+        <!-- Center discharge drop channel -->
+        <line x1="100" y1="125" x2="100" y2="168" stroke="#1e293b" stroke-width="2.5" />
         
+        <!-- Cross structural bracing between columns -->
+        <line x1="75" y1="135" x2="125" y2="160" stroke="#334155" stroke-width="1.2" />
+        <line x1="125" y1="135" x2="75" y2="160" stroke="#334155" stroke-width="1.2" />
+
         <!-- Cylinder Container -->
-        <ellipse cx="100" cy="50" rx="32" ry="12" fill="#475569" stroke="#334155" />
-        <path :d="'M 68 50 A 32 12 0 0 0 132 50 L 132 130 A 32 12 0 0 1 68 130 Z'" :fill="'url(#metalCylinder-' + id + ')'" stroke="#1e293b" />
+        <ellipse cx="100" cy="50" rx="34" ry="12" fill="#475569" stroke="#334155" />
+        <path :d="'M 66 50 A 34 12 0 0 0 134 50 L 134 125 A 34 12 0 0 1 66 125 Z'" :fill="'url(#metalCylinder-' + id + ')'" stroke="#1e293b" />
         
-        <!-- Discharging cone bottom -->
-        <path d="M 68 130 A 32 12 0 0 0 132 130 L 100 155 Z" fill="#1e293b" stroke="#334155" />
+        <!-- Discharging cone bottom hopper -->
+        <path d="M 66 125 A 34 12 0 0 0 134 125 L 100 152 Z" fill="#1e293b" stroke="#334155" />
         
-        <!-- Ladder detail -->
-        <path d="M 74 52 L 74 125 M 74 60 L 78 60 M 74 70 L 78 70 M 74 80 L 78 80 M 74 90 L 78 90 M 74 100 L 78 100 M 74 110 L 78 110 M 74 120 L 78 120" stroke="#94a3b8" stroke-width="0.8" />
-        
-        <!-- Glass Gauge Column -->
-        <rect x="98" y="60" width="4" height="50" rx="1" fill="#090d16" />
-        <rect x="99" y="65" width="2" height="42" rx="0.5" fill="#38bdf8" class="gauge-fluid" />
+        <!-- Top intake dome & safety handrails (安全护栏) -->
+        <ellipse cx="100" cy="48" rx="34.5" ry="12.5" fill="none" stroke="#64748b" stroke-width="1.5" />
+        <line x1="65.5" y1="41" x2="65.5" y2="48" stroke="#64748b" stroke-width="1" />
+        <line x1="134.5" y1="41" x2="134.5" y2="48" stroke="#64748b" stroke-width="1" />
+        <ellipse cx="100" cy="41" rx="34.5" ry="12.5" fill="none" stroke="#64748b" stroke-width="1" />
+
+        <!-- Vertical Ladder with Cage loops -->
+        <path d="M 72 52 L 72 122 M 75 52 L 75 122" stroke="#94a3b8" stroke-width="0.7" />
+        <path d="M 72 58 L 75 58 M 72 66 L 75 66 M 72 74 L 75 74 M 72 82 L 75 82 M 72 90 L 75 90 M 72 98 L 75 98 M 72 106 L 75 106 M 72 114 L 75 114" stroke="#94a3b8" stroke-width="0.5" />
+        <path d="M 72 62 A 5 5 0 0 0 67 67 M 72 82 A 5 5 0 0 0 67 87 M 72 102 A 5 5 0 0 0 67 107" fill="none" stroke="#475569" stroke-width="0.7" />
+
+        <!-- Glass Level Gauge Column with Measurement ticks (测量刻度线) -->
+        <rect x="97" y="58" width="6" height="52" rx="1.5" fill="#090d16" stroke="#334155" stroke-width="0.5" />
+        <rect x="99" y="62" width="2" height="44" rx="0.5" fill="#38bdf8" class="gauge-fluid" :filter="'url(#laserGlow-' + id + ')'" />
+        <!-- Level ticks -->
+        <line x1="95" y1="65" x2="97" y2="65" stroke="#94a3b8" stroke-width="0.6" />
+        <line x1="95" y1="75" x2="97" y2="75" stroke="#94a3b8" stroke-width="0.6" />
+        <line x1="95" y1="85" x2="97" y2="85" stroke="#94a3b8" stroke-width="0.6" />
+        <line x1="95" y1="95" x2="97" y2="95" stroke="#94a3b8" stroke-width="0.6" />
+        <line x1="95" y1="105" x2="97" y2="105" stroke="#94a3b8" stroke-width="0.6" />
+
+        <!-- Discharging valve manual wheel -->
+        <circle cx="100" cy="152" r="3.5" fill="#ca8a04" stroke="#854d0e" stroke-width="0.8" />
+        <line x1="96.5" y1="152" x2="103.5" y2="152" stroke="#854d0e" stroke-width="0.6" />
+        <line x1="100" y1="148.5" x2="100" y2="155.5" stroke="#854d0e" stroke-width="0.6" />
       </g>
 
       <!-- TYPE 3: SILO_CONCRETE (混凝土配煤仓) -->
