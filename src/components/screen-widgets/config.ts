@@ -18,6 +18,7 @@ import WidgetScrollTable from './WidgetScrollTable.vue'
 import WidgetTimeWeather from './WidgetTimeWeather.vue'
 import WidgetTopologyDevice from './WidgetTopologyDevice.vue'
 import WidgetMineProcessMap from './WidgetMineProcessMap.vue'
+import WidgetMineDevice from './WidgetMineDevice.vue'
 
 export const screenComponentMap = {
   rect: WidgetRect,
@@ -39,5 +40,6 @@ export const screenComponentMap = {
   scrollTable: WidgetScrollTable,
   timeWeather: WidgetTimeWeather,
   topologyDevice: WidgetTopologyDevice,
-  mineProcessMap: WidgetMineProcessMap
+  mineProcessMap: WidgetMineProcessMap,
+  mineDevice: WidgetMineDevice
 }
