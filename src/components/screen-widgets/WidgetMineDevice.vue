@@ -1,15 +1,15 @@
 <template>
   <div
     class="mine-device-card"
-    :class="[deviceType, finalStatus, { hovered: isHovered }]"
+    :class="[deviceType, finalStatus, { hovered: isHovered, 'is-transparent': isTransparent }]"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
     <!-- Grid/Shadow foundation backdrop for 2.5D perspective depth -->
-    <div class="foundation-shadow"></div>
+    <div class="foundation-shadow" v-if="!isTransparent"></div>
 
     <!-- Main SVG Render Area -->
-    <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg" class="device-svg">
+    <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg" class="device-svg" :style="svgStyle">
       <defs>
         <!-- Steel Gradients for realistic specular highlights -->
         <linearGradient :id="'metalCylinder-' + id" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -566,6 +566,9 @@ const props = withDefaults(
     status?: 'running' | 'warning' | 'stopped'
     value?: string | number
     unit?: string
+    flipX?: boolean
+    flipY?: boolean
+    transparentBg?: boolean
     xField?: string
     yField?: string
     rows?: Record<string, unknown>[]
@@ -576,11 +579,30 @@ const props = withDefaults(
     status: 'running',
     value: '',
     unit: '',
+    flipX: false,
+    flipY: false,
+    transparentBg: undefined,
     rows: () => []
   }
 )
 
 const isHovered = ref(false)
+
+const isTransparent = computed(() => {
+  if (props.transparentBg !== undefined) {
+    return props.transparentBg
+  }
+  return props.deviceType === 'conveyor_belt'
+})
+
+const svgStyle = computed(() => {
+  const transformParts = []
+  if (props.flipX) transformParts.push('scaleX(-1)')
+  if (props.flipY) transformParts.push('scaleY(-1)')
+  return {
+    transform: transformParts.length > 0 ? transformParts.join(' ') : undefined
+  }
+})
 
 const hasData = computed(() => Boolean(props.rows && props.rows.length > 0 && props.yField))
 const firstRow = computed(() => {
@@ -660,6 +682,18 @@ function getDefaultStaticValue() {
     0 8px 30px rgba(56, 189, 248, 0.2),
     inset 0 0 15px rgba(56, 189, 248, 0.08);
   transform: translateY(-2px) scale(1.02);
+}
+
+.mine-device-card.is-transparent {
+  background: transparent !important;
+  border-color: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+.mine-device-card.is-transparent:hover, .mine-device-card.is-transparent.hovered {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: scale(1.02);
 }
 
 /* Perspective base shadow */

@@ -122,6 +122,43 @@
               </el-form-item>
             </template>
 
+            <!-- Custom 2.5D mine device settings -->
+            <template v-if="selectedNode.component === 'mineDevice'">
+              <el-form-item label="设备类型">
+                <el-select v-model="selectedNode.props.deviceType" placeholder="选择设备类型" class="w-full">
+                  <el-option label="主/副竖井塔" value="shaft" />
+                  <el-option label="重型板式给料机" value="feeder_plate" />
+                  <el-option label="金属原煤仓" value="silo_metal" />
+                  <el-option label="混凝土配煤仓" value="silo_concrete" />
+                  <el-option label="重型破碎机" value="crusher_jaw" />
+                  <el-option label="高频振动筛" value="sifter_vibratory" />
+                  <el-option label="皮带传送桥" value="conveyor_belt" />
+                  <el-option label="电磁除铁器" value="iron_remover" />
+                  <el-option label="袋式除尘器" value="baghouse_filter" />
+                  <el-option label="点式除尘箱" value="dust_collector" />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item label="方向配置">
+                <div class="flex gap-4">
+                  <el-checkbox v-model="selectedNode.props.flipX">水平翻转 (左右)</el-checkbox>
+                  <el-checkbox v-model="selectedNode.props.flipY">垂直翻转 (上下)</el-checkbox>
+                </div>
+              </el-form-item>
+
+              <el-form-item label="外观配置">
+                <el-checkbox v-model="selectedNode.props.transparentBg">透明背景 (无边框和背板)</el-checkbox>
+              </el-form-item>
+
+              <el-form-item label="静态状态 (无数据绑定时)">
+                <el-select v-model="selectedNode.props.status" placeholder="选择初始状态" class="w-full">
+                  <el-option label="正常运行 (running)" value="running" />
+                  <el-option label="告警中 (warning)" value="warning" />
+                  <el-option label="已停机 (stopped)" value="stopped" />
+                </el-select>
+              </el-form-item>
+            </template>
+
             <div class="grid grid-cols-2 gap-3">
               <el-form-item label="宽度">
                 <el-input-number v-model="selectedNode.w" :min="20" class="w-full" />
