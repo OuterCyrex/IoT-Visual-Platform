@@ -16,6 +16,7 @@ export const DATASET_DRIVEN_COMPONENTS = [
   'ringProgress',
   'scrollTable',
   'topologyDevice',
+  'mineProcessMap',
 ] as const
 
 export const DUAL_FIELD_COMPONENTS = [
@@ -30,7 +31,7 @@ export const DUAL_FIELD_COMPONENTS = [
   'horizontalBar',
   'ringProgress',
 ] as const
-export const SINGLE_VALUE_COMPONENTS = ['text', 'metricCard', 'progressBar', 'topologyDevice'] as const
+export const SINGLE_VALUE_COMPONENTS = ['text', 'metricCard', 'progressBar', 'topologyDevice', 'mineProcessMap'] as const
 export const LABEL_FIELD_COMPONENTS = ['metricCard', 'progressBar'] as const
 
 export function createScreenNode(template: PaletteItem, x: number, y: number): ScreenNode {

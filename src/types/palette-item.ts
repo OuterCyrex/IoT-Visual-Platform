@@ -126,6 +126,24 @@ export const PaletteList: PaletteGroup[] = [
           text: '时间天气看板',
         },
       },
+      {
+        label: '工业流程图',
+        desc: '智慧矿山 2.5D 动态连接流程图',
+        nodeType: 'basic',
+        dotClass: 'bg-sky-500',
+        component: 'mineProcessMap',
+        defaultSize: {
+          w: 800,
+          h: 500,
+        },
+        defaultProps: {
+          text: '矿山生产流程图',
+          datasetId: '',
+          xField: '',
+          yField: '',
+          refreshInterval: 0,
+        },
+      },
     ],
   },
   {

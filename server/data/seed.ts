@@ -365,6 +365,171 @@ export const seedState: PlatformState = {
           component: 'scrollTable',
           props: { text: '各机架集群温度与负荷清单', datasetId: 'set-workshop-oee', xField: 'workshop', yField: 'oee', refreshInterval: 5000 }
         }
+    },
+    {
+      id: 'scr-005',
+      name: '智慧矿山管控平台',
+      group: '矿山中心',
+      scene: '主斜井及采区',
+      owner: '系统管理员',
+      updatedAt: '2026-07-11 17:41',
+      status: 'published',
+      publishedVersion: 'v10.3',
+      tags: ['智慧矿山', '流光流程图', '安全监管'],
+      screenNodes: [
+        {
+          id: 'node-title',
+          x: 200,
+          y: 15,
+          w: 1520,
+          h: 70,
+          component: 'text',
+          props: { text: '智慧矿山管控平台' }
+        },
+        {
+          id: 'node-time',
+          x: 40,
+          y: 15,
+          w: 360,
+          h: 80,
+          component: 'timeWeather',
+          props: { text: '系统时间与环境天气' }
+        },
+        {
+          id: 'node-env-box',
+          x: 40,
+          y: 110,
+          w: 380,
+          h: 220,
+          component: 'borderBox',
+          props: { text: '矿山环境监测 (Environment)' }
+        },
+        {
+          id: 'node-env-temp',
+          x: 60,
+          y: 150,
+          w: 160,
+          h: 75,
+          component: 'metricCard',
+          props: { text: '温度', yField: '29.8°C' }
+        },
+        {
+          id: 'node-env-humidity',
+          x: 240,
+          y: 150,
+          w: 160,
+          h: 75,
+          component: 'metricCard',
+          props: { text: '湿度', yField: '40%' }
+        },
+        {
+          id: 'node-env-co2',
+          x: 60,
+          y: 235,
+          w: 160,
+          h: 75,
+          component: 'metricCard',
+          props: { text: 'CO2浓度', yField: '15 mg/m³' }
+        },
+        {
+          id: 'node-env-wind',
+          x: 240,
+          y: 235,
+          w: 160,
+          h: 75,
+          component: 'metricCard',
+          props: { text: '井下风速', yField: '2.8 m/s' }
+        },
+        {
+          id: 'node-safety-box',
+          x: 40,
+          y: 350,
+          w: 380,
+          h: 240,
+          component: 'borderBox',
+          props: { text: '安全监管与隐患排查' }
+        },
+        {
+          id: 'node-safety-ring',
+          x: 60,
+          y: 400,
+          w: 160,
+          h: 160,
+          component: 'ringProgress',
+          props: { text: '本班安全率', yField: '75' }
+        },
+        {
+          id: 'node-safety-status',
+          x: 240,
+          y: 400,
+          w: 160,
+          h: 160,
+          component: 'metricCard',
+          props: { text: '排查隐患 (正常率)', yField: '75%' }
+        },
+        {
+          id: 'node-energy-line',
+          x: 40,
+          y: 610,
+          w: 380,
+          h: 430,
+          component: 'lineChart',
+          props: { text: '周动力用电负荷趋势 (kWh)', datasetId: 'set-hourly-throughput', xField: 'hour', yField: 'count', refreshInterval: 5000 }
+        },
+        {
+          id: 'node-process-map',
+          x: 440,
+          y: 110,
+          w: 1040,
+          h: 640,
+          component: 'mineProcessMap',
+          props: { text: '等距智能采矿输送物料流', datasetId: 'set-ev-mqtt', xField: 'timestamp', yField: 'value', refreshInterval: 0 }
+        },
+        {
+          id: 'node-alarms-table',
+          x: 440,
+          y: 770,
+          w: 1040,
+          h: 270,
+          component: 'alertList',
+          props: { text: '井下有毒气体及瓦斯实时监测告警', datasetId: 'set-active-alarms', xField: 'message', yField: 'level', refreshInterval: 5000 }
+        },
+        {
+          id: 'node-control-box',
+          x: 1500,
+          y: 110,
+          w: 380,
+          h: 220,
+          component: 'borderBox',
+          props: { text: '通风/排水/防瓦斯系统状态' }
+        },
+        {
+          id: 'node-control-grid',
+          x: 1520,
+          y: 150,
+          w: 340,
+          h: 160,
+          component: 'statusGrid',
+          props: { text: '集控系统运行状态', datasetId: 'set-workshop-oee', xField: 'workshop', yField: 'oee', refreshInterval: 5000 }
+        },
+        {
+          id: 'node-inspection-pie',
+          x: 1500,
+          y: 350,
+          w: 380,
+          h: 240,
+          component: 'pieChart',
+          props: { text: '日巡检计划达成率 (57%)', datasetId: 'set-production-progress', xField: 'task_name', yField: 'progress_percent', refreshInterval: 5000 }
+        },
+        {
+          id: 'node-tonnage-bar',
+          x: 1500,
+          y: 610,
+          w: 380,
+          h: 430,
+          component: 'chart',
+          props: { text: '分时装车矿石吞吐量 (t)', datasetId: 'set-hourly-throughput', xField: 'hour', yField: 'count', refreshInterval: 5000 }
+        }
       ],
     },
   ],
