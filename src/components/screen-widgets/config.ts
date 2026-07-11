@@ -16,6 +16,7 @@ import WidgetHorizontalBar from './WidgetHorizontalBar.vue'
 import WidgetRingProgress from './WidgetRingProgress.vue'
 import WidgetScrollTable from './WidgetScrollTable.vue'
 import WidgetTimeWeather from './WidgetTimeWeather.vue'
+import WidgetTopologyDevice from './WidgetTopologyDevice.vue'
 
 export const screenComponentMap = {
   rect: WidgetRect,
@@ -35,5 +36,6 @@ export const screenComponentMap = {
   horizontalBar: WidgetHorizontalBar,
   ringProgress: WidgetRingProgress,
   scrollTable: WidgetScrollTable,
-  timeWeather: WidgetTimeWeather
+  timeWeather: WidgetTimeWeather,
+  topologyDevice: WidgetTopologyDevice
 }

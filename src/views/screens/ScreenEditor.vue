@@ -99,6 +99,29 @@
               <el-input v-model="selectedNode.props.text" />
             </el-form-item>
 
+            <!-- Custom topology device settings -->
+            <template v-slot v-if="selectedNode.component === 'topologyDevice'">
+              <el-form-item label="设备类型">
+                <el-select v-model="selectedNode.props.deviceType" placeholder="选择设备类型" class="w-full">
+                  <el-option label="变压器" value="transformer" />
+                  <el-option label="储能电池" value="battery" />
+                  <el-option label="配电柜" value="cabinet" />
+                  <el-option label="UPS 电源" value="ups" />
+                  <el-option label="服务器机柜" value="rack" />
+                  <el-option label="空调冷机" value="chiller" />
+                  <el-option label="柴油发电机" value="generator" />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item label="静态状态 (无数据绑定时)">
+                <el-select v-model="selectedNode.props.status" placeholder="选择初始状态" class="w-full">
+                  <el-option label="正常运行 (running)" value="running" />
+                  <el-option label="告警中 (warning)" value="warning" />
+                  <el-option label="已停机 (stopped)" value="stopped" />
+                </el-select>
+              </el-form-item>
+            </template>
+
             <div class="grid grid-cols-2 gap-3">
               <el-form-item label="宽度">
                 <el-input-number v-model="selectedNode.w" :min="20" class="w-full" />
