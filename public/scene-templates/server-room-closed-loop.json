@@ -1,0 +1,326 @@
+{
+  "sceneNodes": [
+    {
+      "id": "outer-road",
+      "name": "机房运维道路",
+      "type": "road",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": 18 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 3.4, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "site-fence-left",
+      "name": "左侧围栏",
+      "type": "fence",
+      "sourceType": "procedural",
+      "position": { "x": -18, "y": 0, "z": 5 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 7, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "site-fence-right",
+      "name": "右侧围栏",
+      "type": "fence",
+      "sourceType": "procedural",
+      "position": { "x": 18, "y": 0, "z": 5 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 7, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "gate-main",
+      "name": "机房门岗",
+      "type": "gateComplex",
+      "sourceType": "procedural",
+      "position": { "x": -12, "y": 0, "z": 18 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "office-ops",
+      "name": "运维值班中心",
+      "type": "officeBuilding",
+      "sourceType": "procedural",
+      "position": { "x": 12, "y": 0, "z": 18 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 0.85 },
+      "props": {}
+    },
+    {
+      "id": "substation-main",
+      "name": "变配电站",
+      "type": "substation",
+      "sourceType": "procedural",
+      "position": { "x": -12, "y": 0, "z": 8 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.2, "y": 1, "z": 1 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "power-01",
+        "valueField": "voltage",
+        "valueLabel": "电压(V)",
+        "statusField": "status",
+        "secondaryField": "current_amp",
+        "secondaryLabel": "电流(A)",
+        "displayTitle": "变配电站",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "ups-main-1",
+      "name": "UPS 机组 1",
+      "type": "upsModule",
+      "sourceType": "procedural",
+      "position": { "x": -5, "y": 0, "z": 8 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.15, "y": 1.1, "z": 1.1 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "ups-01",
+        "valueField": "load_percent",
+        "valueLabel": "负载(%)",
+        "statusField": "status",
+        "secondaryField": "battery_soc",
+        "secondaryLabel": "电池SoC",
+        "displayTitle": "UPS 机组 1",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "ups-main-2",
+      "name": "UPS 机组 2",
+      "type": "upsModule",
+      "sourceType": "procedural",
+      "position": { "x": -1.8, "y": 0, "z": 8 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.15, "y": 1.1, "z": 1.1 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "ups-02",
+        "valueField": "load_percent",
+        "valueLabel": "负载(%)",
+        "statusField": "status",
+        "secondaryField": "battery_soc",
+        "secondaryLabel": "电池SoC",
+        "displayTitle": "UPS 机组 2",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "pdu-main-1",
+      "name": "列头柜 PDU 1",
+      "type": "powerCabinet",
+      "sourceType": "procedural",
+      "position": { "x": 5.2, "y": 0, "z": 8 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.05, "y": 1.08, "z": 1.05 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "pdu-01",
+        "valueField": "load_percent",
+        "valueLabel": "负载(%)",
+        "statusField": "status",
+        "secondaryField": "current_amp",
+        "secondaryLabel": "电流(A)",
+        "displayTitle": "列头柜 PDU 1",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "pdu-main-2",
+      "name": "列头柜 PDU 2",
+      "type": "powerCabinet",
+      "sourceType": "procedural",
+      "position": { "x": 8.4, "y": 0, "z": 8 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.05, "y": 1.08, "z": 1.05 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "pdu-02",
+        "valueField": "load_percent",
+        "valueLabel": "负载(%)",
+        "statusField": "status",
+        "secondaryField": "current_amp",
+        "secondaryLabel": "电流(A)",
+        "displayTitle": "列头柜 PDU 2",
+        "refreshInterval": 2000
+      }
+    },
+
+    {
+      "id": "main-floor",
+      "name": "主机房地板区",
+      "type": "raisedFloor",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": -2 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 3.1, "y": 1, "z": 2.3 },
+      "props": {}
+    },
+    {
+      "id": "cold-aisle-1",
+      "name": "冷通道 1",
+      "type": "coldAisle",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": -6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.9, "y": 1.05, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "cold-aisle-2",
+      "name": "冷通道 2",
+      "type": "coldAisle",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": 2 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.9, "y": 1.05, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "cold-aisle-3",
+      "name": "冷通道 3",
+      "type": "coldAisle",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": 10 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.9, "y": 1.05, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "busway-1",
+      "name": "供电母线 1",
+      "type": "busway",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": -6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.9, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "busway-2",
+      "name": "供电母线 2",
+      "type": "busway",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": 2 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.9, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "busway-3",
+      "name": "供电母线 3",
+      "type": "busway",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": 10 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.9, "y": 1, "z": 1 },
+      "props": {}
+    },
+
+    {
+      "id": "cooling-01-node",
+      "name": "1号精密空调",
+      "type": "coolingUnit",
+      "sourceType": "procedural",
+      "position": { "x": -14, "y": 0, "z": -10 },
+      "rotation": { "x": 0, "y": 0.3, "z": 0 },
+      "scale": { "x": 1.15, "y": 1.15, "z": 1.15 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "cooling-01",
+        "valueField": "supply_temp",
+        "valueLabel": "送风温度",
+        "statusField": "status",
+        "secondaryField": "load_percent",
+        "secondaryLabel": "负载(%)",
+        "displayTitle": "1号精密空调",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "cooling-02-node",
+      "name": "2号精密空调",
+      "type": "coolingUnit",
+      "sourceType": "procedural",
+      "position": { "x": 14, "y": 0, "z": -10 },
+      "rotation": { "x": 0, "y": -0.3, "z": 0 },
+      "scale": { "x": 1.15, "y": 1.15, "z": 1.15 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "cooling-02",
+        "valueField": "return_temp",
+        "valueLabel": "回风温度",
+        "statusField": "status",
+        "secondaryField": "airflow",
+        "secondaryLabel": "风量",
+        "displayTitle": "2号精密空调",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "cooling-03-node",
+      "name": "3号精密空调",
+      "type": "coolingUnit",
+      "sourceType": "procedural",
+      "position": { "x": -14, "y": 0, "z": 10 },
+      "rotation": { "x": 0, "y": 0.3, "z": 0 },
+      "scale": { "x": 1.15, "y": 1.15, "z": 1.15 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "cooling-03",
+        "valueField": "supply_temp",
+        "valueLabel": "送风温度",
+        "statusField": "status",
+        "secondaryField": "load_percent",
+        "secondaryLabel": "负载(%)",
+        "displayTitle": "3号精密空调",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "cooling-04-node",
+      "name": "4号精密空调",
+      "type": "coolingUnit",
+      "sourceType": "procedural",
+      "position": { "x": 14, "y": 0, "z": 10 },
+      "rotation": { "x": 0, "y": -0.3, "z": 0 },
+      "scale": { "x": 1.15, "y": 1.15, "z": 1.15 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "cooling-04",
+        "valueField": "return_temp",
+        "valueLabel": "回风温度",
+        "statusField": "status",
+        "secondaryField": "airflow",
+        "secondaryLabel": "风量",
+        "displayTitle": "4号精密空调",
+        "refreshInterval": 2000
+      }
+    },
+
+    {
+      "id": "ops-desk",
+      "name": "运维工作台",
+      "type": "workbench",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": 16 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.2, "y": 1.1, "z": 1.2 },
+      "props": {}
+    }
+  ]
+}

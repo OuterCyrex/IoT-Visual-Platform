@@ -174,6 +174,230 @@ const buildServerRoomLiveRows = () => {
   return rows
 }
 
+const buildServerRoomClosedLoopRows = () => {
+  const nowMs = Date.now()
+  const drift = Math.sin(nowMs / 4200)
+  const swing = Math.cos(nowMs / 6100)
+  const pulse = (Math.sin(nowMs / 3000) + 1) / 2
+  const rows: Array<Record<string, unknown>> = []
+
+  const rackGroups = [
+    { zone: 'A', feed: 'a', cooling: 'a', basePower: 5.1 },
+    { zone: 'B', feed: 'a', cooling: 'a', basePower: 5.6 },
+    { zone: 'C', feed: 'b', cooling: 'b', basePower: 6.0 },
+    { zone: 'D', feed: 'b', cooling: 'b', basePower: 6.4 },
+  ]
+
+  const feedPower = { a: 0, b: 0 }
+  const coldAislePower = { a: 0, b: 0 }
+  const coldAisleTemps = { a: [] as number[], b: [] as number[] }
+  let totalPowerKw = 0
+
+  rackGroups.forEach((group, groupIndex) => {
+    for (let i = 1; i <= 8; i += 1) {
+      const suffix = `${group.zone.toLowerCase()}${String(i).padStart(2, '0')}`
+      const phase = groupIndex * 0.38 + i * 0.17
+      const powerKw = Number((group.basePower + i * 0.22 + drift * 0.5 + swing * 0.18).toFixed(2))
+      const intakeTemp = Number((21.8 + phase * 0.22 + pulse * 1.1).toFixed(1))
+      const outletTemp = Number((intakeTemp + 6.4 + Math.abs(swing) * 1.7 + i * 0.08).toFixed(1))
+      const humidity = Number((45.5 + groupIndex * 0.6 + swing * 1.8).toFixed(1))
+      const hotRack = (group.zone === 'B' && i === 5) || (group.zone === 'D' && i === 7 && pulse > 0.55)
+      const alarmLevel = hotRack ? 'warning' : 'normal'
+      const status = hotRack ? 'warning' : 'running'
+      const alarmMessage = hotRack ? 'Inlet temperature rising' : 'Normal'
+
+      rows.push({
+        id: `rack-${suffix}`,
+        device: `rack-${suffix}`,
+        name: `Rack ${group.zone}-${String(i).padStart(2, '0')}`,
+        zone: `row-${group.zone}`,
+        power_feed: group.feed,
+        cooling_loop: group.cooling,
+        status,
+        alarm_level: alarmLevel,
+        alarm_message: alarmMessage,
+        intake_temp: intakeTemp,
+        outlet_temp: outletTemp,
+        power_kw: powerKw,
+        humidity,
+        timestamp: nowText(),
+      })
+
+      feedPower[group.feed] += powerKw
+      coldAislePower[group.cooling] += powerKw
+      coldAisleTemps[group.cooling].push(intakeTemp)
+      totalPowerKw += powerKw
+    }
+  })
+
+  const buswayALoadKw = Number((feedPower.a * 1.03).toFixed(2))
+  const buswayBLoadKw = Number((feedPower.b * 1.03).toFixed(2))
+  const totalUpsOutputKw = Number((buswayALoadKw + buswayBLoadKw + 8.6).toFixed(2))
+  const totalCoolingLoadPercent = Number((58 + totalPowerKw / 14 + swing * 3.4).toFixed(1))
+  const avgColdAisleATemp = coldAisleTemps.a.reduce((sum, value) => sum + value, 0) / coldAisleTemps.a.length
+  const avgColdAisleBTemp = coldAisleTemps.b.reduce((sum, value) => sum + value, 0) / coldAisleTemps.b.length
+  const coldAisleStatusA = avgColdAisleATemp > 24.5 ? 'warning' : 'running'
+  const coldAisleStatusB = avgColdAisleBTemp > 24.8 ? 'warning' : 'running'
+  const totalAlarmCount = rows.filter((row) => row.alarm_level === 'warning' || row.alarm_level === 'critical').length
+
+  rows.push({
+    id: 'substation-main',
+    device: 'substation-main',
+    name: 'Substation Main',
+    zone: 'power-entry',
+    status: totalPowerKw > 210 ? 'warning' : 'running',
+    alarm_level: totalPowerKw > 220 ? 'critical' : totalPowerKw > 210 ? 'warning' : 'normal',
+    alarm_message: totalPowerKw > 220 ? 'Incoming feeder nearing capacity' : 'Normal',
+    input_kw: Number((totalUpsOutputKw + totalCoolingLoadPercent * 0.62 + 12).toFixed(1)),
+    voltage: Number((398 + drift * 2.8).toFixed(1)),
+    current_amp: Number((332 + totalPowerKw * 0.72 + swing * 9).toFixed(1)),
+    power_factor: Number((0.97 - Math.abs(drift) * 0.02).toFixed(2)),
+    frequency_hz: Number((50 + swing * 0.04).toFixed(2)),
+    timestamp: nowText(),
+  })
+
+  ;[
+    { id: 'busway-a', loadKw: buswayALoadKw, aisleTemp: avgColdAisleATemp, status: coldAisleStatusA },
+    { id: 'busway-b', loadKw: buswayBLoadKw, aisleTemp: avgColdAisleBTemp, status: coldAisleStatusB },
+  ].forEach((item, index) => {
+    rows.push({
+      id: item.id,
+      device: item.id,
+      name: item.id.toUpperCase(),
+      zone: 'busway',
+      status: item.status,
+      alarm_level: item.status === 'warning' ? 'warning' : 'normal',
+      alarm_message: item.status === 'warning' ? 'Busway temperature elevated' : 'Normal',
+      load_percent: Number((item.loadKw / 110 * 100).toFixed(1)),
+      current_amp: Number((168 + item.loadKw * 1.85 + index * 6).toFixed(1)),
+      voltage: Number((230 + swing * 1.6).toFixed(1)),
+      bus_temp: Number((31.6 + item.aisleTemp * 0.18 + pulse * 3.2).toFixed(1)),
+      timestamp: nowText(),
+    })
+  })
+
+  ;[
+    { id: 'power-01', loadKw: buswayALoadKw, currentOffset: 0 },
+    { id: 'power-02', loadKw: buswayBLoadKw, currentOffset: 12 },
+  ].forEach((item) => {
+    const loadPercent = Number((item.loadKw / 125 * 100).toFixed(1))
+    rows.push({
+      id: item.id,
+      device: item.id,
+      name: item.id.toUpperCase(),
+      zone: 'power-room',
+      status: loadPercent > 78 ? 'warning' : 'running',
+      alarm_level: loadPercent > 85 ? 'critical' : loadPercent > 78 ? 'warning' : 'normal',
+      alarm_message: loadPercent > 78 ? 'Power cabinet load rising' : 'Normal',
+      input_kw: Number((item.loadKw + 3.6).toFixed(1)),
+      load_percent: loadPercent,
+      current_amp: Number((182 + item.loadKw * 1.52 + item.currentOffset + drift * 8).toFixed(1)),
+      voltage: Number((380 + drift * 2.6).toFixed(1)),
+      cabinet_temp: Number((28.8 + loadPercent * 0.07 + pulse * 1.4).toFixed(1)),
+      timestamp: nowText(),
+    })
+  })
+
+  ;[
+    { id: 'ups-01', outputKw: Number((buswayALoadKw + 4.2).toFixed(1)), batteryLoss: 0 },
+    { id: 'ups-02', outputKw: Number((buswayBLoadKw + 4.4).toFixed(1)), batteryLoss: 1.8 },
+  ].forEach((item, index) => {
+    const loadPercent = Number((item.outputKw / 96 * 100).toFixed(1))
+    const batterySoc = Number((96 - item.batteryLoss - pulse * 3.4 - index * 1.2).toFixed(1))
+    rows.push({
+      id: item.id,
+      device: item.id,
+      name: item.id.toUpperCase(),
+      zone: 'ups-room',
+      status: loadPercent > 72 || batterySoc < 90 ? 'warning' : 'running',
+      alarm_level: loadPercent > 82 ? 'critical' : loadPercent > 72 || batterySoc < 90 ? 'warning' : 'normal',
+      alarm_message: batterySoc < 90 ? 'Battery discharge margin reduced' : loadPercent > 72 ? 'UPS load elevated' : 'Normal',
+      output_kw: item.outputKw,
+      load_percent: loadPercent,
+      battery_soc: batterySoc,
+      backup_min: Number((22 - loadPercent * 0.08 - index * 1.5).toFixed(1)),
+      timestamp: nowText(),
+    })
+  })
+
+  ;[
+    { id: 'pdu-01', loadKw: buswayALoadKw * 0.98 },
+    { id: 'pdu-02', loadKw: buswayBLoadKw * 0.98 },
+  ].forEach((item, index) => {
+    const loadPercent = Number((item.loadKw / 90 * 100).toFixed(1))
+    rows.push({
+      id: item.id,
+      device: item.id,
+      name: item.id.toUpperCase(),
+      zone: 'distribution',
+      status: loadPercent > 76 ? 'warning' : 'running',
+      alarm_level: loadPercent > 84 ? 'critical' : loadPercent > 76 ? 'warning' : 'normal',
+      alarm_message: loadPercent > 76 ? 'PDU branch nearing threshold' : 'Normal',
+      load_percent: loadPercent,
+      current_amp: Number((146 + item.loadKw * 1.22 + drift * 7 + index * 4).toFixed(1)),
+      voltage: Number((220 + swing * 1.3).toFixed(1)),
+      branch_temp: Number((30.4 + loadPercent * 0.06 + pulse * 1.2).toFixed(1)),
+      timestamp: nowText(),
+    })
+  })
+
+  ;[
+    { id: 'cold-aisle-a', avgTemp: avgColdAisleATemp, powerKw: coldAislePower.a, humidityOffset: 0.8 },
+    { id: 'cold-aisle-b', avgTemp: avgColdAisleBTemp, powerKw: coldAislePower.b, humidityOffset: 1.2 },
+  ].forEach((item) => {
+    rows.push({
+      id: item.id,
+      device: item.id,
+      name: item.id.toUpperCase(),
+      zone: 'cooling-loop',
+      status: item.avgTemp > 24.7 ? 'warning' : 'running',
+      alarm_level: item.avgTemp > 25.3 ? 'critical' : item.avgTemp > 24.7 ? 'warning' : 'normal',
+      alarm_message: item.avgTemp > 24.7 ? 'Cold aisle supply temperature high' : 'Normal',
+      aisle_temp: Number(item.avgTemp.toFixed(1)),
+      humidity: Number((46.2 + item.humidityOffset + swing * 1.4).toFixed(1)),
+      airflow: Number((16200 + item.powerKw * 23 + drift * 240).toFixed(0)),
+      timestamp: nowText(),
+    })
+  })
+
+  for (let i = 1; i <= 4; i += 1) {
+    const linkedPower = i <= 2 ? coldAislePower.a : coldAislePower.b
+    const loadPercent = Number((52 + linkedPower / 10 + i * 2.4 + swing * 2.8).toFixed(1))
+    const returnTemp = Number((25.9 + linkedPower * 0.032 + pulse * 1.5 + i * 0.18).toFixed(1))
+    rows.push({
+      id: `cooling-${String(i).padStart(2, '0')}`,
+      device: `cooling-${String(i).padStart(2, '0')}`,
+      name: `Cooling-${String(i).padStart(2, '0')}`,
+      zone: 'precision-cooling',
+      status: loadPercent > 74 || (i === 2 && pulse > 0.72) ? 'warning' : 'running',
+      alarm_level: loadPercent > 82 ? 'critical' : loadPercent > 74 || (i === 2 && pulse > 0.72) ? 'warning' : 'normal',
+      alarm_message: i === 2 && pulse > 0.72 ? 'Compressor stage shifted to high load' : loadPercent > 74 ? 'Cooling load elevated' : 'Normal',
+      supply_temp: Number((18.2 + drift * 0.7 + i * 0.12).toFixed(1)),
+      return_temp: returnTemp,
+      airflow: Number((7600 + linkedPower * 18 + i * 140 + swing * 180).toFixed(0)),
+      load_percent: loadPercent,
+      cop: Number((3.4 - loadPercent * 0.008 + swing * 0.06).toFixed(2)),
+      timestamp: nowText(),
+    })
+  }
+
+  rows.push({
+    id: 'ops-desk',
+    device: 'ops-desk',
+    name: 'Ops Desk',
+    zone: 'monitoring',
+    status: totalAlarmCount > 0 ? 'attention' : 'running',
+    alarm_level: totalAlarmCount > 3 ? 'warning' : 'normal',
+    alarm_message: totalAlarmCount > 0 ? 'Active alarms require inspection' : 'All systems normal',
+    pue: Number((1.42 + totalCoolingLoadPercent / 260 + pulse * 0.03).toFixed(2)),
+    active_alarms: totalAlarmCount,
+    total_power_kw: Number(totalPowerKw.toFixed(1)),
+    timestamp: nowText(),
+  })
+
+  return rows
+}
+
 const sanitizeUser = (user: PlatformUser) => {
   const { passwordHash: _passwordHash, ...safeUser } = user
   return safeUser
@@ -786,19 +1010,7 @@ const datasetPreviewRoute: RouteDefinition = {
   permission: 'dataset:read',
   handler: async ({ res, params }) => {
     if (params.id === 'set-server-room-live') {
-      const nowMs = Date.now()
-      const drift = Math.sin(nowMs / 4000)
-      const swing = Math.cos(nowMs / 5200)
-      const rows = [
-        { id: 'rack-a01', device: 'rack-a01', name: 'A01 核心机柜', zone: 'A列', status: 'running', intake_temp: Number((23.8 + drift * 1.4).toFixed(1)), outlet_temp: Number((31.6 + swing * 1.8).toFixed(1)), power_kw: Number((6.8 + drift * 0.9).toFixed(2)), humidity: Number((46 + swing * 2.2).toFixed(1)), timestamp: nowText() },
-        { id: 'rack-a02', device: 'rack-a02', name: 'A02 数据机柜', zone: 'A列', status: swing > 0.72 ? 'warning' : 'running', intake_temp: Number((24.6 + swing * 1.7).toFixed(1)), outlet_temp: Number((33.2 + drift * 2.4).toFixed(1)), power_kw: Number((7.4 + swing * 1.1).toFixed(2)), humidity: Number((47.5 + drift * 2.1).toFixed(1)), timestamp: nowText() },
-        { id: 'rack-b01', device: 'rack-b01', name: 'B01 存储机柜', zone: 'B列', status: 'running', intake_temp: Number((22.9 + drift * 1.1).toFixed(1)), outlet_temp: Number((30.4 + swing * 1.5).toFixed(1)), power_kw: Number((5.9 + drift * 0.7).toFixed(2)), humidity: Number((45.4 + swing * 1.9).toFixed(1)), timestamp: nowText() },
-        { id: 'rack-b02', device: 'rack-b02', name: 'B02 备用机柜', zone: 'B列', status: drift < -0.82 ? 'idle' : 'running', intake_temp: Number((21.8 + swing * 0.8).toFixed(1)), outlet_temp: Number((28.1 + drift * 1.2).toFixed(1)), power_kw: Number((2.6 + Math.max(drift, -0.2) * 0.6).toFixed(2)), humidity: Number((44.8 + swing * 1.5).toFixed(1)), timestamp: nowText() },
-        { id: 'cooling-01', device: 'cooling-01', name: '1号精密空调', zone: '制冷区', status: swing > 0.82 ? 'warning' : 'running', supply_temp: Number((18.4 + drift * 0.9).toFixed(1)), return_temp: Number((27.3 + swing * 1.4).toFixed(1)), airflow: Number((8200 + drift * 420).toFixed(0)), load_percent: Number((63 + swing * 8).toFixed(1)), timestamp: nowText() },
-        { id: 'cooling-02', device: 'cooling-02', name: '2号精密空调', zone: '制冷区', status: 'running', supply_temp: Number((18.1 + swing * 0.8).toFixed(1)), return_temp: Number((26.8 + drift * 1.1).toFixed(1)), airflow: Number((7980 + swing * 380).toFixed(0)), load_percent: Number((58 + drift * 7).toFixed(1)), timestamp: nowText() },
-        { id: 'ups-01', device: 'ups-01', name: 'UPS 机组', zone: '动力区', status: drift > 0.88 ? 'warning' : 'running', load_percent: Number((54 + drift * 9).toFixed(1)), battery_soc: Number((93 - Math.abs(swing) * 4).toFixed(1)), output_kw: Number((42 + swing * 3.5).toFixed(1)), timestamp: nowText() },
-        { id: 'pdu-01', device: 'pdu-01', name: '列头柜 PDU', zone: '动力区', status: 'running', load_percent: Number((48 + swing * 6).toFixed(1)), current_amp: Number((168 + drift * 12).toFixed(1)), voltage: Number((220 + swing * 2).toFixed(1)), timestamp: nowText() },
-      ]
+      const rows = buildServerRoomClosedLoopRows()
       return sendJson(res, 200, {
         datasetId: 'set-server-room-live',
         sourceId: virtualServerRoomSource.id,

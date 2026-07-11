@@ -124,10 +124,9 @@ function applyNodeTransform(mesh: THREE.Object3D, node: SceneNode) {
 }
 
 function getRowFieldValue(row: Record<string, unknown> | null, preferredField?: string) {
-  if (!row) return undefined
-  if (preferredField && preferredField in row) return row[preferredField]
-  const entries = Object.entries(row).filter(([, value]) => value != null && value !== '')
-  return entries.length ? entries[0][1] : undefined
+  if (!row || !preferredField) return undefined
+  if (preferredField in row) return row[preferredField]
+  return undefined
 }
 
 function getPrimaryText(node: SceneNode, row: Record<string, unknown> | null) {
@@ -143,15 +142,27 @@ function getSecondaryText(node: SceneNode, row: Record<string, unknown> | null) 
   return `${auxLabel}: ${auxValue == null ? '--' : String(auxValue)} | 状态: ${statusValue == null ? '--' : String(statusValue)}`
 }
 
+function findRowByField(rows: Array<Record<string, unknown>>, field: string, expectedValue: string) {
+  return rows.find((row) => String(row[field] ?? '').trim().toLowerCase() === expectedValue)
+}
+
 function pickRow(node: SceneNode, rows: Array<Record<string, unknown>>) {
   if (!rows.length) return null
-  const matchField = node.props.matchField
-  const matchValue = node.props.matchValue?.trim()
+  const matchField = node.props.matchField?.trim()
+  const matchValue = node.props.matchValue?.trim().toLowerCase()
   if (matchField && matchValue) {
-    const matched = rows.find((row) => String(row[matchField] ?? '').trim().toLowerCase() === matchValue.toLowerCase())
+    const matched = findRowByField(rows, matchField, matchValue)
     if (matched) return matched
   }
-  return rows[0]
+
+  if (matchValue) {
+    for (const fallbackField of ['device', 'id', 'device_id', 'name']) {
+      const matched = findRowByField(rows, fallbackField, matchValue)
+      if (matched) return matched
+    }
+  }
+
+  return null
 }
 
 function rebuildOverlayLabels() {
