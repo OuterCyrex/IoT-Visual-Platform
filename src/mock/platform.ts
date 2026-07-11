@@ -2,6 +2,7 @@ import type {
   DataSource,
   Dataset,
   ManagedProject,
+  ModelAsset,
   PlatformUser,
   SceneProject,
   ScreenProject,
@@ -81,6 +82,8 @@ export const sceneProjects: SceneProject[] = [
     sceneNodes: [],
   },
 ]
+
+export const modelAssets: ModelAsset[] = []
 
 export const dataSources: DataSource[] = [
   {

@@ -3,6 +3,7 @@ import cors from 'cors'
 import morgan from 'morgan'
 import { forbidden, unauthorized } from './lib/http.ts'
 import { roleHasPermission, verifyToken } from './lib/auth.ts'
+import { uploadsRoot } from './lib/config.ts'
 import { getUserById, listRoles } from './lib/store.ts'
 import { routes } from './routes/platform.ts'
 
@@ -19,10 +20,13 @@ app.use(cors({
 }))
 
 // Parse JSON payloads
-app.use(express.json())
+app.use(express.json({ limit: '20mb' }))
 
 // Standard morgan dev logging middleware
 app.use(morgan('dev'))
+
+// Static uploads for model assets and exported scene files
+app.use('/uploads', express.static(uploadsRoot))
 
 // Register routes
 for (const route of routes) {

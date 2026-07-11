@@ -8,6 +8,7 @@ import type {
   DataSource,
   Dataset,
   ManagedProject,
+  ModelAsset,
   PlatformState,
   ProjectMembership,
   PlatformUser,
@@ -53,6 +54,10 @@ export interface StorageAdapter {
   createSceneProject?: (project: SceneProject) => Promise<SceneProject>
   updateSceneProject?: (id: string, patch: Partial<SceneProject>) => Promise<SceneProject | null>
   deleteSceneProject?: (id: string) => Promise<boolean>
+  listModelAssets?: () => Promise<ModelAsset[]>
+  createModelAsset?: (asset: ModelAsset) => Promise<ModelAsset>
+  updateModelAsset?: (id: string, patch: Partial<ModelAsset>) => Promise<ModelAsset | null>
+  deleteModelAsset?: (id: string) => Promise<boolean>
   listDataSources?: () => Promise<DataSource[]>
   createDataSource?: (source: DataSource) => Promise<DataSource>
   updateDataSource?: (id: string, patch: Partial<DataSource>) => Promise<DataSource | null>
@@ -344,6 +349,37 @@ const fileAdapter: StorageAdapter = {
     writeFileState(state)
     return true
   },
+  async listModelAssets() {
+    return readFileState().modelAssets ?? []
+  },
+  async createModelAsset(asset) {
+    const state = readFileState()
+    state.modelAssets = [asset, ...(state.modelAssets ?? [])]
+    writeFileState(state)
+    return asset
+  },
+  async updateModelAsset(id, patch) {
+    const state = readFileState()
+    const assets = state.modelAssets ?? []
+    const index = assets.findIndex((item) => item.id === id)
+    if (index === -1) {
+      return null
+    }
+    assets[index] = { ...assets[index], ...patch }
+    state.modelAssets = assets
+    writeFileState(state)
+    return assets[index]
+  },
+  async deleteModelAsset(id) {
+    const state = readFileState()
+    const next = (state.modelAssets ?? []).filter((item) => item.id !== id)
+    if (next.length === (state.modelAssets ?? []).length) {
+      return false
+    }
+    state.modelAssets = next
+    writeFileState(state)
+    return true
+  },
   async listDataSources() {
     return readFileState().dataSources
   },
@@ -433,6 +469,15 @@ const readStateFromMysql = async (): Promise<PlatformState> => {
     const [sceneRows] = await connection.query(
       'SELECT id, name, project_group, owner, model_count, status, engine, scene_nodes, updated_at FROM scene_projects ORDER BY name',
     )
+    let modelAssetRows: Array<Record<string, unknown>> = []
+    try {
+      const [rows] = await connection.query(
+        'SELECT id, name, category, description, tags, format, file_name, file_path, file_url, file_size, updated_at FROM model_assets ORDER BY updated_at DESC',
+      )
+      modelAssetRows = rows as Array<Record<string, unknown>>
+    } catch {
+      modelAssetRows = []
+    }
     const [sourceRows] = await connection.query(
       'SELECT id, name, type, host, database_name, owner, status, updated_at FROM data_sources ORDER BY name',
     )
@@ -496,6 +541,21 @@ const readStateFromMysql = async (): Promise<PlatformState> => {
           engine: String(row.engine),
           sceneNodes: parseJson<any[]>(row.scene_nodes, []),
           updatedAt: String(row.updated_at),
+        }),
+      ),
+      modelAssets: modelAssetRows.map(
+        (row): ModelAsset => ({
+          id: String(row.id),
+          name: String(row.name),
+          category: String(row.category ?? ''),
+          description: String(row.description ?? ''),
+          tags: parseJson<string[]>(row.tags, []),
+          format: row.format as ModelAsset['format'],
+          fileName: String(row.file_name ?? ''),
+          filePath: String(row.file_path ?? ''),
+          fileUrl: String(row.file_url ?? ''),
+          fileSize: Number(row.file_size ?? 0),
+          updatedAt: String(row.updated_at ?? ''),
         }),
       ),
       dataSources: (sourceRows as Array<Record<string, unknown>>).map(
@@ -613,6 +673,30 @@ const writeStateToMysql = async (state: PlatformState) => {
         item.updatedAt,
       ],
     )
+
+    try {
+      await replaceTable(
+        connection,
+        'model_assets',
+        ['id', 'name', 'category', 'description', 'tags', 'format', 'file_name', 'file_path', 'file_url', 'file_size', 'updated_at'],
+        state.modelAssets ?? [],
+        (item) => [
+          item.id,
+          item.name,
+          item.category,
+          item.description,
+          JSON.stringify(item.tags),
+          item.format,
+          item.fileName,
+          item.filePath,
+          item.fileUrl,
+          item.fileSize,
+          item.updatedAt,
+        ],
+      )
+    } catch {
+      // Keep MySQL mode backward compatible when the model_assets table has not been migrated yet.
+    }
 
     await replaceTable(
       connection,
@@ -1216,6 +1300,125 @@ const mysqlAdapter: StorageAdapter = {
       await connection.end()
     }
   },
+  async listModelAssets() {
+    const connection = await createMysqlConnection(true)
+    try {
+      try {
+        const [rows] = await connection.query(
+          'SELECT id, name, category, description, tags, format, file_name, file_path, file_url, file_size, updated_at FROM model_assets ORDER BY updated_at DESC',
+        )
+        return (rows as Array<Record<string, unknown>>).map(
+          (row): ModelAsset => ({
+            id: String(row.id),
+            name: String(row.name),
+            category: String(row.category ?? ''),
+            description: String(row.description ?? ''),
+            tags: parseJson<string[]>(row.tags, []),
+            format: row.format as ModelAsset['format'],
+            fileName: String(row.file_name ?? ''),
+            filePath: String(row.file_path ?? ''),
+            fileUrl: String(row.file_url ?? ''),
+            fileSize: Number(row.file_size ?? 0),
+            updatedAt: String(row.updated_at ?? ''),
+          }),
+        )
+      } catch {
+        return readMysqlFallback().modelAssets ?? []
+      }
+    } finally {
+      await connection.end()
+    }
+  },
+  async createModelAsset(asset) {
+    const connection = await createMysqlConnection(true)
+    try {
+      try {
+        await connection.query(
+          'INSERT INTO model_assets (id, name, category, description, tags, format, file_name, file_path, file_url, file_size, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [
+            asset.id,
+            asset.name,
+            asset.category,
+            asset.description,
+            JSON.stringify(asset.tags),
+            asset.format,
+            asset.fileName,
+            asset.filePath,
+            asset.fileUrl,
+            asset.fileSize,
+            asset.updatedAt,
+          ],
+        )
+      } catch {
+        const state = readMysqlFallback()
+        state.modelAssets = [asset, ...(state.modelAssets ?? [])]
+        writeMysqlFallback(state)
+      }
+      return asset
+    } finally {
+      await connection.end()
+    }
+  },
+  async updateModelAsset(id, patch) {
+    const current = (await this.listModelAssets?.())?.find((item) => item.id === id) ?? null
+    if (!current) {
+      return null
+    }
+    const next = { ...current, ...patch }
+    const connection = await createMysqlConnection(true)
+    try {
+      try {
+        await connection.query(
+          'UPDATE model_assets SET name = ?, category = ?, description = ?, tags = ?, format = ?, file_name = ?, file_path = ?, file_url = ?, file_size = ?, updated_at = ? WHERE id = ?',
+          [
+            next.name,
+            next.category,
+            next.description,
+            JSON.stringify(next.tags),
+            next.format,
+            next.fileName,
+            next.filePath,
+            next.fileUrl,
+            next.fileSize,
+            next.updatedAt,
+            id,
+          ],
+        )
+      } catch {
+        const state = readMysqlFallback()
+        const assets = state.modelAssets ?? []
+        const index = assets.findIndex((item) => item.id === id)
+        if (index !== -1) {
+          assets[index] = next
+          state.modelAssets = assets
+          writeMysqlFallback(state)
+        }
+      }
+      return next
+    } finally {
+      await connection.end()
+    }
+  },
+  async deleteModelAsset(id) {
+    const connection = await createMysqlConnection(true)
+    try {
+      try {
+        const [result] = await connection.query('DELETE FROM model_assets WHERE id = ?', [id])
+        return Number((result as { affectedRows?: number }).affectedRows ?? 0) > 0
+      } catch {
+        const state = readMysqlFallback()
+        const next = (state.modelAssets ?? []).filter((item) => item.id !== id)
+        if (next.length === (state.modelAssets ?? []).length) {
+          return false
+        }
+        state.modelAssets = next
+        writeMysqlFallback(state)
+        return true
+      }
+    } finally {
+      await connection.end()
+    }
+  },
   async listDataSources() {
     const connection = await createMysqlConnection(true)
     try {
@@ -1389,6 +1592,11 @@ export const createSceneProject = (project: SceneProject) => adapter.createScene
 export const updateSceneProject = (id: string, patch: Partial<SceneProject>) =>
   adapter.updateSceneProject?.(id, patch)
 export const deleteSceneProject = (id: string) => adapter.deleteSceneProject?.(id)
+export const listModelAssets = () => adapter.listModelAssets?.()
+export const createModelAsset = (asset: ModelAsset) => adapter.createModelAsset?.(asset)
+export const updateModelAsset = (id: string, patch: Partial<ModelAsset>) =>
+  adapter.updateModelAsset?.(id, patch)
+export const deleteModelAsset = (id: string) => adapter.deleteModelAsset?.(id)
 export const listDataSources = () => adapter.listDataSources?.()
 export const createDataSource = (source: DataSource) => adapter.createDataSource?.(source)
 export const updateDataSource = (id: string, patch: Partial<DataSource>) => adapter.updateDataSource?.(id, patch)

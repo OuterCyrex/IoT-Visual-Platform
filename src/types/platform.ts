@@ -35,13 +35,29 @@ export interface SceneProject {
   status: ProjectStatus
   engine: string
   sceneNodes: SceneNodeData[]
+  publishedFileUrl?: string
+}
+
+export interface ModelAsset {
+  id: string
+  name: string
+  category: string
+  description: string
+  tags: string[]
+  format: 'glb' | 'gltf'
+  fileName: string
+  filePath: string
+  fileUrl: string
+  fileSize: number
+  updatedAt: string
 }
 
 export interface SceneNodeData {
   id: string
   name: string
   type: string
-  sourceType?: 'procedural' | 'imported'
+  sourceType?: 'procedural' | 'imported' | 'asset'
+  assetId?: string
   sourceUrl?: string
   position: { x: number; y: number; z: number }
   rotation: { x: number; y: number; z: number }

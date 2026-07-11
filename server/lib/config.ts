@@ -43,3 +43,7 @@ export const mysqlConfig: MysqlConfig = {
   password: process.env.MYSQL_PASSWORD ?? '',
   database: process.env.MYSQL_DATABASE ?? 'iot_visual_platform',
 }
+
+export const uploadsRoot = resolve(process.cwd(), process.env.UPLOADS_DIR ?? 'server/uploads')
+export const modelUploadsDir = resolve(uploadsRoot, 'models')
+export const sceneExportDir = resolve(uploadsRoot, 'scene-exports')

@@ -52,19 +52,25 @@ const router = createRouter({
           path: 'scenes',
           name: 'scenes',
           component: SceneProjectsView,
-          meta: { title: '三维可视化', section: 'scene-visualization', permission: 'scene:read' },
+          meta: { title: '3D 可视化', section: 'scene-visualization', permission: 'scene:read' },
+        },
+        {
+          path: 'scene-assets',
+          name: 'scene-assets',
+          component: () => import('../views/scenes/SceneAssetLibraryView.vue'),
+          meta: { title: '3D 组件库', section: 'scene-visualization', permission: 'scene:read' },
         },
         {
           path: 'scenes/:id/editor',
           name: 'scene-editor',
           component: () => import('../views/scenes/SceneEditor.vue'),
-          meta: { title: '三维编辑器', section: 'scene-visualization', fullscreen: true, permission: 'scene:write' },
+          meta: { title: '3D 编辑器', section: 'scene-visualization', fullscreen: true, permission: 'scene:write' },
         },
         {
           path: 'scenes/:id/preview',
           name: 'scene-preview',
           component: () => import('../views/scenes/ScenePreview.vue'),
-          meta: { title: '三维预览', section: 'scene-visualization', fullscreen: true, permission: 'scene:read' },
+          meta: { title: '3D 预览', section: 'scene-visualization', fullscreen: true, permission: 'scene:read' },
         },
         {
           path: 'data-sources',

@@ -35,6 +35,21 @@ export interface SceneProject {
   status: ProjectStatus
   engine: string
   sceneNodes: any[]
+  publishedFileUrl?: string
+}
+
+export interface ModelAsset {
+  id: string
+  name: string
+  category: string
+  description: string
+  tags: string[]
+  format: 'glb' | 'gltf'
+  fileName: string
+  filePath: string
+  fileUrl: string
+  fileSize: number
+  updatedAt: string
 }
 
 export interface DataSource {
@@ -99,6 +114,7 @@ export interface ProjectMembership {
 export interface PlatformState {
   screenProjects: ScreenProject[]
   sceneProjects: SceneProject[]
+  modelAssets: ModelAsset[]
   dataSources: DataSource[]
   datasets: Dataset[]
   users: PlatformUser[]

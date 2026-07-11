@@ -1,48 +1,35 @@
 <template>
-  <div class="relative h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col items-center justify-center font-sans">
-    <div class="absolute top-4 left-4 z-50 flex items-center gap-3 rounded-lg bg-slate-900/90 px-4 py-2 backdrop-blur border border-slate-800 shadow-xl select-none">
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+  <div class="relative flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-slate-950 font-sans text-slate-100">
+    <div class="absolute left-4 top-4 z-50 flex select-none items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/90 px-4 py-2 shadow-xl backdrop-blur">
+      <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping"></span>
       <div class="text-sm font-semibold tracking-wide text-slate-200">{{ sceneTitle }}</div>
       <el-tag size="small" type="info" effect="dark" class="border-slate-700 bg-slate-800">3D 数字孪生</el-tag>
-      <el-button size="small" type="info" plain class="ml-2 hover:bg-slate-800 border-slate-700 text-slate-300" @click="backToEditor">
+      <el-button size="small" type="info" plain class="ml-2 border-slate-700 text-slate-300 hover:bg-slate-800" @click="backToEditor">
         返回编辑
       </el-button>
     </div>
 
-    <div ref="canvasContainer" class="w-full h-full"></div>
+    <div ref="canvasContainer" class="h-full w-full"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import request from '../../utils/request'
-import type { SceneProject } from '../../types/platform'
+import type { SceneNodeData, SceneProject } from '../../types/platform'
 import { loadImportedModel } from './scene-model-loader'
+import { createProceduralMesh } from './scene-mesh-factory'
 
-interface SceneNode {
-  id: string
-  name: string
-  type: string
-  sourceType?: 'procedural' | 'imported'
-  sourceUrl?: string
-  position: { x: number; y: number; z: number }
-  rotation: { x: number; y: number; z: number }
-  scale: { x: number; y: number; z: number }
-  props: {
-    datasetId?: string
-    alarmField?: string
-    speedField?: string
-  }
-}
+type SceneNode = SceneNodeData
 
 const route = useRoute()
 const router = useRouter()
 const projectId = route.params.id as string
 
-const sceneTitle = ref('大屏画布')
+const sceneTitle = ref('3D 场景预览')
 const sceneNodes = ref<SceneNode[]>([])
 const canvasContainer = ref<HTMLDivElement | null>(null)
 let scene: THREE.Scene
@@ -52,71 +39,11 @@ let controls: OrbitControls
 let animationFrameId: number
 const modelGroupMap = new Map<string, THREE.Group>()
 
-function createProceduralMesh(type: string, id: string): THREE.Group {
-  const group = new THREE.Group()
-  group.name = id
-
-  if (type === 'cnc') {
-    const baseGeo = new THREE.BoxGeometry(3, 1.8, 2.2)
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2, metalness: 0.8 })
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat)
-    baseMesh.position.y = 0.9
-    group.add(baseMesh)
-
-    const glassGeo = new THREE.BoxGeometry(2.2, 1, 0.1)
-    const glassMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.5, roughness: 0.1, metalness: 0.9 })
-    const glassMesh = new THREE.Mesh(glassGeo, glassMat)
-    glassMesh.position.set(0, 1.1, 1.1)
-    group.add(glassMesh)
-
-    const beaconGeo = new THREE.SphereGeometry(0.15, 16, 16)
-    const beaconMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 0.5 })
-    const beaconMesh = new THREE.Mesh(beaconGeo, beaconMat)
-    beaconMesh.position.set(1.2, 1.9, 0.9)
-    group.add(beaconMesh)
-  } else if (type === 'arm') {
-    const baseGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.3, 32)
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.5 })
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat)
-    baseMesh.position.y = 0.15
-    group.add(baseMesh)
-
-    const shaftGeo = new THREE.CylinderGeometry(0.2, 0.2, 1.8, 16)
-    const shaftMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 })
-    const shaftMesh = new THREE.Mesh(shaftGeo, shaftMat)
-    shaftMesh.position.set(0, 1.0, 0)
-    group.add(shaftMesh)
-
-    const jointGroup = new THREE.Group()
-    jointGroup.position.set(0, 1.8, 0)
-    const jointGeo = new THREE.BoxGeometry(0.3, 1.2, 0.3)
-    const jointMat = new THREE.MeshStandardMaterial({ color: 0x0891b2, metalness: 0.7 })
-    const jointMesh = new THREE.Mesh(jointGeo, jointMat)
-    jointMesh.position.set(0.3, 0.6, 0)
-    jointMesh.rotation.z = Math.PI / 4
-    jointGroup.add(jointMesh)
-    group.add(jointGroup)
-  } else {
-    const motorGeo = new THREE.CylinderGeometry(0.6, 0.6, 1.8, 32)
-    motorGeo.rotateZ(Math.PI / 2)
-    const motorMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, metalness: 0.9, roughness: 0.3 })
-    const motorMesh = new THREE.Mesh(motorGeo, motorMat)
-    motorMesh.position.y = 0.6
-    group.add(motorMesh)
-
-    const fanGroup = new THREE.Group()
-    fanGroup.name = 'rotor'
-    fanGroup.position.set(-1.05, 0.6, 0)
-
-    const fanGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.3, 32)
-    fanGeo.rotateZ(Math.PI / 2)
-    const fanMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 })
-    const fanMesh = new THREE.Mesh(fanGeo, fanMat)
-    fanGroup.add(fanMesh)
-    group.add(fanGroup)
+async function createMeshForNode(node: SceneNode) {
+  if ((node.sourceType === 'asset' || node.sourceType === 'imported') && node.sourceUrl) {
+    return loadImportedModel(node.sourceUrl)
   }
-
-  return group
+  return createProceduralMesh(node.type, node.id)
 }
 
 async function loadProject() {
@@ -130,9 +57,7 @@ async function loadProject() {
     modelGroupMap.clear()
 
     for (const node of sceneNodes.value) {
-      const mesh = node.sourceType === 'imported' && node.sourceUrl
-        ? await loadImportedModel(node.sourceUrl)
-        : createProceduralMesh(node.type, node.id)
+      const mesh = await createMeshForNode(node)
       mesh.name = node.id
       mesh.position.set(node.position.x, node.position.y, node.position.z)
       mesh.rotation.set(node.rotation.x, node.rotation.y, node.rotation.z)

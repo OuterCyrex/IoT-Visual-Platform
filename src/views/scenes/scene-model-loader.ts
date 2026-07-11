@@ -1,9 +1,23 @@
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import request from '../../utils/request'
 
-export async function loadImportedModel(dataUrl: string) {
+export function resolveSceneAssetUrl(source: string) {
+  if (!source) {
+    return source
+  }
+
+  if (/^(data:|blob:|https?:)/i.test(source)) {
+    return source
+  }
+
+  const baseUrl = String(request.defaults.baseURL ?? window.location.origin)
+  return new URL(source, baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`).toString()
+}
+
+export async function loadImportedModel(source: string) {
   const loader = new GLTFLoader()
-  const gltf = await loader.loadAsync(dataUrl)
+  const gltf = await loader.loadAsync(resolveSceneAssetUrl(source))
   const root = gltf.scene || gltf.scenes[0] || new THREE.Group()
 
   const box = new THREE.Box3().setFromObject(root)

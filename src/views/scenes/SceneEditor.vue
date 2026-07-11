@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen w-screen flex-col overflow-hidden bg-slate-950 text-slate-100 font-sans">
+  <div class="flex h-screen w-screen flex-col overflow-hidden bg-slate-950 font-sans text-slate-100">
     <header class="flex h-16 items-center justify-between border-b border-slate-800 bg-slate-900/90 px-6 backdrop-blur">
       <div class="flex items-center gap-3">
         <el-button size="small" type="info" plain class="border-slate-700 bg-slate-800 text-slate-200" @click="backToList">
@@ -9,75 +9,105 @@
         <div class="text-sm font-semibold tracking-wide text-slate-200">{{ sceneTitle }}</div>
       </div>
       <div class="flex items-center gap-3">
+        <el-button size="small" @click="openAssetLibrary">3D 组件库</el-button>
+        <el-button size="small" type="info" plain @click="handleExport">导出 JSON</el-button>
         <el-button size="small" type="primary" :loading="saving" @click="handleSave">保存场景</el-button>
-        <el-button size="small" type="success" plain class="border-emerald-800 bg-emerald-950/20 text-emerald-400" @click="handlePreview">
-          进入三维预览
+        <el-button
+          size="small"
+          type="success"
+          plain
+          class="border-emerald-800 bg-emerald-950/20 text-emerald-400"
+          @click="handlePreview"
+        >
+          进入 3D 预览
         </el-button>
       </div>
     </header>
 
-    <div class="flex flex-1 min-h-0 min-w-0">
-      <aside class="w-64 border-r border-slate-800 bg-slate-900/40 p-4 flex flex-col gap-4">
+    <div class="flex min-h-0 min-w-0 flex-1">
+      <aside class="flex w-72 flex-col gap-4 border-r border-slate-800 bg-slate-900/40 p-4">
         <div>
-          <div class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1">三维模型库</div>
+          <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">基础组件</div>
+          <div class="text-[11px] text-slate-500">可直接绑定数据源的程序化组件</div>
         </div>
 
-        <el-upload
-          :auto-upload="false"
-          accept=".glb,.gltf"
-          :show-file-list="false"
-          class="w-full"
-          @change="handleImportModel"
-        >
-          <el-button class="w-full" type="primary" plain>导入模型</el-button>
-        </el-upload>
-
-        <div class="flex-1 overflow-y-auto space-y-3 pr-1">
+        <div class="space-y-3">
           <div
-            v-for="item in modelLibrary"
+            v-for="item in proceduralLibrary"
             :key="item.type"
-            class="flex items-center gap-3 p-3 rounded-lg border border-slate-800/80 bg-slate-900/50 hover:bg-slate-800/60 hover:border-slate-700 cursor-pointer transition-all group select-none"
-            @click="addModelToScene(item.type)"
+            class="group cursor-pointer select-none rounded-lg border border-slate-800/80 bg-slate-900/50 p-3 transition-all hover:border-slate-700 hover:bg-slate-800/60"
+            @click="addProceduralModel(item)"
           >
-            <div class="w-8 h-8 rounded bg-cyan-500/10 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform">
-              <span class="text-lg font-bold">3D</span>
+            <div class="flex items-center gap-3">
+              <div class="flex h-8 w-8 items-center justify-center rounded bg-cyan-500/10 text-cyan-400 transition-transform group-hover:scale-105">
+                <span class="text-lg font-bold">3D</span>
+              </div>
+              <div>
+                <div class="text-xs font-medium text-slate-200">{{ item.name }}</div>
+                <div class="text-[10px] text-slate-500">{{ item.desc }}</div>
+              </div>
             </div>
-            <div>
-              <div class="text-xs font-medium text-slate-200">{{ item.name }}</div>
-              <div class="text-[10px] text-slate-500">{{ item.desc }}</div>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-800 pt-4">
+          <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">组件库资产</div>
+          <div class="mb-3 text-[11px] text-slate-500">来自 3D 组件库的可复用模型资产</div>
+          <div class="mb-3">
+            <el-input v-model="assetKeyword" size="small" placeholder="搜索资产名称 / 分类" clearable />
+          </div>
+          <div class="flex-1 space-y-3 overflow-y-auto pr-1">
+            <div
+              v-for="asset in filteredAssets"
+              :key="asset.id"
+              class="group cursor-pointer select-none rounded-lg border border-slate-800/80 bg-slate-900/50 p-3 transition-all hover:border-slate-700 hover:bg-slate-800/60"
+              @click="addAssetToScene(asset)"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <div class="text-xs font-medium text-slate-200">{{ asset.name }}</div>
+                  <div class="text-[10px] text-slate-500">{{ asset.category || '未分类' }}</div>
+                </div>
+                <el-tag size="small" effect="dark">{{ asset.format.toUpperCase() }}</el-tag>
+              </div>
             </div>
+            <el-empty v-if="!filteredAssets.length" description="暂无可用资产" :image-size="60" />
           </div>
         </div>
       </aside>
 
-      <main class="flex-1 relative bg-slate-950">
-        <div class="absolute top-4 left-4 z-10 pointer-events-none bg-slate-900/80 px-3 py-1.5 rounded border border-slate-800 text-[10px] text-slate-400 flex flex-col gap-1 backdrop-blur shadow-lg">
-          <div class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            <span>鼠标左键旋转视角</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            <span>鼠标右键平移视角</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            <span>滚轮缩放视图</span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-            <span>单击选中模型</span>
-          </div>
+      <main class="relative flex-1 bg-slate-950">
+        <div class="pointer-events-none absolute left-4 top-4 z-10 flex flex-col gap-1 rounded border border-slate-800 bg-slate-900/80 px-3 py-1.5 text-[10px] text-slate-400 shadow-lg backdrop-blur">
+          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span><span>左键旋转视角</span></div>
+          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span><span>右键平移视角</span></div>
+          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span><span>滚轮缩放视图</span></div>
+          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span><span>单击选中模型</span></div>
+          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span><span>选中后可拖拽、旋转、缩放</span></div>
         </div>
 
-        <div ref="canvasContainer" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+        <div
+          v-if="selectedNode"
+          class="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-slate-700 bg-slate-900/90 px-3 py-2 shadow-lg backdrop-blur"
+        >
+          <el-button-group>
+            <el-button size="small" :type="transformMode === 'translate' ? 'primary' : 'default'" @click="setTransformMode('translate')">移动</el-button>
+            <el-button size="small" :type="transformMode === 'rotate' ? 'primary' : 'default'" @click="setTransformMode('rotate')">旋转</el-button>
+            <el-button size="small" :type="transformMode === 'scale' ? 'primary' : 'default'" @click="setTransformMode('scale')">缩放</el-button>
+          </el-button-group>
+        </div>
+
+        <div ref="canvasContainer" class="h-full w-full cursor-grab active:cursor-grabbing"></div>
       </main>
 
-      <aside class="w-80 border-l border-slate-800 bg-slate-900/40 p-5 flex flex-col gap-5 overflow-y-auto">
+      <aside class="flex w-80 flex-col gap-5 overflow-y-auto border-l border-slate-800 bg-slate-900/40 p-5">
         <template v-if="selectedNode">
           <div>
-            <div class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1">基本属性</div>
-            <div class="text-[11px] text-slate-400">设备唯一标识: {{ selectedNode.id.substring(0, 8) }}...</div>
+            <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">基础属性</div>
+            <div class="text-[11px] text-slate-400">设备唯一标识：{{ selectedNode.id.substring(0, 8) }}...</div>
+            <div class="mt-1 text-[11px] text-slate-500">
+              来源：
+              {{ selectedNode.sourceType === 'asset' ? '组件库资产' : selectedNode.sourceType === 'imported' ? '兼容旧导入模型' : '基础组件' }}
+            </div>
           </div>
 
           <el-form label-position="top" size="small">
@@ -85,8 +115,8 @@
               <el-input v-model="selectedNode.name" placeholder="输入设备名称" class="dark-input" />
             </el-form-item>
 
-            <div class="border-t border-slate-800/80 pt-3 mt-3">
-              <div class="text-xs text-slate-400 mb-2">坐标位置 (Position)</div>
+            <div class="mt-3 border-t border-slate-800/80 pt-3">
+              <div class="mb-2 text-xs text-slate-400">坐标位置 (Position)</div>
               <div class="grid grid-cols-3 gap-2">
                 <el-form-item label="X"><el-input-number v-model="selectedNode.position.x" :precision="1" :step="0.5" class="w-full" controls-position="right" /></el-form-item>
                 <el-form-item label="Y"><el-input-number v-model="selectedNode.position.y" :precision="1" :step="0.5" class="w-full" controls-position="right" /></el-form-item>
@@ -94,17 +124,26 @@
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 mt-2">
-              <el-form-item label="旋转 (Rotate Y)">
-                <el-input-number v-model="selectedNode.rotation.y" :precision="2" :step="0.1" class="w-full" controls-position="right" />
-              </el-form-item>
-              <el-form-item label="缩放比例">
-                <el-input-number v-model="selectedNode.scale.x" :precision="1" :step="0.1" :min="0.1" class="w-full" controls-position="right" @change="syncScale" />
-              </el-form-item>
+            <div class="mt-3 border-t border-slate-800/80 pt-3">
+              <div class="mb-2 text-xs text-slate-400">旋转角度 (Rotation)</div>
+              <div class="grid grid-cols-3 gap-2">
+                <el-form-item label="X"><el-input-number v-model="selectedNode.rotation.x" :precision="2" :step="0.1" class="w-full" controls-position="right" /></el-form-item>
+                <el-form-item label="Y"><el-input-number v-model="selectedNode.rotation.y" :precision="2" :step="0.1" class="w-full" controls-position="right" /></el-form-item>
+                <el-form-item label="Z"><el-input-number v-model="selectedNode.rotation.z" :precision="2" :step="0.1" class="w-full" controls-position="right" /></el-form-item>
+              </div>
             </div>
 
-            <div class="border-t border-slate-800/80 pt-3 mt-3 space-y-3">
-              <div class="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-1">物理数据关联</div>
+            <div class="mt-3 border-t border-slate-800/80 pt-3">
+              <div class="mb-2 text-xs text-slate-400">缩放比例 (Scale)</div>
+              <div class="grid grid-cols-3 gap-2">
+                <el-form-item label="X"><el-input-number v-model="selectedNode.scale.x" :precision="2" :step="0.1" :min="0.1" class="w-full" controls-position="right" /></el-form-item>
+                <el-form-item label="Y"><el-input-number v-model="selectedNode.scale.y" :precision="2" :step="0.1" :min="0.1" class="w-full" controls-position="right" /></el-form-item>
+                <el-form-item label="Z"><el-input-number v-model="selectedNode.scale.z" :precision="2" :step="0.1" :min="0.1" class="w-full" controls-position="right" /></el-form-item>
+              </div>
+            </div>
+
+            <div class="mt-3 space-y-3 border-t border-slate-800/80 pt-3">
+              <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">物理数据关联</div>
               <el-form-item label="绑定数据集">
                 <el-select v-model="selectedNode.props.datasetId" placeholder="选择关联数据集" class="w-full" @change="handleDatasetChange">
                   <el-option v-for="opt in datasetOptions" :key="opt.id" :label="opt.name" :value="opt.id" />
@@ -126,7 +165,7 @@
               </template>
             </div>
 
-            <el-button class="w-full mt-6" type="danger" plain @click="deleteSelectedNode">删除此 3D 设备</el-button>
+            <el-button class="mt-6 w-full" type="danger" plain @click="deleteSelectedNode">删除该 3D 设备</el-button>
           </el-form>
         </template>
         <el-empty v-else description="请在场景中单击选择设备" class="my-auto text-slate-500" />
@@ -136,30 +175,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import request from '../../utils/request'
-import type { SceneProject, Dataset } from '../../types/platform'
+import type { Dataset, ModelAsset, SceneNodeData, SceneProject } from '../../types/platform'
 import { loadImportedModel } from './scene-model-loader'
+import { createProceduralMesh } from './scene-mesh-factory'
 
-interface SceneNode {
-  id: string
-  name: string
-  type: string
-  sourceType?: 'procedural' | 'imported'
-  sourceUrl?: string
-  position: { x: number; y: number; z: number }
-  rotation: { x: number; y: number; z: number }
-  scale: { x: number; y: number; z: number }
+type SceneNode = SceneNodeData & {
   props: {
     datasetId?: string
     alarmField?: string
     speedField?: string
   }
 }
+
+type ProceduralLibraryItem = {
+  type: string
+  name: string
+  desc: string
+}
+
+type TransformMode = 'translate' | 'rotate' | 'scale'
+
+const proceduralLibrary: ProceduralLibraryItem[] = [
+  { type: 'cnc', name: 'CNC 机床', desc: '适合绑定运行状态、告警和转速数据' },
+  { type: 'arm', name: '机械臂', desc: '适合绑定动作节拍、工位状态等数据' },
+  { type: 'pump', name: '离心泵', desc: '适合绑定转速、流量和设备告警数据' },
+]
 
 const route = useRoute()
 const router = useRouter()
@@ -172,157 +219,98 @@ const selectedId = ref<string | null>(null)
 const saving = ref(false)
 const datasetOptions = ref<Dataset[]>([])
 const datasetColumns = ref<string[]>([])
+const assetKeyword = ref('')
+const modelAssets = ref<ModelAsset[]>([])
+const transformMode = ref<TransformMode>('translate')
 
-const modelLibrary = [
-  { type: 'cnc', name: 'CNC机床', desc: '包含刀头与警示指示灯' },
-  { type: 'arm', name: '机械手臂', desc: '包含关节支撑柱结构' },
-  { type: 'pump', name: '离心泵机', desc: '包含驱动电机与离心涡轮' },
-]
+const filteredAssets = computed(() => {
+  if (!assetKeyword.value) return modelAssets.value
+  const lower = assetKeyword.value.toLowerCase()
+  return modelAssets.value.filter((item) =>
+    [item.name, item.category, item.description].some((value) => value.toLowerCase().includes(lower)),
+  )
+})
 
 const canvasContainer = ref<HTMLDivElement | null>(null)
 let scene: THREE.Scene
 let camera: THREE.PerspectiveCamera
 let renderer: THREE.WebGLRenderer
 let controls: OrbitControls
+let transformControls: TransformControls
+let animationFrameId: number
 const modelGroupMap = new Map<string, THREE.Group>()
-
-const selectedNode = computed(() => sceneNodes.value.find((n) => n.id === selectedId.value) || null)
-
-function syncScale(val: number | null) {
-  if (!selectedNode.value || val === null) return
-  selectedNode.value.scale.y = val
-  selectedNode.value.scale.z = val
-}
-
-function createProceduralMesh(type: string, id: string): THREE.Group {
-  const group = new THREE.Group()
-  group.name = id
-
-  if (type === 'cnc') {
-    const baseGeo = new THREE.BoxGeometry(3, 1.8, 2.2)
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2, metalness: 0.8 })
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat)
-    baseMesh.position.y = 0.9
-    group.add(baseMesh)
-
-    const glassGeo = new THREE.BoxGeometry(2.2, 1, 0.1)
-    const glassMat = new THREE.MeshStandardMaterial({ color: 0x06b6d4, transparent: true, opacity: 0.5, roughness: 0.1, metalness: 0.9 })
-    const glassMesh = new THREE.Mesh(glassGeo, glassMat)
-    glassMesh.position.set(0, 1.1, 1.1)
-    group.add(glassMesh)
-
-    const beaconGeo = new THREE.SphereGeometry(0.15, 16, 16)
-    const beaconMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 0.5 })
-    const beaconMesh = new THREE.Mesh(beaconGeo, beaconMat)
-    beaconMesh.name = 'beacon'
-    beaconMesh.position.set(1.2, 1.9, 0.9)
-    group.add(beaconMesh)
-  } else if (type === 'arm') {
-    const baseGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.3, 32)
-    const baseMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.5 })
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat)
-    baseMesh.position.y = 0.15
-    group.add(baseMesh)
-
-    const shaftGeo = new THREE.CylinderGeometry(0.2, 0.2, 1.8, 16)
-    const shaftMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.4 })
-    const shaftMesh = new THREE.Mesh(shaftGeo, shaftMat)
-    shaftMesh.position.set(0, 1.0, 0)
-    group.add(shaftMesh)
-
-    const jointGroup = new THREE.Group()
-    jointGroup.name = 'joint'
-    jointGroup.position.set(0, 1.8, 0)
-
-    const jointGeo = new THREE.BoxGeometry(0.3, 1.2, 0.3)
-    const jointMat = new THREE.MeshStandardMaterial({ color: 0x0891b2, metalness: 0.7 })
-    const jointMesh = new THREE.Mesh(jointGeo, jointMat)
-    jointMesh.position.set(0.3, 0.6, 0)
-    jointMesh.rotation.z = Math.PI / 4
-    jointGroup.add(jointMesh)
-
-    group.add(jointGroup)
-  } else {
-    const motorGeo = new THREE.CylinderGeometry(0.6, 0.6, 1.8, 32)
-    motorGeo.rotateZ(Math.PI / 2)
-    const motorMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, metalness: 0.9, roughness: 0.3 })
-    const motorMesh = new THREE.Mesh(motorGeo, motorMat)
-    motorMesh.position.y = 0.6
-    group.add(motorMesh)
-
-    const fanGroup = new THREE.Group()
-    fanGroup.name = 'rotor'
-    fanGroup.position.set(-1.05, 0.6, 0)
-
-    const fanGeo = new THREE.CylinderGeometry(0.7, 0.7, 0.3, 32)
-    fanGeo.rotateZ(Math.PI / 2)
-    const fanMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 })
-    const fanMesh = new THREE.Mesh(fanGeo, fanMat)
-    fanGroup.add(fanMesh)
-
-    group.add(fanGroup)
-  }
-
-  return group
-}
-
-function fileToDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result || ''))
-    reader.onerror = () => reject(new Error('Failed to read file'))
-    reader.readAsDataURL(file)
-  })
-}
-
-async function handleImportModel(uploadFile: { raw?: File }) {
-  const file = uploadFile.raw
-  if (!file) return
-
-  const ext = file.name.split('.').pop()?.toLowerCase()
-  if (!ext || !['glb', 'gltf'].includes(ext)) {
-    ElMessage.error('仅支持 .glb / .gltf 模型')
-    return
-  }
-
-  try {
-    const dataUrl = await fileToDataUrl(file)
-    const node: SceneNode = {
-      id: `node-${crypto.randomUUID()}`,
-      name: file.name.replace(/\.(glb|gltf)$/i, ''),
-      type: 'imported-model',
-      sourceType: 'imported',
-      sourceUrl: dataUrl,
-      position: { x: (Math.random() - 0.5) * 8, y: 0, z: (Math.random() - 0.5) * 8 },
-      rotation: { x: 0, y: 0, z: 0 },
-      scale: { x: 1, y: 1, z: 1 },
-      props: {},
-    }
-
-    sceneNodes.value.push(node)
-    selectedId.value = node.id
-
-    const mesh = await loadImportedModel(dataUrl)
-    mesh.name = node.id
-    mesh.position.set(node.position.x, node.position.y, node.position.z)
-    mesh.rotation.set(node.rotation.x, node.rotation.y, node.rotation.z)
-    mesh.scale.set(node.scale.x, node.scale.y, node.scale.z)
-    scene.add(mesh)
-    modelGroupMap.set(node.id, mesh)
-    ElMessage.success('模型导入成功')
-  } catch (err) {
-    console.error(err)
-    ElMessage.error('模型导入失败')
-  }
-}
 
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 let mouseDownTime = 0
 let mouseDownPos = { x: 0, y: 0 }
 
+const selectedNode = computed(() => sceneNodes.value.find((n) => n.id === selectedId.value) || null)
+
+function setTransformMode(mode: TransformMode) {
+  transformMode.value = mode
+  transformControls?.setMode(mode)
+}
+
+async function createMeshForNode(node: SceneNode) {
+  if ((node.sourceType === 'asset' || node.sourceType === 'imported') && node.sourceUrl) {
+    return loadImportedModel(node.sourceUrl)
+  }
+  return createProceduralMesh(node.type, node.id)
+}
+
+function applyNodeTransform(mesh: THREE.Object3D, node: SceneNode) {
+  mesh.name = node.id
+  mesh.position.set(node.position.x, node.position.y, node.position.z)
+  mesh.rotation.set(node.rotation.x, node.rotation.y, node.rotation.z)
+  mesh.scale.set(node.scale.x, node.scale.y, node.scale.z)
+}
+
+function syncNodeFromMesh(node: SceneNode, mesh: THREE.Object3D) {
+  node.position.x = Number(mesh.position.x.toFixed(2))
+  node.position.y = Number(mesh.position.y.toFixed(2))
+  node.position.z = Number(mesh.position.z.toFixed(2))
+  node.rotation.x = Number(mesh.rotation.x.toFixed(3))
+  node.rotation.y = Number(mesh.rotation.y.toFixed(3))
+  node.rotation.z = Number(mesh.rotation.z.toFixed(3))
+  node.scale.x = Number(mesh.scale.x.toFixed(3))
+  node.scale.y = Number(mesh.scale.y.toFixed(3))
+  node.scale.z = Number(mesh.scale.z.toFixed(3))
+}
+
+async function mountNode(node: SceneNode) {
+  const mesh = await createMeshForNode(node)
+  applyNodeTransform(mesh, node)
+  scene.add(mesh)
+  modelGroupMap.set(node.id, mesh)
+}
+
+function removeNodeMesh(id: string) {
+  const mesh = modelGroupMap.get(id)
+  if (!mesh) return
+  if (transformControls.object === mesh) {
+    transformControls.detach()
+  }
+  scene.remove(mesh)
+  modelGroupMap.delete(id)
+}
+
+function attachTransformControls(id: string | null) {
+  if (!transformControls) return
+  if (!id) {
+    transformControls.detach()
+    return
+  }
+  const mesh = modelGroupMap.get(id)
+  if (!mesh) {
+    transformControls.detach()
+    return
+  }
+  transformControls.attach(mesh)
+  transformControls.setMode(transformMode.value)
+}
+
 function setupInteraction() {
-  if (!renderer) return
   const dom = renderer.domElement
 
   dom.addEventListener('mousedown', (e) => {
@@ -331,65 +319,80 @@ function setupInteraction() {
   })
 
   dom.addEventListener('mouseup', (e) => {
+    if (transformControls?.dragging) return
+
     const elapsed = Date.now() - mouseDownTime
     const distance = Math.hypot(e.clientX - mouseDownPos.x, e.clientY - mouseDownPos.y)
+    if (elapsed >= 200 || distance >= 3) return
 
-    if (elapsed < 200 && distance < 3) {
-      const rect = dom.getBoundingClientRect()
-      mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
-      mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+    const rect = dom.getBoundingClientRect()
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+    raycaster.setFromCamera(mouse, camera)
+    const intersects = raycaster.intersectObjects(scene.children, true)
 
-      raycaster.setFromCamera(mouse, camera)
-      const intersects = raycaster.intersectObjects(scene.children, true)
-
-      if (intersects.length > 0) {
-        let rootGroup: THREE.Object3D | null = intersects[0].object
-        while (rootGroup && rootGroup.parent && rootGroup.parent !== scene) {
-          rootGroup = rootGroup.parent
-        }
-
-        if (rootGroup && modelGroupMap.has(rootGroup.name)) {
-          selectedId.value = rootGroup.name
-          return
-        }
+    if (intersects.length > 0) {
+      let rootGroup: THREE.Object3D | null = intersects[0].object
+      while (rootGroup && rootGroup.parent && rootGroup.parent !== scene) {
+        rootGroup = rootGroup.parent
       }
-      selectedId.value = null
+      if (rootGroup && modelGroupMap.has(rootGroup.name)) {
+        selectedId.value = rootGroup.name
+        return
+      }
     }
+
+    selectedId.value = null
   })
 }
 
-function addModelToScene(type: string) {
-  const node: SceneNode = {
+function createBaseNode(partial: Partial<SceneNode>): SceneNode {
+  return {
     id: `node-${crypto.randomUUID()}`,
-    name: `${type.toUpperCase()}设备`,
-    type,
-    sourceType: 'procedural',
-    position: { x: (Math.random() - 0.5) * 8, y: 0, z: (Math.random() - 0.5) * 8 },
-    rotation: { x: 0, y: 0, z: 0 },
-    scale: { x: 1, y: 1, z: 1 },
-    props: {},
+    name: partial.name ?? '未命名设备',
+    type: partial.type ?? 'custom',
+    sourceType: partial.sourceType,
+    assetId: partial.assetId,
+    sourceUrl: partial.sourceUrl,
+    position: partial.position ?? { x: (Math.random() - 0.5) * 8, y: 0, z: (Math.random() - 0.5) * 8 },
+    rotation: partial.rotation ?? { x: 0, y: 0, z: 0 },
+    scale: partial.scale ?? { x: 1, y: 1, z: 1 },
+    props: partial.props ?? {},
   }
+}
 
+async function addProceduralModel(item: ProceduralLibraryItem) {
+  const node = createBaseNode({
+    name: item.name,
+    type: item.type,
+    sourceType: 'procedural',
+  })
   sceneNodes.value.push(node)
   selectedId.value = node.id
+  await mountNode(node)
+  attachTransformControls(node.id)
+  ElMessage.success(`已添加基础组件：${item.name}`)
+}
 
-  const mesh = createProceduralMesh(type, node.id)
-  mesh.position.set(node.position.x, node.position.y, node.position.z)
-  scene.add(mesh)
-  modelGroupMap.set(node.id, mesh)
-
-  ElMessage.success(`添加了 ${type} 模型`)
+async function addAssetToScene(asset: ModelAsset) {
+  const node = createBaseNode({
+    name: asset.name,
+    type: 'asset-model',
+    sourceType: 'asset',
+    assetId: asset.id,
+    sourceUrl: asset.fileUrl,
+  })
+  sceneNodes.value.push(node)
+  selectedId.value = node.id
+  await mountNode(node)
+  attachTransformControls(node.id)
+  ElMessage.success(`已添加组件库模型：${asset.name}`)
 }
 
 function deleteSelectedNode() {
   if (!selectedId.value) return
   const id = selectedId.value
-  const mesh = modelGroupMap.get(id)
-  if (mesh) {
-    scene.remove(mesh)
-    modelGroupMap.delete(id)
-  }
-
+  removeNodeMesh(id)
   sceneNodes.value = sceneNodes.value.filter((n) => n.id !== id)
   selectedId.value = null
   ElMessage.success('已删除该设备')
@@ -401,9 +404,7 @@ watch(
     newNodes.forEach((node) => {
       const mesh = modelGroupMap.get(node.id)
       if (mesh) {
-        mesh.position.set(node.position.x, node.position.y, node.position.z)
-        mesh.rotation.set(node.rotation.x, node.rotation.y, node.rotation.z)
-        mesh.scale.set(node.scale.x, node.scale.y, node.scale.z)
+        applyNodeTransform(mesh, node)
       }
     })
   },
@@ -414,7 +415,7 @@ watch(selectedId, (newId, oldId) => {
   if (oldId) {
     const oldMesh = modelGroupMap.get(oldId)
     oldMesh?.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
+      if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
         child.material.emissiveIntensity = 0
       }
     })
@@ -423,18 +424,33 @@ watch(selectedId, (newId, oldId) => {
   if (newId) {
     const newMesh = modelGroupMap.get(newId)
     newMesh?.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
+      if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
         child.material.emissive = new THREE.Color(0x06b6d4)
         child.material.emissiveIntensity = 0.2
       }
     })
   }
+
+  attachTransformControls(newId)
+})
+
+watch(transformMode, (mode) => {
+  transformControls?.setMode(mode)
 })
 
 async function fetchDatasetOptions() {
   try {
     const res: any = await request.get('/api/datasets')
     datasetOptions.value = res.items || []
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+async function fetchModelAssets() {
+  try {
+    const res: any = await request.get('/api/model-assets')
+    modelAssets.value = res.items || []
   } catch (err) {
     console.error(err)
   }
@@ -460,38 +476,47 @@ watch(
   () => selectedNode.value?.props.datasetId,
   async (newDsId) => {
     datasetColumns.value = []
-    if (newDsId) {
-      try {
-        const res: any = await request.get(`/api/datasets/${newDsId}/preview`)
-        datasetColumns.value = res.columns || []
-      } catch (err) {
-        console.error(err)
-      }
+    if (!newDsId) return
+    try {
+      const res: any = await request.get(`/api/datasets/${newDsId}/preview`)
+      datasetColumns.value = res.columns || []
+    } catch (err) {
+      console.error(err)
     }
   },
 )
+
+function normalizeSceneNodes(rawNodes: SceneProject['sceneNodes']): SceneNode[] {
+  const nodes = typeof rawNodes === 'string' ? JSON.parse(rawNodes) : rawNodes || []
+  return nodes.map((node: any) => ({
+    id: String(node.id),
+    name: String(node.name ?? '未命名设备'),
+    type: String(node.type ?? 'custom'),
+    sourceType: node.sourceType,
+    assetId: node.assetId,
+    sourceUrl: node.sourceUrl,
+    position: node.position ?? { x: 0, y: 0, z: 0 },
+    rotation: node.rotation ?? { x: 0, y: 0, z: 0 },
+    scale: node.scale ?? { x: 1, y: 1, z: 1 },
+    props: node.props ?? {},
+  }))
+}
 
 async function loadScene() {
   try {
     const res: any = await request.get(`/api/sceneProjects/${projectId}`)
     projectDetail.value = res.item
     sceneTitle.value = res.item.name
-    sceneNodes.value = typeof res.item.sceneNodes === 'string' ? JSON.parse(res.item.sceneNodes) : (res.item.sceneNodes || [])
+    sceneNodes.value = normalizeSceneNodes(res.item.sceneNodes)
 
+    transformControls?.detach()
     modelGroupMap.forEach((mesh) => scene.remove(mesh))
     modelGroupMap.clear()
 
     for (const node of sceneNodes.value) {
-      const mesh = node.sourceType === 'imported' && node.sourceUrl
-        ? await loadImportedModel(node.sourceUrl)
-        : createProceduralMesh(node.type, node.id)
-      mesh.name = node.id
-      mesh.position.set(node.position.x, node.position.y, node.position.z)
-      mesh.rotation.set(node.rotation.x, node.rotation.y, node.rotation.z)
-      mesh.scale.set(node.scale.x, node.scale.y, node.scale.z)
-      scene.add(mesh)
-      modelGroupMap.set(node.id, mesh)
+      await mountNode(node)
     }
+    attachTransformControls(selectedId.value)
   } catch (err) {
     console.error(err)
   }
@@ -516,6 +541,17 @@ async function handleSave() {
   }
 }
 
+async function handleExport() {
+  try {
+    const res: any = await request.get(`/api/sceneProjects/${projectId}/export`)
+    if (res.fileUrl) {
+      window.open(new URL(res.fileUrl, String(request.defaults.baseURL)).toString(), '_blank')
+    }
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 function handlePreview() {
   router.push(`/scenes/${projectId}/preview`)
 }
@@ -524,11 +560,12 @@ function backToList() {
   router.push('/scenes')
 }
 
-let animationFrameId: number
+function openAssetLibrary() {
+  router.push('/scene-assets')
+}
 
 function initThree() {
   if (!canvasContainer.value) return
-
   const width = canvasContainer.value.clientWidth
   const height = canvasContainer.value.clientHeight
 
@@ -548,9 +585,21 @@ function initThree() {
   controls.dampingFactor = 0.05
   controls.maxPolarAngle = Math.PI / 2 - 0.05
 
-  const gridHelper = new THREE.GridHelper(50, 50, 0x0891b2, 0x1e293b)
-  scene.add(gridHelper)
+  transformControls = new TransformControls(camera, renderer.domElement)
+  transformControls.setMode(transformMode.value)
+  transformControls.addEventListener('dragging-changed', (event) => {
+    controls.enabled = !event.value
+  })
+  transformControls.addEventListener('objectChange', () => {
+    if (!selectedId.value) return
+    const mesh = modelGroupMap.get(selectedId.value)
+    const node = selectedNode.value
+    if (!mesh || !node) return
+    syncNodeFromMesh(node, mesh)
+  })
+  scene.add(transformControls.getHelper())
 
+  scene.add(new THREE.GridHelper(50, 50, 0x0891b2, 0x1e293b))
   scene.add(new THREE.AmbientLight(0xffffff, 0.35))
 
   const dirLight = new THREE.DirectionalLight(0xffffff, 0.75)
@@ -582,7 +631,7 @@ function handleResize() {
 
 onMounted(async () => {
   initThree()
-  await fetchDatasetOptions()
+  await Promise.all([fetchDatasetOptions(), fetchModelAssets()])
   await loadScene()
   window.addEventListener('resize', handleResize)
 })
@@ -590,6 +639,7 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
   cancelAnimationFrame(animationFrameId)
+  transformControls?.dispose()
   renderer?.dispose()
 })
 </script>

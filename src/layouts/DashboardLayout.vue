@@ -72,6 +72,7 @@ import {
   Collection,
   Connection,
   DataBoard,
+  Files,
   Monitor,
   Setting,
   User,
@@ -105,7 +106,8 @@ const navigationGroups: Array<{ title: string; items: NavItem[] }> = [
     title: 'Visualization',
     items: [
       { label: '大屏可视化', path: '/screens', icon: DataBoard, permission: 'screen:read' },
-      { label: '三维可视化', path: '/scenes', icon: Box, permission: 'scene:read' },
+      { label: '3D 可视化', path: '/scenes', icon: Box, permission: 'scene:read' },
+      { label: '3D 组件库', path: '/scene-assets', icon: Files, permission: 'scene:read' },
     ],
   },
   {
@@ -139,14 +141,14 @@ const filteredNavigationGroups = computed(() => {
 const sectionLabelMap: Record<string, string> = {
   overview: '项目管理',
   'screen-visualization': '大屏可视化',
-  'scene-visualization': '三维可视化',
+  'scene-visualization': '3D 可视化',
   'data-management': '数据管理',
   'system-management': '系统管理',
 }
 
 const isFullscreen = computed(() => Boolean(route.meta.fullscreen))
 const currentTitle = computed(() => String(route.meta.title ?? 'IoT Visual Platform'))
-const currentSection = computed(() => sectionLabelMap[String(route.meta.section ?? 'overview')])
+const currentSection = computed(() => sectionLabelMap[String(route.meta.section ?? 'overview')] ?? '项目管理')
 
 function handleCommand(command: string) {
   if (command === 'logout') {

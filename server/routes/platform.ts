@@ -1,9 +1,14 @@
 import { hashPassword, issueToken, verifyPassword } from '../lib/auth.ts'
 import type { RouteDefinition } from '../lib/http.ts'
 import { badRequest, sendJson, sendNoContent, unauthorized } from '../lib/http.ts'
+import { mkdirSync, unlinkSync, writeFileSync } from 'node:fs'
+import { basename, extname, join } from 'node:path'
+import multer from 'multer'
+import { modelUploadsDir, sceneExportDir } from '../lib/config.ts'
 import { createMysqlConnectionForDataSource } from '../lib/mysql.ts'
 import {
   countUsersByRole,
+  createModelAsset,
   createDataSource,
   createDataset,
   createProject,
@@ -12,6 +17,7 @@ import {
   createSceneProject,
   createScreenProject,
   createUser,
+  deleteModelAsset,
   deleteDataSource,
   deleteDataset,
   deleteProject,
@@ -26,6 +32,7 @@ import {
   getUserById,
   listDataSources,
   listDatasets,
+  listModelAssets,
   listProjectMemberships,
   listProjectMembershipsByProject,
   listProjectMembershipsByUser,
@@ -51,6 +58,7 @@ import type {
   DataSource,
   Dataset,
   ManagedProject,
+  ModelAsset,
   PlatformState,
   PlatformUser,
   ProjectMembership,
@@ -152,6 +160,46 @@ const applyKeywordFilter = <T>(items: T[], keyword: string, fields: Array<(item:
 
   return items.filter((item) => fields.some((field) => includesText(field(item), keyword)))
 }
+
+const ensureUploadDirs = () => {
+  mkdirSync(modelUploadsDir, { recursive: true })
+  mkdirSync(sceneExportDir, { recursive: true })
+}
+
+ensureUploadDirs()
+
+const modelUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      cb(null, modelUploadsDir)
+    },
+    filename: (_req, file, cb) => {
+      const ext = extname(file.originalname).toLowerCase()
+      cb(null, `${createId('ast')}${ext}`)
+    },
+  }),
+})
+
+const normalizeTextArray = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return []
+  }
+  return value.map((item) => String(item).trim()).filter(Boolean)
+}
+
+const buildSceneExportPayload = (project: SceneProject) => ({
+  version: '1.0.0',
+  exportedAt: nowText(),
+  project: {
+    name: project.name,
+    group: project.group,
+    owner: project.owner,
+    engine: project.engine,
+    status: project.status,
+    modelCount: project.modelCount,
+  },
+  sceneNodes: project.sceneNodes ?? [],
+})
 
 const routeCollection = <T>(collectionKey: keyof PlatformState, fields: Array<(item: T) => string>) => {
   const base = `/api/${String(collectionKey)}`
@@ -1035,6 +1083,171 @@ const projectMembershipRoutes: RouteDefinition[] = [
   },
 ]
 
+const modelAssetRoutes: RouteDefinition[] = [
+  {
+    method: 'GET',
+    pattern: /^\/api\/model-assets$/,
+    permission: 'scene:read',
+    handler: async ({ res, url }) => {
+      const keyword = pickQuery(url, 'keyword')
+      const items = (await listModelAssets()) ?? []
+      const filtered = applyKeywordFilter(items, keyword, [
+        (item) => item.name,
+        (item) => item.category,
+        (item) => item.description,
+        (item) => item.tags.join(','),
+      ])
+      sendJson(res, 200, { items: filtered })
+    },
+  },
+  {
+    method: 'POST',
+    pattern: /^\/api\/model-assets$/,
+    permission: 'scene:write',
+    handler: async ({ req, res }) => {
+      const uploadResult = await new Promise<{ file?: Express.Multer.File; fields: Record<string, unknown> }>((resolve, reject) => {
+        modelUpload.single('file')(req, res, (error) => {
+          if (error) {
+            reject(error)
+            return
+          }
+          resolve({
+            file: req.file ?? undefined,
+            fields: req.body as Record<string, unknown>,
+          })
+        })
+      })
+
+      const payload = uploadResult.fields
+      const uploadedFile = uploadResult.file
+      const rawFileName = String(uploadedFile?.originalname ?? '').trim()
+      const rawName = String(payload.name ?? '').trim()
+      const ext = extname(rawFileName).toLowerCase()
+      if (!rawFileName || !['.glb', '.gltf'].includes(ext)) {
+        return badRequest(res, 'Only .glb and .gltf files are supported')
+      }
+      if (!uploadedFile) {
+        return badRequest(res, 'Model file is required')
+      }
+
+      const fileNameOnDisk = basename(uploadedFile.path)
+      const id = fileNameOnDisk.replace(ext, '')
+
+      const item: ModelAsset = {
+        id,
+        name: rawName || basename(rawFileName, ext),
+        category: String(payload.category ?? 'Uncategorized').trim() || 'Uncategorized',
+        description: String(payload.description ?? '').trim(),
+        tags:
+          typeof payload.tags === 'string'
+            ? String(payload.tags).split(',').map((item) => item.trim()).filter(Boolean)
+            : normalizeTextArray(payload.tags),
+        format: ext === '.glb' ? 'glb' : 'gltf',
+        fileName: rawFileName,
+        filePath: `/uploads/models/${fileNameOnDisk}`,
+        fileUrl: `/uploads/models/${fileNameOnDisk}`,
+        fileSize: uploadedFile.size,
+        updatedAt: nowText(),
+      }
+
+      const created = await createModelAsset(item)
+      sendJson(res, 201, { item: created ?? item })
+    },
+  },
+  {
+    method: 'DELETE',
+    pattern: /^\/api\/model-assets\/(?<id>[^/]+)$/,
+    permission: 'scene:write',
+    handler: async ({ res, params }) => {
+      const assets = (await listModelAssets()) ?? []
+      const current = assets.find((item) => item.id === params.id)
+      if (!current) {
+        return sendJson(res, 404, { message: 'Model asset not found' })
+      }
+
+      const projects = (await listSceneProjects()) ?? []
+      const inUse = projects.some((project) =>
+        (project.sceneNodes ?? []).some((node: any) => node?.assetId === current.id),
+      )
+      if (inUse) {
+        return sendJson(res, 409, { message: 'Model asset is used by scenes and cannot be deleted' })
+      }
+
+      const ok = await deleteModelAsset(params.id)
+      if (!ok) {
+        return sendJson(res, 404, { message: 'Model asset not found' })
+      }
+
+      if (current.fileUrl.startsWith('/uploads/models/')) {
+        const fileDiskPath = join(modelUploadsDir, current.fileUrl.replace('/uploads/models/', ''))
+        try {
+          unlinkSync(fileDiskPath)
+        } catch {
+          // Ignore missing files so metadata deletion still succeeds.
+        }
+      }
+
+      sendNoContent(res)
+    },
+  },
+]
+
+const sceneExportRoute: RouteDefinition = {
+  method: 'GET',
+  pattern: /^\/api\/sceneProjects\/(?<id>[^/]+)\/export$/,
+  permission: 'scene:read',
+  handler: async ({ res, params }) => {
+    const items = (await listSceneProjects()) ?? []
+    const item = items.find((entry) => entry.id === params.id)
+    if (!item) {
+      return sendJson(res, 404, { message: 'Project not found' })
+    }
+
+    ensureUploadDirs()
+    const payload = buildSceneExportPayload(item)
+    const fileName = `${item.name.replace(/[^\w\u4e00-\u9fa5-]+/g, '_') || item.id}-${Date.now()}.json`
+    const diskPath = join(sceneExportDir, fileName)
+    writeFileSync(diskPath, JSON.stringify(payload, null, 2), 'utf8')
+
+    sendJson(res, 200, {
+      fileName,
+      fileUrl: `/uploads/scene-exports/${fileName}`,
+      payload,
+    })
+  },
+}
+
+const createScenePublishedFileRoute = (): RouteDefinition => ({
+  method: 'POST',
+  pattern: /^\/api\/sceneProjects\/(?<id>[^/]+)\/publish-file$/,
+  permission: 'scene:write',
+  handler: async ({ res, params }) => {
+    const items = (await listSceneProjects()) ?? []
+    const item = items.find((entry) => entry.id === params.id)
+    if (!item) {
+      return sendJson(res, 404, { message: 'Project not found' })
+    }
+
+    ensureUploadDirs()
+    const payload = buildSceneExportPayload(item)
+    const fileName = `${item.id}-published.json`
+    const diskPath = join(sceneExportDir, fileName)
+    writeFileSync(diskPath, JSON.stringify(payload, null, 2), 'utf8')
+
+    const publishedFileUrl = `/uploads/scene-exports/${fileName}`
+    const updated = await updateSceneProject(item.id, {
+      status: 'published',
+      publishedFileUrl,
+      updatedAt: nowText(),
+    })
+
+    sendJson(res, 200, {
+      item: updated ?? { ...item, status: 'published', publishedFileUrl },
+      fileUrl: publishedFileUrl,
+    })
+  },
+})
+
 const publishRoute = <T extends ScreenProject | SceneProject | ManagedProject>(
   collectionKey: 'screenProjects' | 'sceneProjects' | 'projects',
 ) => {
@@ -1193,17 +1406,38 @@ export const routes: RouteDefinition[] = [
     update: (id, patch) => updateSceneProject(id, patch),
     remove: (id) => deleteSceneProject(id),
     fields: [(item) => item.name, (item) => item.group, (item) => item.owner, (item) => item.engine],
-    buildCreateItem: (body) => ({
-      id: createId('scn'),
-      name: String(body.name ?? ''),
-      group: String(body.group ?? ''),
-      owner: String(body.owner ?? ''),
-      modelCount: Number(body.modelCount ?? 0),
-      status: (body.status as SceneProject['status']) ?? 'draft',
-      engine: String(body.engine ?? 'Three.js'),
-      sceneNodes: Array.isArray(body.sceneNodes) ? body.sceneNodes : [],
-      updatedAt: nowText(),
-    }),
+    buildCreateItem: async (body) => {
+      let importedSceneNodes: any[] = []
+      if ('importedSceneJson' in body && body.importedSceneJson) {
+        const rawImported = body.importedSceneJson
+        const parsed = typeof rawImported === 'string' ? JSON.parse(rawImported) : rawImported
+        if (!parsed || typeof parsed !== 'object') {
+          throw new RouteValidationError('importedSceneJson is invalid')
+        }
+        const rawNodes = (parsed as Record<string, unknown>).sceneNodes
+        if (rawNodes != null && !Array.isArray(rawNodes)) {
+          throw new RouteValidationError('sceneNodes in importedSceneJson must be an array')
+        }
+        importedSceneNodes = Array.isArray(rawNodes) ? rawNodes : []
+      }
+
+      const sceneNodes = Array.isArray(body.sceneNodes)
+        ? body.sceneNodes
+        : importedSceneNodes
+
+      return {
+        id: createId('scn'),
+        name: String(body.name ?? ''),
+        group: String(body.group ?? ''),
+        owner: String(body.owner ?? ''),
+        modelCount: Number(body.modelCount ?? sceneNodes.length ?? 0),
+        status: (body.status as SceneProject['status']) ?? 'draft',
+        engine: String(body.engine ?? 'Three.js'),
+        sceneNodes,
+        publishedFileUrl: String(body.publishedFileUrl ?? ''),
+        updatedAt: nowText(),
+      }
+    },
     normalizePatch: (id, body) => {
       const patch: Partial<SceneProject> = {}
       if ('name' in body) patch.name = String(body.name ?? '')
@@ -1213,10 +1447,14 @@ export const routes: RouteDefinition[] = [
       if ('status' in body) patch.status = body.status as SceneProject['status']
       if ('engine' in body) patch.engine = String(body.engine ?? 'Three.js')
       if ('sceneNodes' in body) patch.sceneNodes = Array.isArray(body.sceneNodes) ? body.sceneNodes : []
+      if ('publishedFileUrl' in body) patch.publishedFileUrl = String(body.publishedFileUrl ?? '')
       patch.updatedAt = nowText()
       return patch
     }
   }),
+  ...modelAssetRoutes,
+  sceneExportRoute,
+  createScenePublishedFileRoute(),
 
   // Datasource
   ...resourceRouteCollection<DataSource>({
