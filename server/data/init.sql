@@ -140,6 +140,18 @@ INSERT INTO screen_projects (id, name, project_group, scene, owner, status, publ
   '["能源","厂务"]',
   '[]',
   '2026-07-11 10:00'
+),
+(
+  'scr-001',
+  '新能源超级工厂集成控制大屏',
+  '能源中心',
+  '园区驾驶舱',
+  '李工',
+  'published',
+  'v2.0.0',
+  '["超级工厂","实时监控","OEE"]',
+  '[{"id":"node-title","x":200,"y":15,"w":1520,"h":70,"component":"text","props":{"text":"GigaFactory 新新能源汽车智造超级工厂数智化集成监控中心"}},{"id":"node-oee","x":40,"y":100,"w":420,"h":220,"component":"metricCard","props":{"text":"整厂综合运营效能 OEE","datasetId":"set-oee-metrics","xField":"desc","yField":"oee_percent","refreshInterval":5000}},{"id":"node-progress","x":40,"y":350,"w":420,"h":220,"component":"progressBar","props":{"text":"今日产量计划达成率","datasetId":"set-production-progress","xField":"task_name","yField":"progress_percent","refreshInterval":5000}},{"id":"node-ranking","x":40,"y":600,"w":420,"h":440,"component":"rankingList","props":{"text":"车间效率 OEE 排行","datasetId":"set-workshop-oee","xField":"workshop","yField":"oee","refreshInterval":5000}},{"id":"node-alerts","x":480,"y":100,"w":960,"h":470,"component":"alertList","props":{"text":"智能工厂设备健康告警流","datasetId":"set-active-alarms","xField":"message","yField":"level","refreshInterval":5000}},{"id":"node-vibration","x":480,"y":600,"w":960,"h":440,"component":"chart","props":{"text":"关键主轴与泵机物理振动遥测 (mm/s)","datasetId":"set-equipment-vibration","xField":"device","yField":"vibration","refreshInterval":5000}},{"id":"node-energy","x":1460,"y":100,"w":420,"h":470,"component":"pieChart","props":{"text":"各工艺车间用电负荷占比 (kWh)","datasetId":"set-energy-distribution","xField":"workshop","yField":"kwh","refreshInterval":5000}},{"id":"node-throughput","x":1460,"y":600,"w":420,"h":440,"component":"lineChart","props":{"text":"逐时生产线整车下线趋势 (辆/小时)","datasetId":"set-hourly-throughput","xField":"hour","yField":"count","refreshInterval":5000}}]',
+  '2026-07-11 11:00'
 );
 
 INSERT INTO scene_projects (id, name, project_group, owner, model_count, status, engine, scene_nodes, updated_at) VALUES
@@ -168,7 +180,14 @@ INSERT INTO datasets (id, name, data_source_id, source_name, table_name, refresh
 ('set-ev-006', '线体 OEE 排行', 'ds-ev-mysql', '生产 MySQL 主库', 'line_oee_ranking', '5 min', 6, '2026-07-11 10:00'),
 ('set-ev-007', 'Andon 告警事件', 'ds-ev-mysql', '生产 MySQL 主库', 'andon_alarm_events', 'real-time', 8, '2026-07-11 10:00'),
 ('set-ev-008', '关键工位节拍', 'ds-ev-mysql', '生产 MySQL 主库', 'station_cycle_monitor', 'real-time', 7, '2026-07-11 10:00'),
-('set-ev-009', '设备资产台账', 'ds-ev-mysql', '生产 MySQL 主库', 'device_assets', 'manual', 7, '2026-07-11 10:00');
+('set-ev-009', '设备资产台账', 'ds-ev-mysql', '生产 MySQL 主库', 'device_assets', 'manual', 7, '2026-07-11 10:00'),
+('set-oee-metrics', '综合指标数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/metrics', '5 min', 5, '2026-07-11 11:00'),
+('set-production-progress', '产量进度数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/production-progress', '5 min', 5, '2026-07-11 11:00'),
+('set-workshop-oee', '车间效率数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/workshop-oee', '5 min', 3, '2026-07-11 11:00'),
+('set-energy-distribution', '能耗分配数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/energy-distribution', '5 min', 3, '2026-07-11 11:00'),
+('set-hourly-throughput', '每小时产量数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/production-trend', '5 min', 3, '2026-07-11 11:00'),
+('set-equipment-vibration', '设备遥测数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/equipment-vibration', '5 min', 3, '2026-07-11 11:00'),
+('set-active-alarms', '实时告警数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/alarms', '5 min', 3, '2026-07-11 11:00');
 
 INSERT INTO project_memberships (id, user_id, project_id, access_level) VALUES
 ('pm-ev-001', 'usr-002', 'prj-ev-001', 'owner'),

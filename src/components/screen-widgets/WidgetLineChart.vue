@@ -1,7 +1,6 @@
 <template>
   <!-- Real ECharts canvas container -->
-  <div v-if="hasData"
-    class="relative w-full h-full flex flex-col p-3 rounded bg-slate-900 border border-slate-800/80 text-slate-200 overflow-hidden">
+  <div class="relative w-full h-full flex flex-col p-3 rounded bg-slate-900 border border-slate-800/80 text-slate-200 overflow-hidden">
     <div
       class="text-xs font-semibold text-cyan-400 mb-2 border-b border-slate-800/60 pb-1.5 flex justify-between items-center select-none">
       <span>{{ text || '趋势分析图表' }}</span>
@@ -9,15 +8,12 @@
       <span v-if="loading" class="text-[9px] text-slate-500 animate-pulse">
         更新中...
       </span>
+      <span v-if="!hasData" class="text-[9px] text-slate-500">
+        (演示数据)
+      </span>
     </div>
 
     <div ref="chartRef" class="flex-1 w-full min-h-0"></div>
-  </div>
-
-
-  <!-- Empty state -->
-  <div v-else class="widget widget-chart">
-    <span>{{ text || '折线图占位' }}</span>
   </div>
 </template>
 
@@ -70,16 +66,14 @@ const hasData = computed(() => {
 
 function initChart() {
   if (!chartRef.value) return
-  if (hasData.value) {
-    chartInstance = echarts.init(
-      chartRef.value,
-      'dark',
-      {
-        renderer: 'canvas'
-      }
-    )
-    updateChartOptions()
-  }
+  chartInstance = echarts.init(
+    chartRef.value,
+    'dark',
+    {
+      renderer: 'canvas'
+    }
+  )
+  updateChartOptions()
   resizeObserver = new ResizeObserver(() => {
     chartInstance?.resize()
   })
@@ -89,13 +83,6 @@ function initChart() {
 
 
 function updateChartOptions() {
-  if (!hasData.value) {
-    if (chartInstance) {
-      chartInstance.dispose()
-      chartInstance = null
-    }
-    return
-  }
   if (!chartInstance && chartRef.value) {
     chartInstance = echarts.init(
       chartRef.value,
@@ -106,11 +93,22 @@ function updateChartOptions() {
     )
   }
   if (!chartInstance) return
-  const xData = props.rows!.map(
-    row => String(row[props.xField!] ?? '')
+
+  const xFieldToUse = hasData.value ? props.xField! : 'time'
+  const yFieldToUse = hasData.value ? props.yField! : 'val'
+  const rowsToUse = hasData.value ? props.rows! : [
+    { time: '10:00', val: 42 },
+    { time: '11:00', val: 65 },
+    { time: '12:00', val: 35 },
+    { time: '13:00', val: 78 },
+    { time: '14:00', val: 54 }
+  ]
+
+  const xData = rowsToUse.map(
+    row => String(row[xFieldToUse] ?? '')
   )
-  const yData = props.rows!.map(
-    row => Number(row[props.yField!]) || 0
+  const yData = rowsToUse.map(
+    row => Number(row[yFieldToUse]) || 0
   )
   chartInstance.setOption({
     backgroundColor: 'transparent',

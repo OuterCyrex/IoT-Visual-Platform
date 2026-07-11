@@ -85,8 +85,15 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
-import request from '../../utils/request'
 import type { ProjectStatus, SceneProject, ScreenProject } from '../../types/platform'
+import {
+  cloneScreenProject,
+  createScreenProject,
+  deleteScreenProject,
+  listSceneProjects,
+  listScreenProjects,
+  publishScreenProject,
+} from '../../api/screens'
 
 const router = useRouter()
 const projects = ref<ScreenProject[]>([])
@@ -141,7 +148,7 @@ function getTagType(value: ProjectStatus) {
 async function fetchProjects() {
   loading.value = true
   try {
-    const res: any = await request.get('/api/screenProjects')
+    const res = await listScreenProjects()
     projects.value = res.items || []
   } catch (err) {
     console.error(err)
@@ -152,7 +159,7 @@ async function fetchProjects() {
 
 async function fetchSceneOptions() {
   try {
-    const res: any = await request.get('/api/sceneProjects')
+    const res = await listSceneProjects()
     sceneOptions.value = res.items || []
   } catch (err) {
     console.error(err)
@@ -177,15 +184,11 @@ async function submitCreate() {
     if (!valid) return
     submitting.value = true
     try {
-      await request.post('/api/screenProjects', {
+      await createScreenProject({
         name: form.value.name,
         group: form.value.group,
         scene: form.value.scene,
         owner: form.value.owner,
-        status: 'draft',
-        publishedVersion: '未发布',
-        tags: [],
-        screenNodes: [],
       })
       ElMessage.success('创建成功')
       createDialogVisible.value = false
@@ -200,7 +203,7 @@ async function submitCreate() {
 
 async function handleClone(row: ScreenProject) {
   try {
-    await request.post(`/api/screenProjects/${row.id}/clone`)
+    await cloneScreenProject(row.id)
     ElMessage.success('克隆成功')
     await fetchProjects()
   } catch (err) {
@@ -215,7 +218,7 @@ async function handleDelete(id: string) {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    await request.delete(`/api/screenProjects/${id}`)
+    await deleteScreenProject(id)
     ElMessage.success('删除成功')
     await fetchProjects()
   } catch (err) {
@@ -234,7 +237,7 @@ async function handlePublish(row: ScreenProject) {
   })
     .then(async ({ value }) => {
       try {
-        await request.post(`/api/screenProjects/${row.id}/publish`, {
+        await publishScreenProject(row.id, {
           version: value ? value.trim() : undefined,
         })
         ElMessage.success('发布成功')

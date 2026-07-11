@@ -8,6 +8,14 @@ import WidgetMetricCard from './WidgetMetricCard.vue'
 import WidgetProgressBar from './WidgetProgressBar.vue'
 import WidgetRankingList from './WidgetRankingList.vue'
 import WidgetAlertList from './WidgetAlertList.vue'
+import WidgetGauge from './WidgetGauge.vue'
+import WidgetStatusGrid from './WidgetStatusGrid.vue'
+import WidgetRadarChart from './WidgetRadarChart.vue'
+import WidgetBorderBox from './WidgetBorderBox.vue'
+import WidgetHorizontalBar from './WidgetHorizontalBar.vue'
+import WidgetRingProgress from './WidgetRingProgress.vue'
+import WidgetScrollTable from './WidgetScrollTable.vue'
+import WidgetTimeWeather from './WidgetTimeWeather.vue'
 
 export const screenComponentMap = {
   rect: WidgetRect,
@@ -19,5 +27,13 @@ export const screenComponentMap = {
   metricCard: WidgetMetricCard,
   progressBar: WidgetProgressBar,
   rankingList: WidgetRankingList,
-  alertList: WidgetAlertList
+  alertList: WidgetAlertList,
+  gauge: WidgetGauge,
+  statusGrid: WidgetStatusGrid,
+  radarChart: WidgetRadarChart,
+  borderBox: WidgetBorderBox,
+  horizontalBar: WidgetHorizontalBar,
+  ringProgress: WidgetRingProgress,
+  scrollTable: WidgetScrollTable,
+  timeWeather: WidgetTimeWeather
 }
