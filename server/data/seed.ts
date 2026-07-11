@@ -75,6 +75,7 @@ export const seedState: PlatformState = {
       sceneNodes: [],
     },
   ],
+  modelAssets: [],
   dataSources: [
     {
       id: 'ds-001',
