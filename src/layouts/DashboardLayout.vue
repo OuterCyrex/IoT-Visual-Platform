@@ -43,18 +43,32 @@
               <h1 class="mt-1 text-2xl font-semibold text-slate-950">{{ currentTitle }}</h1>
             </div>
 
-            <el-dropdown trigger="click" @command="handleCommand">
-              <span class="flex cursor-pointer items-center gap-2 transition-colors hover:text-blue-600">
-                <el-avatar :size="32" class="bg-blue-600 font-bold text-white">{{ avatarText }}</el-avatar>
-                <span class="text-sm font-medium text-slate-700">{{ username }}</span>
-              </span>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item disabled>角色: {{ userRole }}</el-dropdown-item>
-                  <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+            <div class="flex items-center gap-4">
+              <!-- Inconspicuous MQTT Simulator Shortcut -->
+              <el-tooltip content="MQTT 实时仿真沙箱" placement="bottom" :show-after="500">
+                <el-button
+                  circle
+                  text
+                  class="text-slate-400 hover:text-cyan-500 hover:bg-slate-100 p-1.5 border-none cursor-pointer"
+                  @click="goToMqttSimulator"
+                >
+                  <el-icon class="text-base"><Promotion /></el-icon>
+                </el-button>
+              </el-tooltip>
+
+              <el-dropdown trigger="click" @command="handleCommand">
+                <span class="flex cursor-pointer items-center gap-2 transition-colors hover:text-blue-600">
+                  <el-avatar :size="32" class="bg-blue-600 font-bold text-white">{{ avatarText }}</el-avatar>
+                  <span class="text-sm font-medium text-slate-700">{{ username }}</span>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item disabled>角色: {{ userRole }}</el-dropdown-item>
+                    <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </div>
         </header>
 
@@ -76,6 +90,7 @@ import {
   Monitor,
   Setting,
   User,
+  Promotion,
 } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -89,6 +104,10 @@ const user = userStr ? JSON.parse(userStr) : null
 const username = computed(() => user?.displayName || '未登录')
 const userRole = computed(() => user?.role || '访客')
 const avatarText = computed(() => (user?.displayName || 'U').slice(0, 1).toUpperCase())
+
+function goToMqttSimulator() {
+  router.push('/mqtt-simulator')
+}
 
 interface NavItem {
   label: string
