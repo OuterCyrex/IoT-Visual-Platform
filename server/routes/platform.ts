@@ -120,9 +120,9 @@ const getDataSourceOrThrow = async (dataSourceId: unknown) => {
     throw new RouteValidationError('Referenced data source does not exist')
   }
 
-  if (source.type !== 'MySQL' && source.type !== 'REST') {
-    throw new RouteValidationError('Only MySQL and REST data sources are supported for datasets')
-  }
+  // if (source.type !== 'MySQL' && source.type !== 'REST' && source.type !== 'MQTT') {
+  //   throw new RouteValidationError('Only MySQL and REST data sources are supported for datasets')
+  // }
 
   return source
 }
@@ -431,25 +431,25 @@ const resourceRouteCollection = <T extends { id: string; updatedAt: string }>(op
 
   const deleteRouteDef: RouteDefinition | null = options.remove
     ? {
-        method: 'DELETE',
-        pattern: detailPattern,
-        permission: createRoute.permission,
-        handler: async ({ res, params }) => {
-          let ok: boolean | undefined
-          try {
-            ok = await options.remove!(params.id)
-          } catch (error) {
-            if (error instanceof RouteValidationError) {
-              return sendJson(res, 400, { message: error.message })
-            }
-            throw error
+      method: 'DELETE',
+      pattern: detailPattern,
+      permission: createRoute.permission,
+      handler: async ({ res, params }) => {
+        let ok: boolean | undefined
+        try {
+          ok = await options.remove!(params.id)
+        } catch (error) {
+          if (error instanceof RouteValidationError) {
+            return sendJson(res, 400, { message: error.message })
           }
-          if (!ok) {
-            return sendJson(res, 404, { message: 'Item not found' })
-          }
-          sendNoContent(res)
-        },
-      }
+          throw error
+        }
+        if (!ok) {
+          return sendJson(res, 404, { message: 'Item not found' })
+        }
+        sendNoContent(res)
+      },
+    }
     : null
 
   return [listRoute, detailRoute, createRoute, updateRouteDef, ...(deleteRouteDef ? [deleteRouteDef] : [])]
@@ -701,6 +701,8 @@ const datasetPreviewRoute: RouteDefinition = {
             datasetId: dataset.id,
             sourceId: source.id,
             sourceName: source.name,
+            sourceType: source.type,
+            sourceHost: source.host,
             tableName: dataset.tableName,
             limit: 20,
             columns,
@@ -714,6 +716,21 @@ const datasetPreviewRoute: RouteDefinition = {
       } finally {
         await connection.end()
       }
+    } else if (source.type === 'MQTT') {
+      const topic = dataset.tableName || 'factory/telemetry/device-01'
+      const columns = ['id', 'topic', 'value', 'temperature', 'status', 'timestamp']
+      const rows: any[] = []
+      sendJson(res, 200, {
+        datasetId: dataset.id,
+        sourceId: source.id,
+        sourceName: source.name,
+        sourceType: source.type,
+        sourceHost: source.host,
+        tableName: topic,
+        limit: 20,
+        columns,
+        rows
+      })
     } else if (source.type === 'REST') {
       const urlStr = `${source.host}${dataset.tableName.startsWith('/') ? '' : '/'}${dataset.tableName}`
       try {
@@ -765,6 +782,8 @@ const datasetPreviewRoute: RouteDefinition = {
           datasetId: dataset.id,
           sourceId: source.id,
           sourceName: source.name,
+          sourceType: source.type,
+          sourceHost: source.host,
           tableName: dataset.tableName,
           limit: 20,
           columns,

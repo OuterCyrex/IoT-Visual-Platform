@@ -123,11 +123,11 @@ export const seedState: PlatformState = {
           h: 440,
           component: 'lineChart',
           props: {
-            text: '逐时生产线整车下线趋势 (辆/小时)',
-            datasetId: 'set-hourly-throughput',
-            xField: 'hour',
-            yField: 'count',
-            refreshInterval: 5000
+            text: '1号压铸机主轴温度实时监控 (MQTT)',
+            datasetId: 'set-ev-mqtt',
+            xField: 'timestamp',
+            yField: 'temperature',
+            refreshInterval: 0
           }
         }
       ],
@@ -222,6 +222,16 @@ export const seedState: PlatformState = {
       database: '/assets',
       owner: '集成组',
       updatedAt: '2026-07-11 11:00',
+      status: 'connected',
+    },
+    {
+      id: 'ds-ev-mqtt',
+      name: '公共测试 MQTT 代理',
+      type: 'MQTT',
+      host: 'broker.emqx.io:1883',
+      database: 'factory/telemetry/erasernoob',
+      owner: '系统管理员',
+      updatedAt: '2026-07-11 12:00',
       status: 'connected',
     },
   ],
@@ -325,6 +335,16 @@ export const seedState: PlatformState = {
       refreshMode: "5 min",
       fieldCount: 3,
       updatedAt: "2026-07-11 11:00"
+    },
+    {
+      id: 'set-ev-mqtt',
+      name: "设备实时遥测 (MQTT)",
+      dataSourceId: "ds-ev-mqtt",
+      sourceName: "公共测试 MQTT 代理",
+      tableName: "factory/telemetry/erasernoob",
+      refreshMode: "real-time",
+      fieldCount: 6,
+      updatedAt: "2026-07-11 12:00"
     }
   ],
   users: [

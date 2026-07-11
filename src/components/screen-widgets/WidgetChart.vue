@@ -33,7 +33,7 @@ let chartInstance: echarts.ECharts | null = null
 let resizeObserver: ResizeObserver | null = null
 
 const hasData = computed(() => {
-  return Boolean(props.datasetId && props.xField && props.yField && props.rows && props.rows.length > 0)
+  return Boolean(props.datasetId && props.rows && props.rows.length > 0)
 })
 
 function initChart() {
@@ -60,8 +60,9 @@ function updateChartOptions() {
 
   if (!chartInstance) return
 
-  const xFieldToUse = hasData.value ? props.xField! : 'item'
-  const yFieldToUse = hasData.value ? props.yField! : 'val'
+  const keys = props.rows && props.rows.length > 0 ? Object.keys(props.rows[0]) : []
+  const xFieldToUse = hasData.value ? (props.xField || keys[0] || 'item') : 'item'
+  const yFieldToUse = hasData.value ? (props.yField || keys[1] || 'val') : 'val'
   const rowsToUse = hasData.value ? props.rows : [
     { item: '项目A', val: 120 },
     { item: '项目B', val: 200 },

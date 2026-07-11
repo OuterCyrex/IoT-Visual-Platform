@@ -7,6 +7,7 @@
           <el-option label="全部类型" value="all" />
           <el-option label="MySQL" value="MySQL" />
           <el-option label="REST" value="REST" />
+          <el-option label="MQTT" value="MQTT" />
         </el-select>
         <el-select v-model="statusFilter" placeholder="连接状态">
           <el-option label="全部状态" value="all" />
@@ -57,6 +58,7 @@
             @change="handleTypeChange">
             <el-option label="MySQL 数据库" value="MySQL" />
             <el-option label="REST API 接口" value="REST" />
+            <el-option label="MQTT Broker" value="MQTT" />
           </el-select>
         </el-form-item>
         <el-form-item label="连接地址 (Host / URL)" prop="host">

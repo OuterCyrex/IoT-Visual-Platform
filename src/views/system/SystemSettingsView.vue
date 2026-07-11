@@ -15,6 +15,7 @@
             <el-select model-value="MySQL">
               <el-option label="MySQL" value="MySQL" />
               <el-option label="REST" value="REST" />
+              <el-option label="MQTT" value="MQTT" />
             </el-select>
           </el-form-item>
           <el-form-item label="自动刷新">

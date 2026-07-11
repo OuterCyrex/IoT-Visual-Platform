@@ -55,8 +55,6 @@ let resizeObserver: ResizeObserver | null = null
 const hasData = computed(() => {
   return Boolean(
     props.datasetId &&
-    props.xField &&
-    props.yField &&
     props.rows &&
     props.rows.length > 0
   )
@@ -94,8 +92,9 @@ function updateChartOptions() {
   }
   if (!chartInstance) return
 
-  const xFieldToUse = hasData.value ? props.xField! : 'time'
-  const yFieldToUse = hasData.value ? props.yField! : 'val'
+  const keys = props.rows && props.rows.length > 0 ? Object.keys(props.rows[0]) : []
+  const xFieldToUse = hasData.value ? (props.xField || keys[0] || 'time') : 'time'
+  const yFieldToUse = hasData.value ? (props.yField || keys[1] || 'val') : 'val'
   const rowsToUse = hasData.value ? props.rows! : [
     { time: '10:00', val: 42 },
     { time: '11:00', val: 65 },

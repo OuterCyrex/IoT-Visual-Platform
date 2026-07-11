@@ -78,7 +78,7 @@
               <div class="screen-node" :class="[node.component, { selected: selectedId === node.id }]">
                 <component
                   :is="screenComponentMap[node.component as keyof typeof screenComponentMap]"
-                  v-bind="node.props"
+                  v-bind="buildComponentProps(node)"
                   @click.stop="selectedId = node.id"
                 />
               </div>
@@ -199,11 +199,15 @@ import { PaletteList, type PaletteItem } from '../../types/palette-item'
 import { screenComponentMap } from '../../components/screen-widgets/config'
 import { useScreenDatasetBinding } from '../../composables/screens/useScreenDatasetBinding'
 import { useScreenProject } from '../../composables/screens/useScreenProject'
+import { useScreenPreviewData } from '../../composables/screens/useScreenPreviewData'
+import type { ScreenNode } from '../../types/screen-node'
 import {
   createScreenNode,
   DUAL_FIELD_COMPONENTS,
   LABEL_FIELD_COMPONENTS,
   SINGLE_VALUE_COMPONENTS,
+  getNodeDatasetId,
+  supportsDatasetRows
 } from '../../utils/screen-node'
 
 const router = useRouter()
@@ -226,6 +230,20 @@ const {
 } = useScreenDatasetBinding()
 const saving = ref(false)
 const publishing = ref(false)
+
+const { datasetData, fetchDatasetData } = useScreenPreviewData()
+
+function buildComponentProps(node: ScreenNode) {
+  const datasetId = getNodeDatasetId(node)
+  return {
+    ...node.props,
+    ...(supportsDatasetRows(node.component)
+      ? {
+          rows: datasetId ? datasetData.value[datasetId]?.rows || [] : [],
+        }
+      : {}),
+  }
+}
 
 const sidebarActiveNames = ref<string[]>(PaletteList.map((group) => group.label))
 
@@ -365,6 +383,9 @@ async function handlePreview() {
 async function handleDatasetChange(datasetId: string) {
   try {
     await changeNodeDataset(selectedNode.value, datasetId)
+    if (datasetId) {
+      await fetchDatasetData(datasetId)
+    }
   } catch (err) {
     console.error(err)
   }
@@ -382,8 +403,19 @@ watch(
   { immediate: true }
 )
 
+async function initializeProject() {
+  try {
+    await loadProject()
+    // Pre-fetch all datasets that are already bound when the editor loads
+    const datasetIds = [...new Set(nodes.value.map(getNodeDatasetId).filter(Boolean))]
+    await Promise.all(datasetIds.map((id) => fetchDatasetData(id).catch(err => console.error(err))))
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 onMounted(() => {
-  loadProject()
+  initializeProject()
   loadDatasetOptions()
   window.addEventListener('pointerup', endCanvasPan as EventListener)
 })

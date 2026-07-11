@@ -14,9 +14,9 @@
           <el-option
             v-for="source in dataSources"
             :key="source.id"
-            :label="source.type === 'MySQL' || source.type === 'REST' ? source.name : `${source.name}（暂不支持绑定）`"
+            :label="source.type === 'MySQL' || source.type === 'REST' || source.type === 'MQTT' ? source.name : `${source.name}（暂不支持绑定）`"
             :value="source.id"
-            :disabled="source.type !== 'MySQL' && source.type !== 'REST'"
+            :disabled="source.type !== 'MySQL' && source.type !== 'REST' && source.type !== 'MQTT'"
           />
         </el-select>
         <div class="flex justify-end gap-3">
@@ -94,7 +94,7 @@
         <el-form-item label="选择数据源" prop="dataSourceId">
           <el-select
             v-model="form.dataSourceId"
-            placeholder="请选择 MySQL 或 REST 数据源"
+            placeholder="请选择数据源"
             class="w-full"
             @change="handleSourceChange"
           >
@@ -106,7 +106,7 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item :label="selectedSourceType === 'MySQL' ? '选择 MySQL 数据表 / 视图' : '请求路径 (Path)'" prop="tableName">
+        <el-form-item :label="selectedSourceType === 'MySQL' ? '选择 MySQL 数据表 / 视图' : selectedSourceType === 'MQTT' ? '订阅主题 (Topic)' : '请求路径 (Path)'" prop="tableName">
           <el-select
             v-if="selectedSourceType === 'MySQL'"
             v-model="form.tableName"
@@ -125,7 +125,7 @@
           <el-input
             v-else
             v-model="form.tableName"
-            placeholder="请输入 API 接口请求路径，如: /telemetry"
+            :placeholder="selectedSourceType === 'MQTT' ? '请输入 MQTT 订阅主题，如: factory/telemetry/device-01' : '请输入 API 接口请求路径，如: /telemetry'"
             :disabled="!form.dataSourceId"
           />
         </el-form-item>
@@ -214,7 +214,7 @@ const filteredDatasets = computed(() => {
   })
 })
 
-const availableSources = computed(() => dataSources.value.filter((item) => item.type === 'MySQL' || item.type === 'REST'))
+const availableSources = computed(() => dataSources.value.filter((item) => item.type === 'MySQL' || item.type === 'REST' || item.type === 'MQTT'))
 
 async function fetchDataSources() {
   const res: any = await request.get('/api/dataSources')
@@ -233,7 +233,7 @@ async function fetchDatasets() {
 
 function handleCreate() {
   if (!availableSources.value.length) {
-    ElMessage.warning('当前没有可绑定的 MySQL 或 REST 数据源')
+    ElMessage.warning('当前没有可绑定的 MySQL、REST 或 MQTT 数据源')
     return
   }
 
