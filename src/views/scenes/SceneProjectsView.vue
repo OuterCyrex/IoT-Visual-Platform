@@ -34,12 +34,12 @@
             <el-tag :type="getTagType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="320" fixed="right">
+        <el-table-column label="操作" min-width="300" fixed="right">
           <template #default="{ row }">
             <div class="flex gap-2">
               <el-button size="small" type="primary" @click="handleEdit(row.id)">编辑</el-button>
               <el-button size="small" @click="handlePreview(row.id)">预览</el-button>
-              <el-button size="small" type="success" plain @click="handlePublish(row)">发布并导出</el-button>
+              <el-button size="small" type="success" plain :disabled="row.status === 'published'" @click="handlePublish(row)">发布</el-button>
               <el-button size="small" type="info" plain @click="handleExport(row.id)">导出 JSON</el-button>
               <el-button size="small" type="danger" plain @click="handleDelete(row)">删除</el-button>
             </div>
@@ -178,8 +178,21 @@ function openCreateDialog() {
 async function handleImportTemplate(uploadFile: UploadFile) {
   const file = uploadFile.raw
   if (!file) return
-  importedTemplateName.value = file.name
-  importedSceneJson.value = await file.text()
+  try {
+    const text = await file.text()
+    const parsed = JSON.parse(text)
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray((parsed as any).sceneNodes)) {
+      throw new Error('invalid_scene_json')
+    }
+    importedTemplateName.value = file.name
+    importedSceneJson.value = text
+    ElMessage.success(`已导入模板：${file.name}`)
+  } catch (error) {
+    importedTemplateName.value = ''
+    importedSceneJson.value = ''
+    ElMessage.error('JSON 模板无效，需包含 sceneNodes 数组')
+    console.error(error)
+  }
 }
 
 async function submitCreate() {
@@ -194,8 +207,6 @@ async function submitCreate() {
         engine: form.value.engine,
         owner: form.value.owner,
         status: 'draft',
-        modelCount: 0,
-        sceneNodes: [],
         importedSceneJson: importedSceneJson.value || undefined,
       })
       ElMessage.success('3D 场景创建成功')
@@ -220,7 +231,9 @@ function handlePreview(id: string) {
 async function handleExport(id: string) {
   try {
     const res: any = await request.get(`/api/sceneProjects/${id}/export`)
-    window.open(new URL(res.fileUrl, String(request.defaults.baseURL)).toString(), '_blank')
+    if (res.fileUrl) {
+      window.open(new URL(res.fileUrl, String(request.defaults.baseURL)).toString(), '_blank')
+    }
   } catch (err) {
     console.error(err)
   }
@@ -228,16 +241,13 @@ async function handleExport(id: string) {
 
 async function handlePublish(row: SceneProject) {
   try {
-    await ElMessageBox.confirm(`确定发布 3D 场景“${row.name}”并导出 JSON 文件吗？`, '发布确认', {
+    await ElMessageBox.confirm(`确定发布 3D 场景“${row.name}”吗？`, '发布确认', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
     })
-    const res: any = await request.post(`/api/sceneProjects/${row.id}/publish-file`)
-    ElMessage.success('场景发布成功，已生成 JSON 文件')
-    if (res.fileUrl) {
-      window.open(new URL(res.fileUrl, String(request.defaults.baseURL)).toString(), '_blank')
-    }
+    await request.post(`/api/sceneProjects/${row.id}/publish`)
+    ElMessage.success('场景发布成功')
     await fetchProjects()
   } catch (err) {
     if (err !== 'cancel' && err !== 'close') {

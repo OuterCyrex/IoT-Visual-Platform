@@ -1,93 +1,78 @@
 <template>
-  <div class="flex h-screen w-screen flex-col overflow-hidden bg-slate-950 font-sans text-slate-100">
-    <header class="flex h-16 items-center justify-between border-b border-slate-800 bg-slate-900/90 px-6 backdrop-blur">
-      <div class="flex items-center gap-3">
-        <el-button size="small" type="info" plain class="border-slate-700 bg-slate-800 text-slate-200" @click="backToList">
-          返回列表
-        </el-button>
-        <span class="text-slate-400">/</span>
-        <div class="text-sm font-semibold tracking-wide text-slate-200">{{ sceneTitle }}</div>
+  <div class="h-screen w-screen overflow-hidden bg-slate-50 text-slate-900">
+    <header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-5">
+      <div class="flex items-center gap-4">
+        <el-button text @click="backToList">返回列表</el-button>
+        <div>
+          <div class="text-sm text-slate-500">3D 场景编辑</div>
+          <div class="text-base font-semibold">{{ sceneTitle }}</div>
+        </div>
       </div>
-      <div class="flex items-center gap-3">
-        <el-button size="small" @click="openAssetLibrary">3D 组件库</el-button>
-        <el-button size="small" type="info" plain @click="handleExport">导出 JSON</el-button>
-        <el-button size="small" type="primary" :loading="saving" @click="handleSave">保存场景</el-button>
-        <el-button
-          size="small"
-          type="success"
-          plain
-          class="border-emerald-800 bg-emerald-950/20 text-emerald-400"
-          @click="handlePreview"
-        >
-          进入 3D 预览
-        </el-button>
+
+      <div class="flex items-center gap-2">
+        <el-button @click="handleExport">导出 JSON</el-button>
+        <el-button @click="handlePreview">预览</el-button>
+        <el-button :loading="saving" @click="handleSave">保存</el-button>
       </div>
     </header>
 
-    <div class="flex min-h-0 min-w-0 flex-1">
-      <aside class="flex w-72 flex-col gap-4 border-r border-slate-800 bg-slate-900/40 p-4">
-        <div>
-          <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">基础组件</div>
-          <div class="text-[11px] text-slate-500">可直接绑定数据源的程序化组件</div>
+    <div class="grid h-[calc(100vh-4rem)] min-h-0 grid-cols-[320px_1fr_320px]">
+      <aside class="overflow-y-auto border-r border-slate-200 bg-white p-4">
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <div class="text-sm font-medium text-slate-900">3D 素材库</div>
+            <div class="mt-1 text-xs text-slate-500">基础组件和组件库资产</div>
+          </div>
+          <el-button size="small" @click="openAssetLibrary">组件库</el-button>
         </div>
 
-        <div class="space-y-3">
-          <div
-            v-for="item in proceduralLibrary"
-            :key="item.type"
-            class="group cursor-pointer select-none rounded-lg border border-slate-800/80 bg-slate-900/50 p-3 transition-all hover:border-slate-700 hover:bg-slate-800/60"
-            @click="addProceduralModel(item)"
-          >
-            <div class="flex items-center gap-3">
-              <div class="flex h-8 w-8 items-center justify-center rounded bg-cyan-500/10 text-cyan-400 transition-transform group-hover:scale-105">
-                <span class="text-lg font-bold">3D</span>
-              </div>
-              <div>
-                <div class="text-xs font-medium text-slate-200">{{ item.name }}</div>
-                <div class="text-[10px] text-slate-500">{{ item.desc }}</div>
+        <el-collapse v-model="sidebarActiveNames">
+          <el-collapse-item title="基础组件" name="procedural">
+            <div class="pt-3">
+              <div
+                v-for="item in proceduralLibrary"
+                :key="item.type"
+                class="mb-2 cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 transition hover:border-cyan-500 hover:bg-cyan-50"
+                @click="addProceduralModel(item)"
+              >
+                <div class="text-sm font-medium text-slate-900">{{ item.name }}</div>
+                <div class="text-xs text-slate-500">{{ item.desc }}</div>
               </div>
             </div>
-          </div>
-        </div>
+          </el-collapse-item>
 
-        <div class="border-t border-slate-800 pt-4">
-          <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">组件库资产</div>
-          <div class="mb-3 text-[11px] text-slate-500">来自 3D 组件库的可复用模型资产</div>
-          <div class="mb-3">
-            <el-input v-model="assetKeyword" size="small" placeholder="搜索资产名称 / 分类" clearable />
-          </div>
-          <div class="flex-1 space-y-3 overflow-y-auto pr-1">
-            <div
-              v-for="asset in filteredAssets"
-              :key="asset.id"
-              class="group cursor-pointer select-none rounded-lg border border-slate-800/80 bg-slate-900/50 p-3 transition-all hover:border-slate-700 hover:bg-slate-800/60"
-              @click="addAssetToScene(asset)"
-            >
-              <div class="flex items-start justify-between gap-3">
-                <div>
-                  <div class="text-xs font-medium text-slate-200">{{ asset.name }}</div>
-                  <div class="text-[10px] text-slate-500">{{ asset.category || '未分类' }}</div>
+          <el-collapse-item title="组件库资产" name="assets">
+            <div class="pt-3">
+              <el-input v-model="assetKeyword" size="small" placeholder="搜索资产名称 / 分类" clearable class="mb-3" />
+              <div
+                v-for="asset in filteredAssets"
+                :key="asset.id"
+                class="mb-2 cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 transition hover:border-cyan-500 hover:bg-cyan-50"
+                @click="addAssetToScene(asset)"
+              >
+                <div class="flex items-center justify-between gap-2">
+                  <div class="text-sm font-medium text-slate-900">{{ asset.name }}</div>
+                  <el-tag size="small" effect="dark">{{ asset.format.toUpperCase() }}</el-tag>
                 </div>
-                <el-tag size="small" effect="dark">{{ asset.format.toUpperCase() }}</el-tag>
+                <div class="mt-1 text-xs text-slate-500">{{ asset.category || '未分类' }}</div>
               </div>
+              <el-empty v-if="!filteredAssets.length" description="暂无可用资产" :image-size="60" />
             </div>
-            <el-empty v-if="!filteredAssets.length" description="暂无可用资产" :image-size="60" />
-          </div>
-        </div>
+          </el-collapse-item>
+        </el-collapse>
       </aside>
 
-      <main class="relative flex-1 bg-slate-950">
-        <div class="pointer-events-none absolute left-4 top-4 z-10 flex flex-col gap-1 rounded border border-slate-800 bg-slate-900/80 px-3 py-1.5 text-[10px] text-slate-400 shadow-lg backdrop-blur">
-          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span><span>左键旋转视角</span></div>
-          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span><span>右键平移视角</span></div>
-          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span><span>滚轮缩放视图</span></div>
-          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span><span>单击选中模型</span></div>
-          <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span><span>选中后可拖拽、旋转、缩放</span></div>
+      <main class="relative flex min-h-0 min-w-0 flex-col bg-slate-100 p-4">
+        <div class="mb-3 flex items-center justify-between">
+          <div class="text-sm text-slate-700">场景画布</div>
+          <div class="flex items-center gap-2 text-xs text-slate-500">
+            <span>支持相机漫游与模型平移、旋转、缩放</span>
+          </div>
         </div>
 
         <div
           v-if="selectedNode"
-          class="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-slate-700 bg-slate-900/90 px-3 py-2 shadow-lg backdrop-blur"
+          class="absolute left-1/2 top-4 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-slate-200 bg-white/95 px-3 py-2 shadow-lg backdrop-blur"
         >
           <el-button-group>
             <el-button size="small" :type="transformMode === 'translate' ? 'primary' : 'default'" @click="setTransformMode('translate')">移动</el-button>
@@ -96,79 +81,90 @@
           </el-button-group>
         </div>
 
-        <div ref="canvasContainer" class="h-full w-full cursor-grab active:cursor-grabbing"></div>
+        <div ref="canvasContainer" class="min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-sm"></div>
       </main>
 
-      <aside class="flex w-80 flex-col gap-5 overflow-y-auto border-l border-slate-800 bg-slate-900/40 p-5">
-        <template v-if="selectedNode">
-          <div>
-            <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">基础属性</div>
-            <div class="text-[11px] text-slate-400">设备唯一标识：{{ selectedNode.id.substring(0, 8) }}...</div>
-            <div class="mt-1 text-[11px] text-slate-500">
-              来源：
-              {{ selectedNode.sourceType === 'asset' ? '组件库资产' : selectedNode.sourceType === 'imported' ? '兼容旧导入模型' : '基础组件' }}
-            </div>
-          </div>
+      <aside class="overflow-y-auto border-l border-slate-200 bg-white p-4">
+        <div class="mb-4">
+          <div class="text-sm font-medium text-slate-900">属性面板</div>
+          <div class="mt-1 text-xs text-slate-500">选中模型后可调整位姿并设置数据绑定</div>
+        </div>
 
+        <template v-if="selectedNode">
           <el-form label-position="top" size="small">
-            <el-form-item label="设备名称">
-              <el-input v-model="selectedNode.name" placeholder="输入设备名称" class="dark-input" />
+            <el-form-item label="名称">
+              <el-input v-model="selectedNode.name" />
             </el-form-item>
 
-            <div class="mt-3 border-t border-slate-800/80 pt-3">
-              <div class="mb-2 text-xs text-slate-400">坐标位置 (Position)</div>
-              <div class="grid grid-cols-3 gap-2">
-                <el-form-item label="X"><el-input-number v-model="selectedNode.position.x" :precision="1" :step="0.5" class="w-full" controls-position="right" /></el-form-item>
-                <el-form-item label="Y"><el-input-number v-model="selectedNode.position.y" :precision="1" :step="0.5" class="w-full" controls-position="right" /></el-form-item>
-                <el-form-item label="Z"><el-input-number v-model="selectedNode.position.z" :precision="1" :step="0.5" class="w-full" controls-position="right" /></el-form-item>
-              </div>
+            <div class="grid grid-cols-3 gap-3">
+              <el-form-item label="X">
+                <el-input-number v-model="selectedNode.position.x" :step="0.1" class="w-full" />
+              </el-form-item>
+              <el-form-item label="Y">
+                <el-input-number v-model="selectedNode.position.y" :step="0.1" class="w-full" />
+              </el-form-item>
+              <el-form-item label="Z">
+                <el-input-number v-model="selectedNode.position.z" :step="0.1" class="w-full" />
+              </el-form-item>
             </div>
 
-            <div class="mt-3 border-t border-slate-800/80 pt-3">
-              <div class="mb-2 text-xs text-slate-400">旋转角度 (Rotation)</div>
-              <div class="grid grid-cols-3 gap-2">
-                <el-form-item label="X"><el-input-number v-model="selectedNode.rotation.x" :precision="2" :step="0.1" class="w-full" controls-position="right" /></el-form-item>
-                <el-form-item label="Y"><el-input-number v-model="selectedNode.rotation.y" :precision="2" :step="0.1" class="w-full" controls-position="right" /></el-form-item>
-                <el-form-item label="Z"><el-input-number v-model="selectedNode.rotation.z" :precision="2" :step="0.1" class="w-full" controls-position="right" /></el-form-item>
-              </div>
+            <div class="grid grid-cols-3 gap-3">
+              <el-form-item label="旋转 X">
+                <el-input-number v-model="selectedNode.rotation.x" :step="0.1" class="w-full" />
+              </el-form-item>
+              <el-form-item label="旋转 Y">
+                <el-input-number v-model="selectedNode.rotation.y" :step="0.1" class="w-full" />
+              </el-form-item>
+              <el-form-item label="旋转 Z">
+                <el-input-number v-model="selectedNode.rotation.z" :step="0.1" class="w-full" />
+              </el-form-item>
             </div>
 
-            <div class="mt-3 border-t border-slate-800/80 pt-3">
-              <div class="mb-2 text-xs text-slate-400">缩放比例 (Scale)</div>
-              <div class="grid grid-cols-3 gap-2">
-                <el-form-item label="X"><el-input-number v-model="selectedNode.scale.x" :precision="2" :step="0.1" :min="0.1" class="w-full" controls-position="right" /></el-form-item>
-                <el-form-item label="Y"><el-input-number v-model="selectedNode.scale.y" :precision="2" :step="0.1" :min="0.1" class="w-full" controls-position="right" /></el-form-item>
-                <el-form-item label="Z"><el-input-number v-model="selectedNode.scale.z" :precision="2" :step="0.1" :min="0.1" class="w-full" controls-position="right" /></el-form-item>
-              </div>
+            <div class="grid grid-cols-3 gap-3">
+              <el-form-item label="缩放 X">
+                <el-input-number v-model="selectedNode.scale.x" :step="0.1" :min="0.1" class="w-full" />
+              </el-form-item>
+              <el-form-item label="缩放 Y">
+                <el-input-number v-model="selectedNode.scale.y" :step="0.1" :min="0.1" class="w-full" />
+              </el-form-item>
+              <el-form-item label="缩放 Z">
+                <el-input-number v-model="selectedNode.scale.z" :step="0.1" :min="0.1" class="w-full" />
+              </el-form-item>
             </div>
 
-            <div class="mt-3 space-y-3 border-t border-slate-800/80 pt-3">
-              <div class="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-400">物理数据关联</div>
-              <el-form-item label="绑定数据集">
-                <el-select v-model="selectedNode.props.datasetId" placeholder="选择关联数据集" class="w-full" @change="handleDatasetChange">
-                  <el-option v-for="opt in datasetOptions" :key="opt.id" :label="opt.name" :value="opt.id" />
+            <el-divider><span class="text-xs text-slate-400">数据配置</span></el-divider>
+
+            <el-form-item label="绑定数据集">
+              <el-select
+                v-model="selectedNode.props.datasetId"
+                placeholder="选择关联数据集"
+                clearable
+                class="w-full"
+                @change="handleDatasetChange"
+              >
+                <el-option v-for="ds in datasetOptions" :key="ds.id" :label="ds.name" :value="ds.id" />
+              </el-select>
+            </el-form-item>
+
+            <template v-if="selectedNode.props.datasetId">
+              <el-form-item label="告警字段">
+                <el-select v-model="selectedNode.props.alarmField" placeholder="选择告警字段" class="w-full">
+                  <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
                 </el-select>
               </el-form-item>
 
-              <template v-if="selectedNode.props.datasetId">
-                <el-form-item label="报警判定列">
-                  <el-select v-model="selectedNode.props.alarmField" placeholder="选择用于报警的列" class="w-full">
-                    <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
-                  </el-select>
-                </el-form-item>
+              <el-form-item label="速度字段">
+                <el-select v-model="selectedNode.props.speedField" placeholder="选择速度字段" class="w-full">
+                  <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
+                </el-select>
+              </el-form-item>
+            </template>
 
-                <el-form-item label="速度绑定列">
-                  <el-select v-model="selectedNode.props.speedField" placeholder="选择设备转速列" class="w-full">
-                    <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
-                  </el-select>
-                </el-form-item>
-              </template>
-            </div>
-
-            <el-button class="mt-6 w-full" type="danger" plain @click="deleteSelectedNode">删除该 3D 设备</el-button>
+            <el-button class="mt-4 w-full" type="danger" plain @click="deleteSelectedNode">删除模型</el-button>
           </el-form>
         </template>
-        <el-empty v-else description="请在场景中单击选择设备" class="my-auto text-slate-500" />
+
+        <el-empty v-else description="请选择场景中的模型" />
       </aside>
     </div>
   </div>
@@ -203,9 +199,27 @@ type ProceduralLibraryItem = {
 type TransformMode = 'translate' | 'rotate' | 'scale'
 
 const proceduralLibrary: ProceduralLibraryItem[] = [
-  { type: 'cnc', name: 'CNC 机床', desc: '适合绑定运行状态、告警和转速数据' },
-  { type: 'arm', name: '机械臂', desc: '适合绑定动作节拍、工位状态等数据' },
-  { type: 'pump', name: '离心泵', desc: '适合绑定转速、流量和设备告警数据' },
+  { type: 'cnc', name: 'CNC 机床', desc: '适合绑定运行状态、告警和转速等设备数据' },
+  { type: 'arm', name: '机械臂', desc: '适合绑定动作节拍、工位状态和产线任务数据' },
+  { type: 'pump', name: '离心泵', desc: '适合绑定转速、流量、温度和设备告警数据' },
+  { type: 'conveyor', name: '输送线', desc: '用于表现物料流转、线体节拍和工序衔接' },
+  { type: 'storageTank', name: '储罐', desc: '适合化工、能源和液体存储等工业场景' },
+  { type: 'pipeSkid', name: '管道 skid', desc: '用于泵站、流体输送和工艺管网场景' },
+  { type: 'controlCabinet', name: '控制柜', desc: '适合配电柜、PLC 柜和工业控制终端' },
+  { type: 'serverRack', name: '机柜', desc: '用于机房、边缘计算和监控网关场景' },
+  { type: 'coolingUnit', name: '精密空调', desc: '适合机房和控制室的环境设备布局' },
+  { type: 'workbench', name: '工作台', desc: '适合装配工位、维修工位和质检工位' },
+  { type: 'forklift', name: '叉车', desc: '用于厂内搬运、仓储物流和车辆调度场景' },
+  { type: 'road', name: '道路', desc: '用于厂区道路、消防通道和物流通道' },
+  { type: 'fence', name: '围栏', desc: '适合安全隔离、区域划分和边界表达' },
+  { type: 'lampPost', name: '路灯', desc: '用于厂区外场照明和道路节点标识' },
+  { type: 'factoryHall', name: '厂房', desc: '适合搭建总装车间、加工车间和生产主厂房' },
+  { type: 'warehouse', name: '仓库', desc: '适合原料仓、成品仓和立体仓储外围布局' },
+  { type: 'officeBuilding', name: '办公楼', desc: '用于厂务办公、调度中心和综合楼布局' },
+  { type: 'gateComplex', name: '门岗', desc: '用于厂区主入口、门禁和访客通行区域' },
+  { type: 'parkingLot', name: '停车区', desc: '适合办公区、访客区和物流车辆停车区域' },
+  { type: 'substation', name: '变配电区', desc: '用于配电、变压器和动力基础设施场景' },
+  { type: 'loadingDock', name: '装卸月台', desc: '适合仓库装卸、托盘堆垛和收发货区域' },
 ]
 
 const route = useRoute()
@@ -222,6 +236,7 @@ const datasetColumns = ref<string[]>([])
 const assetKeyword = ref('')
 const modelAssets = ref<ModelAsset[]>([])
 const transformMode = ref<TransformMode>('translate')
+const sidebarActiveNames = ref<string[]>(['procedural', 'assets'])
 
 const filteredAssets = computed(() => {
   if (!assetKeyword.value) return modelAssets.value
@@ -231,21 +246,21 @@ const filteredAssets = computed(() => {
   )
 })
 
+const selectedNode = computed(() => sceneNodes.value.find((n) => n.id === selectedId.value) || null)
+
 const canvasContainer = ref<HTMLDivElement | null>(null)
 let scene: THREE.Scene
 let camera: THREE.PerspectiveCamera
 let renderer: THREE.WebGLRenderer
 let controls: OrbitControls
 let transformControls: TransformControls
-let animationFrameId: number
-const modelGroupMap = new Map<string, THREE.Group>()
+let animationFrameId = 0
+const modelGroupMap = new Map<string, THREE.Object3D>()
 
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 let mouseDownTime = 0
 let mouseDownPos = { x: 0, y: 0 }
-
-const selectedNode = computed(() => sceneNodes.value.find((n) => n.id === selectedId.value) || null)
 
 function setTransformMode(mode: TransformMode) {
   transformMode.value = mode
@@ -301,11 +316,13 @@ function attachTransformControls(id: string | null) {
     transformControls.detach()
     return
   }
+
   const mesh = modelGroupMap.get(id)
   if (!mesh) {
     transformControls.detach()
     return
   }
+
   transformControls.attach(mesh)
   transformControls.setMode(transformMode.value)
 }
@@ -313,31 +330,31 @@ function attachTransformControls(id: string | null) {
 function setupInteraction() {
   const dom = renderer.domElement
 
-  dom.addEventListener('mousedown', (e) => {
+  dom.addEventListener('mousedown', (event) => {
     mouseDownTime = Date.now()
-    mouseDownPos = { x: e.clientX, y: e.clientY }
+    mouseDownPos = { x: event.clientX, y: event.clientY }
   })
 
-  dom.addEventListener('mouseup', (e) => {
+  dom.addEventListener('mouseup', (event) => {
     if (transformControls?.dragging) return
 
     const elapsed = Date.now() - mouseDownTime
-    const distance = Math.hypot(e.clientX - mouseDownPos.x, e.clientY - mouseDownPos.y)
+    const distance = Math.hypot(event.clientX - mouseDownPos.x, event.clientY - mouseDownPos.y)
     if (elapsed >= 200 || distance >= 3) return
 
     const rect = dom.getBoundingClientRect()
-    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
-    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
     raycaster.setFromCamera(mouse, camera)
     const intersects = raycaster.intersectObjects(scene.children, true)
 
     if (intersects.length > 0) {
-      let rootGroup: THREE.Object3D | null = intersects[0].object
-      while (rootGroup && rootGroup.parent && rootGroup.parent !== scene) {
-        rootGroup = rootGroup.parent
+      let rootObject: THREE.Object3D | null = intersects[0].object
+      while (rootObject && rootObject.parent && rootObject.parent !== scene) {
+        rootObject = rootObject.parent
       }
-      if (rootGroup && modelGroupMap.has(rootGroup.name)) {
-        selectedId.value = rootGroup.name
+      if (rootObject && modelGroupMap.has(rootObject.name)) {
+        selectedId.value = rootObject.name
         return
       }
     }
@@ -393,15 +410,15 @@ function deleteSelectedNode() {
   if (!selectedId.value) return
   const id = selectedId.value
   removeNodeMesh(id)
-  sceneNodes.value = sceneNodes.value.filter((n) => n.id !== id)
+  sceneNodes.value = sceneNodes.value.filter((item) => item.id !== id)
   selectedId.value = null
-  ElMessage.success('已删除该设备')
+  ElMessage.success('已删除该模型')
 }
 
 watch(
   () => sceneNodes.value,
-  (newNodes) => {
-    newNodes.forEach((node) => {
+  (nodes) => {
+    nodes.forEach((node) => {
       const mesh = modelGroupMap.get(node.id)
       if (mesh) {
         applyNodeTransform(mesh, node)
@@ -439,21 +456,13 @@ watch(transformMode, (mode) => {
 })
 
 async function fetchDatasetOptions() {
-  try {
-    const res: any = await request.get('/api/datasets')
-    datasetOptions.value = res.items || []
-  } catch (err) {
-    console.error(err)
-  }
+  const res: any = await request.get('/api/datasets')
+  datasetOptions.value = res.items || []
 }
 
 async function fetchModelAssets() {
-  try {
-    const res: any = await request.get('/api/model-assets')
-    modelAssets.value = res.items || []
-  } catch (err) {
-    console.error(err)
-  }
+  const res: any = await request.get('/api/model-assets')
+  modelAssets.value = res.items || []
 }
 
 async function handleDatasetChange(datasetId: string) {
@@ -463,26 +472,17 @@ async function handleDatasetChange(datasetId: string) {
   }
   datasetColumns.value = []
   if (!datasetId) return
-
-  try {
-    const res: any = await request.get(`/api/datasets/${datasetId}/preview`)
-    datasetColumns.value = res.columns || []
-  } catch (err) {
-    console.error(err)
-  }
+  const res: any = await request.get(`/api/datasets/${datasetId}/preview`)
+  datasetColumns.value = res.columns || []
 }
 
 watch(
   () => selectedNode.value?.props.datasetId,
-  async (newDsId) => {
+  async (datasetId) => {
     datasetColumns.value = []
-    if (!newDsId) return
-    try {
-      const res: any = await request.get(`/api/datasets/${newDsId}/preview`)
-      datasetColumns.value = res.columns || []
-    } catch (err) {
-      console.error(err)
-    }
+    if (!datasetId) return
+    const res: any = await request.get(`/api/datasets/${datasetId}/preview`)
+    datasetColumns.value = res.columns || []
   },
 )
 
@@ -503,23 +503,20 @@ function normalizeSceneNodes(rawNodes: SceneProject['sceneNodes']): SceneNode[] 
 }
 
 async function loadScene() {
-  try {
-    const res: any = await request.get(`/api/sceneProjects/${projectId}`)
-    projectDetail.value = res.item
-    sceneTitle.value = res.item.name
-    sceneNodes.value = normalizeSceneNodes(res.item.sceneNodes)
+  const res: any = await request.get(`/api/sceneProjects/${projectId}`)
+  projectDetail.value = res.item
+  sceneTitle.value = res.item.name
+  sceneNodes.value = normalizeSceneNodes(res.item.sceneNodes)
 
-    transformControls?.detach()
-    modelGroupMap.forEach((mesh) => scene.remove(mesh))
-    modelGroupMap.clear()
+  transformControls?.detach()
+  modelGroupMap.forEach((mesh) => scene.remove(mesh))
+  modelGroupMap.clear()
 
-    for (const node of sceneNodes.value) {
-      await mountNode(node)
-    }
-    attachTransformControls(selectedId.value)
-  } catch (err) {
-    console.error(err)
+  for (const node of sceneNodes.value) {
+    await mountNode(node)
   }
+
+  attachTransformControls(selectedId.value)
 }
 
 async function handleSave() {
@@ -534,8 +531,8 @@ async function handleSave() {
     })
     ElMessage.success('保存成功')
     await loadScene()
-  } catch (err) {
-    console.error('保存失败:', err)
+  } catch (error) {
+    console.error('保存失败:', error)
   } finally {
     saving.value = false
   }
@@ -547,8 +544,8 @@ async function handleExport() {
     if (res.fileUrl) {
       window.open(new URL(res.fileUrl, String(request.defaults.baseURL)).toString(), '_blank')
     }
-  } catch (err) {
-    console.error(err)
+  } catch (error) {
+    console.error(error)
   }
 }
 
@@ -566,6 +563,7 @@ function openAssetLibrary() {
 
 function initThree() {
   if (!canvasContainer.value) return
+
   const width = canvasContainer.value.clientWidth
   const height = canvasContainer.value.clientHeight
 
@@ -622,11 +620,11 @@ function initThree() {
 
 function handleResize() {
   if (!canvasContainer.value || !renderer || !camera) return
-  const w = canvasContainer.value.clientWidth
-  const h = canvasContainer.value.clientHeight
-  camera.aspect = w / h
+  const width = canvasContainer.value.clientWidth
+  const height = canvasContainer.value.clientHeight
+  camera.aspect = width / height
   camera.updateProjectionMatrix()
-  renderer.setSize(w, h)
+  renderer.setSize(width, height)
 }
 
 onMounted(async () => {
@@ -645,9 +643,29 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.dark-input :deep(.el-input__wrapper) {
-  background-color: rgba(15, 23, 42, 0.6) !important;
-  border-color: rgba(51, 65, 85, 0.8) !important;
-  box-shadow: none !important;
+:deep(.el-collapse) {
+  --el-collapse-border-color: #e2e8f0;
+  --el-collapse-header-bg-color: #ffffff;
+  --el-collapse-content-bg-color: #ffffff;
+  --el-collapse-header-text-color: #0f172a;
+  --el-collapse-content-text-color: #475569;
+}
+
+:deep(.el-collapse-item__header) {
+  background: #ffffff;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+:deep(.el-collapse-item__wrap) {
+  background: #ffffff;
+}
+
+:deep(.el-collapse-item__content) {
+  color: #475569;
+}
+
+:deep(.el-form-item__label) {
+  color: #475569;
 }
 </style>

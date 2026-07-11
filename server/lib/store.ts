@@ -73,6 +73,14 @@ const mysqlFallbackFile = resolve(process.cwd(), 'server/data/mysql-state.json')
 
 const cloneSeed = (): PlatformState => JSON.parse(JSON.stringify(seedState)) as PlatformState
 
+const defaultPasswordHash =
+  seedState.users.find((user) => user.username === 'admin')?.passwordHash ?? seedState.users[0]?.passwordHash ?? ''
+
+const getUserPasswordHash = (user: PlatformUser) =>
+  user.passwordHash ??
+  seedState.users.find((entry) => entry.id === user.id || entry.username === user.username)?.passwordHash ??
+  defaultPasswordHash
+
 const ensureStateFile = () => {
   if (!existsSync(dataFile)) {
     writeFileSync(dataFile, JSON.stringify(cloneSeed(), null, 2))
@@ -624,9 +632,18 @@ const writeStateToMysql = async (state: PlatformState) => {
     await replaceTable(
       connection,
       'users',
-      ['id', 'username', 'display_name', 'role', 'phone', 'status', 'updated_at'],
+      ['id', 'username', 'display_name', 'role', 'phone', 'password_hash', 'status', 'updated_at'],
       state.users,
-      (item) => [item.id, item.username, item.displayName, item.role, item.phone, item.status, item.updatedAt],
+      (item) => [
+        item.id,
+        item.username,
+        item.displayName,
+        item.role,
+        item.phone,
+        getUserPasswordHash(item),
+        item.status,
+        item.updatedAt,
+      ],
     )
 
     await replaceTable(

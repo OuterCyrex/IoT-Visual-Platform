@@ -1,0 +1,486 @@
+{
+  "sceneNodes": [
+    {
+      "id": "campus-road-main",
+      "name": "厂区主干道",
+      "type": "road",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 5.8, "y": 1, "z": 1.25 },
+      "props": {}
+    },
+    {
+      "id": "campus-road-north",
+      "name": "北侧横向道路",
+      "type": "road",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": -17 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 3.4, "y": 1, "z": 1.1 },
+      "props": {}
+    },
+    {
+      "id": "campus-road-south",
+      "name": "南侧横向道路",
+      "type": "road",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": 17 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 3.4, "y": 1, "z": 1.1 },
+      "props": {}
+    },
+    {
+      "id": "campus-gate",
+      "name": "厂区主门岗",
+      "type": "gateComplex",
+      "sourceType": "procedural",
+      "position": { "x": -24, "y": 0, "z": 0 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-office",
+      "name": "综合办公楼",
+      "type": "officeBuilding",
+      "sourceType": "procedural",
+      "position": { "x": -16, "y": 0, "z": -11.5 },
+      "rotation": { "x": 0, "y": 0.12, "z": 0 },
+      "scale": { "x": 1.15, "y": 1, "z": 1.05 },
+      "props": {}
+    },
+    {
+      "id": "campus-parking",
+      "name": "办公停车区",
+      "type": "parkingLot",
+      "sourceType": "procedural",
+      "position": { "x": -15.5, "y": 0, "z": -4.6 },
+      "rotation": { "x": 0, "y": 0.08, "z": 0 },
+      "scale": { "x": 1.2, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-hall-a",
+      "name": "总装厂房 A",
+      "type": "factoryHall",
+      "sourceType": "procedural",
+      "position": { "x": -3, "y": 0, "z": -9.5 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.4, "y": 1.1, "z": 1.08 },
+      "props": {}
+    },
+    {
+      "id": "campus-hall-b",
+      "name": "加工厂房 B",
+      "type": "factoryHall",
+      "sourceType": "procedural",
+      "position": { "x": -3, "y": 0, "z": 9.5 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.4, "y": 1.1, "z": 1.08 },
+      "props": {}
+    },
+    {
+      "id": "campus-warehouse-a",
+      "name": "原料仓库",
+      "type": "warehouse",
+      "sourceType": "procedural",
+      "position": { "x": 14.5, "y": 0, "z": -10.5 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.15, "y": 1, "z": 1.05 },
+      "props": {}
+    },
+    {
+      "id": "campus-warehouse-b",
+      "name": "成品仓库",
+      "type": "warehouse",
+      "sourceType": "procedural",
+      "position": { "x": 14.5, "y": 0, "z": 10.5 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.15, "y": 1, "z": 1.05 },
+      "props": {}
+    },
+    {
+      "id": "campus-dock-a",
+      "name": "原料装卸月台",
+      "type": "loadingDock",
+      "sourceType": "procedural",
+      "position": { "x": 22, "y": 0, "z": -10.5 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 1.05, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-dock-b",
+      "name": "成品装卸月台",
+      "type": "loadingDock",
+      "sourceType": "procedural",
+      "position": { "x": 22, "y": 0, "z": 10.5 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 1.05, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-substation",
+      "name": "变配电区",
+      "type": "substation",
+      "sourceType": "procedural",
+      "position": { "x": 24, "y": 0, "z": -1.5 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-tank-a",
+      "name": "化学储罐 A",
+      "type": "storageTank",
+      "sourceType": "procedural",
+      "position": { "x": 25.5, "y": 0, "z": 8.6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.05, "y": 1.05, "z": 1.05 },
+      "props": {}
+    },
+    {
+      "id": "campus-tank-b",
+      "name": "化学储罐 B",
+      "type": "storageTank",
+      "sourceType": "procedural",
+      "position": { "x": 25.5, "y": 0, "z": 12.6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.05, "y": 1.05, "z": 1.05 },
+      "props": {}
+    },
+    {
+      "id": "campus-pipes",
+      "name": "工艺管廊",
+      "type": "pipeSkid",
+      "sourceType": "procedural",
+      "position": { "x": 20, "y": 0, "z": 10.4 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.8, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-pump",
+      "name": "泵站",
+      "type": "pump",
+      "sourceType": "procedural",
+      "position": { "x": 18.4, "y": 0, "z": 7.4 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.1, "y": 1.1, "z": 1.1 },
+      "props": {}
+    },
+    {
+      "id": "campus-rack-a",
+      "name": "机柜 A",
+      "type": "serverRack",
+      "sourceType": "procedural",
+      "position": { "x": -15.5, "y": 0, "z": 10.5 },
+      "rotation": { "x": 0, "y": -1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-rack-b",
+      "name": "机柜 B",
+      "type": "serverRack",
+      "sourceType": "procedural",
+      "position": { "x": -15.5, "y": 0, "z": 12.2 },
+      "rotation": { "x": 0, "y": -1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-cooling",
+      "name": "精密空调",
+      "type": "coolingUnit",
+      "sourceType": "procedural",
+      "position": { "x": -12.6, "y": 0, "z": 10.8 },
+      "rotation": { "x": 0, "y": -1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-cabinet",
+      "name": "控制柜",
+      "type": "controlCabinet",
+      "sourceType": "procedural",
+      "position": { "x": -12.4, "y": 0, "z": 13.2 },
+      "rotation": { "x": 0, "y": -1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-conveyor-a",
+      "name": "厂房 A 输送线",
+      "type": "conveyor",
+      "sourceType": "procedural",
+      "position": { "x": -3, "y": 0, "z": -9.5 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.8, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-conveyor-b",
+      "name": "厂房 B 输送线",
+      "type": "conveyor",
+      "sourceType": "procedural",
+      "position": { "x": -3, "y": 0, "z": 9.5 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.8, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-cnc-a1",
+      "name": "A 线 CNC 1",
+      "type": "cnc",
+      "sourceType": "procedural",
+      "position": { "x": -7.4, "y": 0, "z": -11.2 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-cnc-a2",
+      "name": "A 线 CNC 2",
+      "type": "cnc",
+      "sourceType": "procedural",
+      "position": { "x": 1.4, "y": 0, "z": -11.2 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-arm-a",
+      "name": "A 线机械臂",
+      "type": "arm",
+      "sourceType": "procedural",
+      "position": { "x": -3, "y": 0, "z": -7.6 },
+      "rotation": { "x": 0, "y": -1.2, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-cnc-b1",
+      "name": "B 线 CNC 1",
+      "type": "cnc",
+      "sourceType": "procedural",
+      "position": { "x": -7.4, "y": 0, "z": 11.2 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-cnc-b2",
+      "name": "B 线 CNC 2",
+      "type": "cnc",
+      "sourceType": "procedural",
+      "position": { "x": 1.4, "y": 0, "z": 11.2 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-arm-b",
+      "name": "B 线机械臂",
+      "type": "arm",
+      "sourceType": "procedural",
+      "position": { "x": -3, "y": 0, "z": 7.6 },
+      "rotation": { "x": 0, "y": 1.2, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-workbench-a",
+      "name": "质检工作台 A",
+      "type": "workbench",
+      "sourceType": "procedural",
+      "position": { "x": 4.2, "y": 0, "z": -7.8 },
+      "rotation": { "x": 0, "y": 0.4, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-workbench-b",
+      "name": "质检工作台 B",
+      "type": "workbench",
+      "sourceType": "procedural",
+      "position": { "x": 4.2, "y": 0, "z": 7.8 },
+      "rotation": { "x": 0, "y": -0.4, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-forklift-a",
+      "name": "叉车 A",
+      "type": "forklift",
+      "sourceType": "procedural",
+      "position": { "x": 11.2, "y": 0, "z": -3.6 },
+      "rotation": { "x": 0, "y": -0.3, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-forklift-b",
+      "name": "叉车 B",
+      "type": "forklift",
+      "sourceType": "procedural",
+      "position": { "x": 11.6, "y": 0, "z": 4.2 },
+      "rotation": { "x": 0, "y": 0.45, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-fence-west",
+      "name": "西侧围栏",
+      "type": "fence",
+      "sourceType": "procedural",
+      "position": { "x": -27.5, "y": 0, "z": 0 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 12, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-fence-east",
+      "name": "东侧围栏",
+      "type": "fence",
+      "sourceType": "procedural",
+      "position": { "x": 30, "y": 0, "z": 0 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 12, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-fence-north",
+      "name": "北侧围栏",
+      "type": "fence",
+      "sourceType": "procedural",
+      "position": { "x": 2, "y": 0, "z": -22 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 18, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-fence-south",
+      "name": "南侧围栏",
+      "type": "fence",
+      "sourceType": "procedural",
+      "position": { "x": 2, "y": 0, "z": 22 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 18, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-lamp-1",
+      "name": "路灯 1",
+      "type": "lampPost",
+      "sourceType": "procedural",
+      "position": { "x": -18, "y": 0, "z": -2.8 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-lamp-2",
+      "name": "路灯 2",
+      "type": "lampPost",
+      "sourceType": "procedural",
+      "position": { "x": -6, "y": 0, "z": -2.8 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-lamp-3",
+      "name": "路灯 3",
+      "type": "lampPost",
+      "sourceType": "procedural",
+      "position": { "x": 6, "y": 0, "z": -2.8 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-lamp-4",
+      "name": "路灯 4",
+      "type": "lampPost",
+      "sourceType": "procedural",
+      "position": { "x": 18, "y": 0, "z": -2.8 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "campus-tree-1",
+      "name": "厂区绿化 1",
+      "type": "asset-model",
+      "sourceType": "asset",
+      "assetId": "ast-2wjfj1",
+      "sourceUrl": "/uploads/models/ast-2wjfj1.glb",
+      "position": { "x": -20, "y": 0, "z": -16 },
+      "rotation": { "x": 0, "y": 0.2, "z": 0 },
+      "scale": { "x": 1.5, "y": 1.5, "z": 1.5 },
+      "props": {}
+    },
+    {
+      "id": "campus-tree-2",
+      "name": "厂区绿化 2",
+      "type": "asset-model",
+      "sourceType": "asset",
+      "assetId": "ast-2wjfj1",
+      "sourceUrl": "/uploads/models/ast-2wjfj1.glb",
+      "position": { "x": -11.5, "y": 0, "z": -18 },
+      "rotation": { "x": 0, "y": 1.1, "z": 0 },
+      "scale": { "x": 1.35, "y": 1.35, "z": 1.35 },
+      "props": {}
+    },
+    {
+      "id": "campus-tree-3",
+      "name": "厂区绿化 3",
+      "type": "asset-model",
+      "sourceType": "asset",
+      "assetId": "ast-2wjfj1",
+      "sourceUrl": "/uploads/models/ast-2wjfj1.glb",
+      "position": { "x": 8, "y": 0, "z": -19 },
+      "rotation": { "x": 0, "y": 2.2, "z": 0 },
+      "scale": { "x": 1.55, "y": 1.55, "z": 1.55 },
+      "props": {}
+    },
+    {
+      "id": "campus-tree-4",
+      "name": "厂区绿化 4",
+      "type": "asset-model",
+      "sourceType": "asset",
+      "assetId": "ast-2wjfj1",
+      "sourceUrl": "/uploads/models/ast-2wjfj1.glb",
+      "position": { "x": 20, "y": 0, "z": -18 },
+      "rotation": { "x": 0, "y": 0.6, "z": 0 },
+      "scale": { "x": 1.45, "y": 1.45, "z": 1.45 },
+      "props": {}
+    },
+    {
+      "id": "campus-tree-5",
+      "name": "厂区绿化 5",
+      "type": "asset-model",
+      "sourceType": "asset",
+      "assetId": "ast-2wjfj1",
+      "sourceUrl": "/uploads/models/ast-2wjfj1.glb",
+      "position": { "x": -19, "y": 0, "z": 18 },
+      "rotation": { "x": 0, "y": 2.6, "z": 0 },
+      "scale": { "x": 1.55, "y": 1.55, "z": 1.55 },
+      "props": {}
+    },
+    {
+      "id": "campus-tree-6",
+      "name": "厂区绿化 6",
+      "type": "asset-model",
+      "sourceType": "asset",
+      "assetId": "ast-2wjfj1",
+      "sourceUrl": "/uploads/models/ast-2wjfj1.glb",
+      "position": { "x": 20, "y": 0, "z": 18.5 },
+      "rotation": { "x": 0, "y": 0.9, "z": 0 },
+      "scale": { "x": 1.5, "y": 1.5, "z": 1.5 },
+      "props": {}
+    }
+  ]
+}

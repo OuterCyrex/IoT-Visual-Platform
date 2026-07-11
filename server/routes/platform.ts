@@ -1440,16 +1440,20 @@ export const routes: RouteDefinition[] = [
         importedSceneNodes = Array.isArray(rawNodes) ? rawNodes : []
       }
 
-      const sceneNodes = Array.isArray(body.sceneNodes)
-        ? body.sceneNodes
-        : importedSceneNodes
+      const explicitSceneNodes = Array.isArray(body.sceneNodes) ? body.sceneNodes : null
+      const sceneNodes =
+        explicitSceneNodes && explicitSceneNodes.length > 0
+          ? explicitSceneNodes
+          : importedSceneNodes.length > 0
+            ? importedSceneNodes
+            : explicitSceneNodes ?? []
 
       return {
         id: createId('scn'),
         name: String(body.name ?? ''),
         group: String(body.group ?? ''),
         owner: String(body.owner ?? ''),
-        modelCount: Number(body.modelCount ?? sceneNodes.length ?? 0),
+        modelCount: sceneNodes.length > 0 ? sceneNodes.length : Number(body.modelCount ?? 0),
         status: (body.status as SceneProject['status']) ?? 'draft',
         engine: String(body.engine ?? 'Three.js'),
         sceneNodes,

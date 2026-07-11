@@ -1,0 +1,194 @@
+{
+  "sceneNodes": [
+    {
+      "id": "node-road-main",
+      "name": "厂区主通道",
+      "type": "road",
+      "sourceType": "procedural",
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.6, "y": 1, "z": 1.1 },
+      "props": {}
+    },
+    {
+      "id": "node-fence-west",
+      "name": "西侧围栏",
+      "type": "fence",
+      "sourceType": "procedural",
+      "position": { "x": -6.6, "y": 0, "z": 0 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 2.8, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-fence-east",
+      "name": "东侧围栏",
+      "type": "fence",
+      "sourceType": "procedural",
+      "position": { "x": 6.6, "y": 0, "z": 0 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 2.8, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-lamp-1",
+      "name": "道路路灯 A",
+      "type": "lampPost",
+      "sourceType": "procedural",
+      "position": { "x": -4.5, "y": 0, "z": -2.6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-lamp-2",
+      "name": "道路路灯 B",
+      "type": "lampPost",
+      "sourceType": "procedural",
+      "position": { "x": 4.5, "y": 0, "z": -2.6 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-cnc-1",
+      "name": "加工中心 1",
+      "type": "cnc",
+      "sourceType": "procedural",
+      "position": { "x": -2.8, "y": 0, "z": 3.4 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-cnc-2",
+      "name": "加工中心 2",
+      "type": "cnc",
+      "sourceType": "procedural",
+      "position": { "x": 0.8, "y": 0, "z": 3.4 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-arm-1",
+      "name": "机械臂工位",
+      "type": "arm",
+      "sourceType": "procedural",
+      "position": { "x": 4.2, "y": 0, "z": 3.1 },
+      "rotation": { "x": 0, "y": -0.9, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-conveyor-main",
+      "name": "主输送线",
+      "type": "conveyor",
+      "sourceType": "procedural",
+      "position": { "x": 1.1, "y": 0, "z": 1.2 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1.25, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-workbench-1",
+      "name": "装配工作台",
+      "type": "workbench",
+      "sourceType": "procedural",
+      "position": { "x": -3.8, "y": 0, "z": -3.1 },
+      "rotation": { "x": 0, "y": 0.35, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-forklift-1",
+      "name": "物流叉车",
+      "type": "forklift",
+      "sourceType": "procedural",
+      "position": { "x": 2.9, "y": 0, "z": -3.4 },
+      "rotation": { "x": 0, "y": -0.5, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-pipe-skid-1",
+      "name": "工艺管组",
+      "type": "pipeSkid",
+      "sourceType": "procedural",
+      "position": { "x": -7.6, "y": 0, "z": 5.1 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-pump-1",
+      "name": "循环泵",
+      "type": "pump",
+      "sourceType": "procedural",
+      "position": { "x": -6.6, "y": 0, "z": 2.6 },
+      "rotation": { "x": 0, "y": 1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-tank-1",
+      "name": "储罐 A",
+      "type": "storageTank",
+      "sourceType": "procedural",
+      "position": { "x": -9.3, "y": 0, "z": 2.3 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 0.95, "y": 0.95, "z": 0.95 },
+      "props": {}
+    },
+    {
+      "id": "node-tank-2",
+      "name": "储罐 B",
+      "type": "storageTank",
+      "sourceType": "procedural",
+      "position": { "x": -9.3, "y": 0, "z": 6.1 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 0.95, "y": 0.95, "z": 0.95 },
+      "props": {}
+    },
+    {
+      "id": "node-rack-1",
+      "name": "边缘机柜 A",
+      "type": "serverRack",
+      "sourceType": "procedural",
+      "position": { "x": 8.2, "y": 0, "z": 2.4 },
+      "rotation": { "x": 0, "y": -1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-rack-2",
+      "name": "边缘机柜 B",
+      "type": "serverRack",
+      "sourceType": "procedural",
+      "position": { "x": 8.2, "y": 0, "z": 4.1 },
+      "rotation": { "x": 0, "y": -1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-cooling-1",
+      "name": "机房空调",
+      "type": "coolingUnit",
+      "sourceType": "procedural",
+      "position": { "x": 8.2, "y": 0, "z": -0.1 },
+      "rotation": { "x": 0, "y": -1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    },
+    {
+      "id": "node-cabinet-1",
+      "name": "控制柜",
+      "type": "controlCabinet",
+      "sourceType": "procedural",
+      "position": { "x": 5.8, "y": 0, "z": -0.8 },
+      "rotation": { "x": 0, "y": -1.5708, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {}
+    }
+  ]
+}
