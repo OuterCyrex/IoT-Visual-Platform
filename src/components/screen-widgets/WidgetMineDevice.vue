@@ -50,31 +50,70 @@
         </filter>
       </defs>
 
-      <!-- TYPE 1: SHAFT (主/副竖井系统) -->
+      <!-- TYPE 1: SHAFT (主/副竖井系统 - 深度重塑版本) -->
       <g v-if="deviceType === 'shaft'" class="isometric-group">
-        <!-- Foundation & Shadows -->
-        <ellipse cx="100" cy="180" rx="60" ry="20" fill="black" opacity="0.5" />
-        <polygon points="50,180 50,165 150,165 150,180" fill="#1e293b" />
+        <!-- 1. Foundation & Shadows -->
+        <ellipse cx="100" cy="188" rx="65" ry="18" fill="black" opacity="0.55" />
         
-        <!-- Tower Legs (Structure) -->
-        <line x1="60" y1="170" x2="60" y2="90" stroke="#475569" stroke-width="4.5" />
-        <line x1="140" y1="170" x2="140" y2="90" stroke="#475569" stroke-width="4.5" />
-        <line x1="60" y1="125" x2="140" y2="125" stroke="#334155" stroke-width="3" />
-        <line x1="60" y1="90" x2="140" y2="150" stroke="#334155" stroke-width="1.5" />
-        <line x1="140" y1="90" x2="60" y2="150" stroke="#334155" stroke-width="1.5" />
-
-        <!-- Main Specular Elevator Tower Body -->
-        <ellipse cx="100" cy="50" rx="35" ry="14" fill="#475569" stroke="#334155" />
-        <path :d="'M 65 50 A 35 14 0 0 0 135 50 L 135 130 A 35 14 0 0 1 65 130 Z'" :fill="'url(#metalCylinder-' + id + ')'" stroke="#0f172a" />
+        <!-- Concrete base block -->
+        <polygon points="45,188 55,168 145,168 155,188" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+        <polygon points="45,188 155,188 145,196 35,196" fill="#0f172a" opacity="0.8" />
         
-        <!-- Ring reinforcement plates -->
-        <ellipse cx="100" cy="75" rx="35.5" ry="14" fill="none" stroke="#64748b" stroke-width="1.5" />
-        <ellipse cx="100" cy="105" rx="35.5" ry="14" fill="none" stroke="#64748b" stroke-width="1.5" />
+        <!-- 2. Outer Scaffold Structural Frame (Steel Truss Cage) -->
+        <!-- Vertical structural beams -->
+        <line x1="50" y1="172" x2="50" y2="70" stroke="#475569" stroke-width="4" />
+        <line x1="150" y1="172" x2="150" y2="70" stroke="#475569" stroke-width="4" />
+        <line x1="100" y1="180" x2="100" y2="155" stroke="#334155" stroke-width="3" /> <!-- Middle support -->
+        
+        <!-- Horizontal tie beams -->
+        <line x1="50" y1="70" x2="150" y2="70" stroke="#334155" stroke-width="3" />
+        <line x1="50" y1="105" x2="150" y2="105" stroke="#334155" stroke-width="3.5" />
+        <line x1="50" y1="140" x2="150" y2="140" stroke="#334155" stroke-width="3.5" />
+        
+        <!-- Cross bracing braces -->
+        <line x1="50" y1="70" x2="150" y2="105" stroke="#475569" stroke-width="1.5" />
+        <line x1="150" y1="70" x2="50" y2="105" stroke="#475569" stroke-width="1.5" />
+        <line x1="50" y1="105" x2="150" y2="140" stroke="#475569" stroke-width="1.5" />
+        <line x1="150" y1="105" x2="50" y2="140" stroke="#475569" stroke-width="1.5" />
+        <line x1="50" y1="140" x2="150" y2="172" stroke="#475569" stroke-width="1.5" />
+        <line x1="150" y1="140" x2="50" y2="172" stroke="#475569" stroke-width="1.5" />
 
-        <!-- Text inscription on Shaft Tower -->
-        <rect x="75" y="65" width="50" height="40" rx="2" fill="#020617" fill-opacity="0.85" stroke="#1e293b" />
-        <text x="100" y="86" fill="#e2e8f0" font-size="10px" font-weight="bold" text-anchor="middle" letter-spacing="1">东</text>
-        <text x="100" y="98" fill="#38bdf8" font-size="10px" font-weight="bold" text-anchor="middle" letter-spacing="1">晋</text>
+        <!-- 3. Specular Cylinder Shaft Body (Internal) -->
+        <ellipse cx="100" cy="45" rx="33" ry="12" fill="#334155" stroke="#1e293b" />
+        <path :d="'M 67 45 A 33 12 0 0 0 133 45 L 133 145 A 33 12 0 0 1 67 145 Z'" :fill="'url(#metalCylinder-' + id + ')'" stroke="#0f172a" />
+        
+        <!-- Cylinder Band Reinforcements -->
+        <ellipse cx="100" cy="65" rx="33.5" ry="12" fill="none" stroke="#475569" stroke-width="1.2" />
+        <ellipse cx="100" cy="95" rx="33.5" ry="12" fill="none" stroke="#475569" stroke-width="1.2" />
+        <ellipse cx="100" cy="125" rx="33.5" ry="12" fill="none" stroke="#475569" stroke-width="1.2" />
+
+        <!-- 4. Top Ventilation / Hood Caps -->
+        <path d="M 67 45 Q 100 20, 133 45 Z" fill="url(#metalCylinder)" stroke="#0f172a" />
+        <!-- Exhaust stack pipeline -->
+        <path d="M 100 26 L 100 12 L 115 8" fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round" />
+        <polygon points="112,8 118,5 120,11 114,14" fill="#0f172a" />
+
+        <!-- 5. Vertical Ladder with safety loops -->
+        <!-- Rails -->
+        <path d="M 125 55 L 125 140 M 128 55 L 128 140" stroke="#64748b" stroke-width="0.8" />
+        <!-- Rungs -->
+        <path d="M 125 60 L 128 60 M 125 68 L 128 68 M 125 76 L 128 76 M 125 84 L 128 84 M 125 92 L 128 92 M 125 100 L 128 100 M 125 108 L 128 108 M 125 116 L 128 116 M 125 124 L 128 124 M 125 132 L 128 132" stroke="#64748b" stroke-width="0.6" />
+        <!-- Safety Hoop guards -->
+        <path d="M 125 65 A 6 6 0 0 1 133 70 M 125 85 A 6 6 0 0 1 133 90 M 125 105 A 6 6 0 0 1 133 110 M 125 125 A 6 6 0 0 1 133 130" fill="none" stroke="#475569" stroke-width="0.8" />
+
+        <!-- 6. Exit Discharge Chute & Micro Conveyor -->
+        <polygon points="90,145 110,145 125,160 85,160" fill="#0f172a" stroke="#334155" />
+        <!-- Micro vibrating feeder -->
+        <rect x="90" y="155" width="20" height="8" fill="#ca8a04" rx="1" />
+        <!-- Conveyor header pulley discharging rightwards -->
+        <path d="M 105 162 L 138 172" stroke="#475569" stroke-width="4.5" stroke-linecap="round" />
+        <ellipse cx="138" cy="172" rx="2" ry="1" fill="#fbbf24" class="drill-led" />
+
+        <!-- 7. Glass Sci-fi Name Badge (东晋东主井) -->
+        <rect x="76" y="70" width="48" height="42" rx="4" fill="#030712" fill-opacity="0.9" stroke="#38bdf8" stroke-width="1.2" />
+        <text x="100" y="83" fill="#ffffff" font-size="8.5px" font-weight="bold" text-anchor="middle" letter-spacing="0.5">东晋东</text>
+        <text x="100" y="94" fill="#38bdf8" font-size="8.5px" font-weight="bold" text-anchor="middle" letter-spacing="0.5">主斜井</text>
+        <text x="100" y="105" fill="#10b981" font-size="7.5px" font-weight="bold" text-anchor="middle" class="drill-led">SYSTEM</text>
 
         <!-- Status glowing ring -->
         <ellipse cx="100" cy="45" rx="30" ry="12" fill="none" stroke="#38bdf8" stroke-width="2.5" class="neon-ring" :filter="'url(#laserGlow-' + id + ')'" />
