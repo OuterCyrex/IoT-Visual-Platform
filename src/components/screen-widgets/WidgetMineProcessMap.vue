@@ -75,7 +75,7 @@
       <!-- 3. DETAILED MODELS -->
 
       <!-- 采矿区 101 工作面 -->
-      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(100, 290)">
+      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(100, 290)" @mouseenter="hoveredNode = 'mining'" @mouseleave="hoveredNode = null">
         <path d="M 10 50 L 25 15 L 75 0 L 125 15 L 140 50 Z" fill="#334155" stroke="#475569" stroke-width="1.5" />
         <path d="M 30 50 L 45 25 L 105 25 L 120 50 Z" fill="#020617" />
         <!-- Glowing light indicator -->
@@ -102,7 +102,7 @@
       </g>
 
       <!-- 重力分选分析塔 (中央塔身) -->
-      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(370, 90)">
+      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(370, 90)" @mouseenter="hoveredNode = 'screening'" @mouseleave="hoveredNode = null">
         <rect x="20" y="30" width="50" height="90" fill="url(#metalCylinder)" stroke="#1e293b" />
         <path d="M 20 30 C 20 15, 70 15, 70 30 Z" fill="#475569" stroke="#334155" />
         <ellipse cx="45" cy="10" rx="26" ry="8" fill="none" stroke="#38bdf8" stroke-width="2" class="neon-ring" filter="url(#laserGlow)" />
@@ -151,7 +151,7 @@
       </g>
 
       <!-- 精矿筒仓 A (上方较大) -->
-      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(640, 220)">
+      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(640, 220)" @mouseenter="hoveredNode = 'silo_a'" @mouseleave="hoveredNode = null">
         <ellipse cx="35" cy="12" rx="22" ry="9" fill="#475569" stroke="#334155" />
         <path d="M 13 12 A 22 9 0 0 0 57 12 L 57 52 A 22 9 0 0 1 13 52 Z" fill="url(#metalCylinder)" stroke="#1e293b" />
         <path d="M 13 52 A 22 9 0 0 0 57 52 L 35 70 Z" fill="#1e293b" />
@@ -166,7 +166,7 @@
       </g>
 
       <!-- 副矿筒仓 B (下方较小) -->
-      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(710, 275)">
+      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(710, 275)" @mouseenter="hoveredNode = 'silo_b'" @mouseleave="hoveredNode = null">
         <ellipse cx="25" cy="9" rx="17" ry="7" fill="#1e293b" stroke="#0ea5e9" stroke-dasharray="2 2" />
         <path d="M 8 9 A 17 7 0 0 0 42 9 L 42 38 A 17 7 0 0 1 8 38 Z" fill="rgba(15, 23, 42, 0.7)" stroke="#0ea5e9" stroke-dasharray="3 3" />
         <path d="M 8 38 A 17 7 0 0 0 42 38 L 25 52 Z" stroke="#0284c7" stroke-dasharray="3 3" />
@@ -178,8 +178,72 @@
         <rect x="0" y="85" width="50" height="15" rx="2" fill="#0f172a" stroke="#ca8a04" stroke-width="0.8" />
         <text x="25" y="96" class="lbl-val font-mono text-yellow-500">54.2%</text>
       </g>
-
     </svg>
+
+    <!-- Floating Interactive Tooltip Overlay -->
+    <transition name="fade">
+      <div v-if="hoveredNode" class="mine-tooltip" :style="tooltipStyle">
+        <!-- Corner decorations -->
+        <div class="tooltip-corner tl"></div>
+        <div class="tooltip-corner tr"></div>
+        <div class="tooltip-corner bl"></div>
+        <div class="tooltip-corner br"></div>
+
+        <template v-if="hoveredNode === 'mining'">
+          <div class="tooltip-header">
+            <span class="tooltip-led pulse-blue"></span>
+            <span>101 采矿工作面 运行监测</span>
+          </div>
+          <div class="tooltip-body">
+            <div class="tooltip-row"><span class="lbl">工作面风速:</span><span class="val">2.8 m/s</span></div>
+            <div class="tooltip-row"><span class="lbl">瓦斯涌出量:</span><span class="val">0.12%</span></div>
+            <div class="tooltip-row"><span class="lbl">钻探机负载:</span><span class="val">85 A</span></div>
+            <div class="tooltip-row"><span class="lbl">采集频率:</span><span class="val text-cyan-400 font-mono">{{ miningRate }} Hz</span></div>
+            <div class="tooltip-row"><span class="lbl">运行状态:</span><span class="val text-emerald-400">稳定运行</span></div>
+          </div>
+        </template>
+
+        <template v-if="hoveredNode === 'screening'">
+          <div class="tooltip-header">
+            <span class="tooltip-led pulse-green"></span>
+            <span>重力分选分析塔 状态</span>
+          </div>
+          <div class="tooltip-body">
+            <div class="tooltip-row"><span class="lbl">分离室压力:</span><span class="val">1.24 MPa</span></div>
+            <div class="tooltip-row"><span class="lbl">入料总流量:</span><span class="val">320 m³/h</span></div>
+            <div class="tooltip-row"><span class="lbl">离心叶转速:</span><span class="val">1450 rpm</span></div>
+            <div class="tooltip-row"><span class="lbl">振动筛频:</span><span class="val">48 Hz</span></div>
+            <div class="tooltip-row"><span class="lbl">系统综合指数:</span><span class="val text-emerald-400">良好 (96%)</span></div>
+          </div>
+        </template>
+
+        <template v-if="hoveredNode === 'silo_a'">
+          <div class="tooltip-header">
+            <span class="tooltip-led pulse-blue"></span>
+            <span>精矿储仓 A 容量明细</span>
+          </div>
+          <div class="tooltip-body">
+            <div class="tooltip-row"><span class="lbl">储矿总重量:</span><span class="val">8,240 t</span></div>
+            <div class="tooltip-row"><span class="lbl">有效仓容度:</span><span class="val">15,000 m³</span></div>
+            <div class="tooltip-row"><span class="lbl">液位探测高:</span><span class="val">14.8 m</span></div>
+            <div class="tooltip-row"><span class="lbl">当前库存比:</span><span class="val text-sky-400 font-mono">{{ siloALevel }}%</span></div>
+          </div>
+        </template>
+
+        <template v-if="hoveredNode === 'silo_b'">
+          <div class="tooltip-header">
+            <span class="tooltip-led pulse-yellow"></span>
+            <span>副矿混煤仓 B 明细</span>
+          </div>
+          <div class="tooltip-body">
+            <div class="tooltip-row"><span class="lbl">堆积储矿重:</span><span class="val">3,120 t</span></div>
+            <div class="tooltip-row"><span class="lbl">有效仓容度:</span><span class="val">8,000 m³</span></div>
+            <div class="tooltip-row"><span class="lbl">堆积孔隙率:</span><span class="val">38%</span></div>
+            <div class="tooltip-row"><span class="lbl">当前库存比:</span><span class="val text-yellow-500 font-mono">54.2%</span></div>
+          </div>
+        </template>
+      </div>
+    </transition>
 
     <!-- Overlay process summary details -->
     <div class="process-legend select-none">
@@ -199,7 +263,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -214,6 +278,7 @@ const props = withDefaults(
 )
 
 const hasData = computed(() => Boolean(props.rows && props.rows.length > 0 && props.yField))
+const hoveredNode = ref<string | null>(null)
 
 const firstRow = computed(() => {
   if (hasData.value) {
@@ -242,6 +307,15 @@ const siloALevel = computed(() => {
     }
   }
   return '64'
+})
+
+// Dynamic tooltip positions inside viewBox proportions
+const tooltipStyle = computed(() => {
+  if (hoveredNode.value === 'mining') return { left: '26%', top: '35%' }
+  if (hoveredNode.value === 'screening') return { left: '56%', top: '15%' }
+  if (hoveredNode.value === 'silo_a') return { left: '56%', top: '24%' }
+  if (hoveredNode.value === 'silo_b') return { left: '50%', top: '50%' }
+  return { display: 'none' }
 })
 
 function getDustStyle(n: number) {
@@ -346,6 +420,18 @@ function getDustStyle(n: number) {
   overflow: visible;
 }
 
+/* Zoom / scale animation for hover */
+.iso-node {
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.iso-node:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.3));
+}
+
 /* Flow Line conveyor belts */
 .pipe-flow-1 {
   animation: pipe-shuttle 1.8s linear infinite;
@@ -417,6 +503,93 @@ function getDustStyle(n: number) {
 @keyframes ring-pulse {
   from { stroke: #0284c7; filter: drop-shadow(0 0 2px #0284c7); }
   to { stroke: #38bdf8; filter: drop-shadow(0 0 6px #38bdf8); }
+}
+
+/* Sci-Fi Tooltip Overlay Styles */
+.mine-tooltip {
+  position: absolute;
+  width: 190px;
+  background: rgba(8, 14, 28, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 6px;
+  padding: 10px 12px;
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.85),
+    0 0 15px rgba(56, 189, 248, 0.2),
+    inset 0 0 10px rgba(56, 189, 248, 0.12);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  pointer-events: none;
+  transition: all 0.25s ease-out;
+}
+
+/* Tooltip Corner Anchors */
+.tooltip-corner {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-color: #38bdf8;
+  border-style: solid;
+}
+.tooltip-corner.tl { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+.tooltip-corner.tr { top: -1px; right: -1px; border-width: 1px 1px 0 0; }
+.tooltip-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 1px 1px; }
+.tooltip-corner.br { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+
+.tooltip-led {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+}
+
+.tooltip-led.pulse-blue { background: #38bdf8; box-shadow: 0 0 5px #38bdf8; }
+.tooltip-led.pulse-green { background: #10b981; box-shadow: 0 0 5px #10b981; }
+.tooltip-led.pulse-yellow { background: #f59e0b; box-shadow: 0 0 5px #f59e0b; }
+
+.tooltip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9.5px;
+}
+
+.tooltip-row .lbl {
+  color: #64748b;
+}
+
+.tooltip-row .val {
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+/* Vue Transition effects */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(5px);
 }
 
 /* Legend styling */
