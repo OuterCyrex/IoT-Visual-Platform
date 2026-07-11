@@ -15,11 +15,8 @@
       </div>
     </div>
     
-    <!-- Child Placeholder content -->
-    <div class="flex-1 flex flex-col items-center justify-center text-center text-xs text-slate-500 border border-dashed border-slate-800/60 rounded-lg p-2 bg-slate-900/10">
-      <span class="text-slate-400 font-medium">高级装饰卡片</span>
-      <span class="text-[10px] text-slate-600 mt-1">可作为文字或其他组件的基础背景</span>
-    </div>
+    <!-- Empty space for absolute-positioned elements -->
+    <div class="flex-1"></div>
   </div>
 </template>
 
