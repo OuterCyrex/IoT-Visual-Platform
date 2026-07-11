@@ -156,6 +156,217 @@ export const seedState: PlatformState = {
       tags: ['环保', '告警'],
       screenNodes: [],
     },
+    {
+      id: 'scr-004',
+      name: '智算中心101号机房运行大屏',
+      group: '数据中心',
+      scene: '101号机房',
+      owner: '李工',
+      updatedAt: '2026-07-11 18:30',
+      status: 'published',
+      publishedVersion: 'v1.0.0',
+      tags: ['数据中心', '机房平面图', '设备遥测'],
+      screenNodes: [
+        {
+          id: 'node-title',
+          x: 200,
+          y: 15,
+          w: 1520,
+          h: 70,
+          component: 'text',
+          props: { text: 'GigaData 智算数据中心 101 号核心机房运行总览' }
+        },
+        {
+          id: 'node-time',
+          x: 40,
+          y: 15,
+          w: 360,
+          h: 80,
+          component: 'timeWeather',
+          props: { text: '系统时间与环境天气' }
+        },
+        {
+          id: 'node-pue',
+          x: 40,
+          y: 110,
+          w: 380,
+          h: 180,
+          component: 'metricCard',
+          props: { text: '机房实时 PUE 能效比', datasetId: '', xField: '实时能效', yField: '1.24' }
+        },
+        {
+          id: 'node-soc',
+          x: 40,
+          y: 310,
+          w: 380,
+          h: 180,
+          component: 'ringProgress',
+          props: { text: '备用储能电量 SoC', datasetId: 'set-production-progress', xField: 'task_name', yField: 'progress_percent', refreshInterval: 5000 }
+        },
+        {
+          id: 'node-humidity',
+          x: 40,
+          y: 510,
+          w: 380,
+          h: 240,
+          component: 'pieChart',
+          props: { text: '机柜区域热载荷比例', datasetId: 'set-energy-distribution', xField: 'workshop', yField: 'kwh', refreshInterval: 5000 }
+        },
+        {
+          id: 'node-floorplan-box',
+          x: 450,
+          y: 110,
+          w: 620,
+          h: 640,
+          component: 'borderBox',
+          props: { text: '101 号核心机房物理设备布局' }
+        },
+        {
+          id: 'dev-rack-a01',
+          x: 480,
+          y: 170,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: 'A-01 机柜', deviceType: 'rack', status: 'running' }
+        },
+        {
+          id: 'dev-rack-a02',
+          x: 610,
+          y: 170,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: 'A-02 核心机柜 (MQTT)', deviceType: 'rack', status: 'running', datasetId: 'set-ev-mqtt', xField: 'timestamp', yField: 'temperature', refreshInterval: 0 }
+        },
+        {
+          id: 'dev-rack-a03',
+          x: 740,
+          y: 170,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: 'A-03 机柜', deviceType: 'rack', status: 'running' }
+        },
+        {
+          id: 'dev-chiller-01',
+          x: 880,
+          y: 170,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: '1号精密空调', deviceType: 'chiller', status: 'running' }
+        },
+        {
+          id: 'dev-rack-b01',
+          x: 480,
+          y: 330,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: 'B-01 机柜', deviceType: 'rack', status: 'running' }
+        },
+        {
+          id: 'dev-rack-b02',
+          x: 610,
+          y: 330,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: 'B-02 备用机柜', deviceType: 'rack', status: 'warning' }
+        },
+        {
+          id: 'dev-rack-b03',
+          x: 740,
+          y: 330,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: 'B-03 机柜', deviceType: 'rack', status: 'running' }
+        },
+        {
+          id: 'dev-chiller-02',
+          x: 880,
+          y: 330,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: '2号精密空调', deviceType: 'chiller', status: 'running' }
+        },
+        {
+          id: 'dev-transformer',
+          x: 480,
+          y: 490,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: '1号变压器', deviceType: 'transformer', status: 'running' }
+        },
+        {
+          id: 'dev-cabinet',
+          x: 610,
+          y: 490,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: '高压配电柜', deviceType: 'cabinet', status: 'running' }
+        },
+        {
+          id: 'dev-ups',
+          x: 740,
+          y: 490,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: 'UPS 机组', deviceType: 'ups', status: 'running' }
+        },
+        {
+          id: 'dev-generator',
+          x: 880,
+          y: 490,
+          w: 120,
+          h: 140,
+          component: 'topologyDevice',
+          props: { text: '应急柴油发电机', deviceType: 'generator', status: 'stopped' }
+        },
+        {
+          id: 'node-alerts',
+          x: 40,
+          y: 770,
+          w: 1030,
+          h: 270,
+          component: 'alertList',
+          props: { text: '智算机房动力与安全告警日志流', datasetId: 'set-active-alarms', xField: 'message', yField: 'level', refreshInterval: 5000 }
+        },
+        {
+          id: 'node-power-line',
+          x: 1100,
+          y: 110,
+          w: 780,
+          h: 280,
+          component: 'lineChart',
+          props: { text: '机房总用电负荷逐时趋势 (kW)', datasetId: 'set-hourly-throughput', xField: 'hour', yField: 'count', refreshInterval: 5000 }
+        },
+        {
+          id: 'node-vibration-chart',
+          x: 1100,
+          y: 410,
+          w: 780,
+          h: 310,
+          component: 'chart',
+          props: { text: '核心节点机架出风口温度监控 (℃)', datasetId: 'set-equipment-vibration', xField: 'device', yField: 'vibration', refreshInterval: 5000 }
+        },
+        {
+          id: 'node-cooling-flow',
+          x: 1100,
+          y: 740,
+          w: 780,
+          h: 300,
+          component: 'scrollTable',
+          props: { text: '各机架集群温度与负荷清单', datasetId: 'set-workshop-oee', xField: 'workshop', yField: 'oee', refreshInterval: 5000 }
+        }
+      ],
+    },
   ],
   sceneProjects: [
     {
