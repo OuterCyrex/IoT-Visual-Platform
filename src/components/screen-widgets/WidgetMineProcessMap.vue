@@ -11,7 +11,7 @@
     </div>
 
     <!-- Isometric SVG -->
-    <svg viewBox="0 0 850 500" fill="none" xmlns="http://www.w3.org/2000/svg" class="isometric-svg select-none">
+    <svg viewBox="0 0 1050 580" fill="none" xmlns="http://www.w3.org/2000/svg" class="isometric-svg select-none">
       <defs>
         <!-- Specular Metallic Cylinder Gradients -->
         <linearGradient id="metalCylinder" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -63,36 +63,36 @@
       </defs>
 
       <!-- 1. Ground/Foundation Shadows -->
-      <ellipse cx="300" cy="200" rx="42" ry="14" fill="black" opacity="0.45" /> <!-- 竖井原煤仓 shadow -->
-      <ellipse cx="145" cy="385" rx="55" ry="18" fill="black" opacity="0.45" /> <!-- 采矿区 shadow -->
-      <ellipse cx="430" cy="285" rx="35" ry="10" fill="black" opacity="0.4" /> <!-- 筛分中仓 shadow -->
-      <ellipse cx="510" cy="275" rx="35" ry="10" fill="black" opacity="0.4" /> <!-- 地面原煤仓 shadow -->
-      <ellipse cx="680" cy="305" rx="35" ry="11" fill="black" opacity="0.4" /> <!-- 精矿仓 shadow -->
-      <ellipse cx="745" cy="355" rx="30" ry="9" fill="black" opacity="0.4" />  <!-- 混煤仓 shadow -->
+      <ellipse cx="340" cy="230" rx="42" ry="14" fill="black" opacity="0.45" /> <!-- 竖井原煤仓 shadow -->
+      <ellipse cx="155" cy="430" rx="55" ry="18" fill="black" opacity="0.45" /> <!-- 采矿区 shadow -->
+      <ellipse cx="530" cy="320" rx="35" ry="10" fill="black" opacity="0.4" /> <!-- 筛分中仓 shadow -->
+      <ellipse cx="640" cy="310" rx="35" ry="10" fill="black" opacity="0.4" /> <!-- 地面原煤仓 shadow -->
+      <ellipse cx="830" cy="340" rx="35" ry="11" fill="black" opacity="0.4" /> <!-- 精矿仓 shadow -->
+      <ellipse cx="920" cy="400" rx="30" ry="9" fill="black" opacity="0.4" />  <!-- 混煤仓 shadow -->
 
       <!-- 2. Conveyor Belt Network (Flowing Lines & Steel Trusses) -->
       <!-- Conveyor bridges backplates -->
-      <path d="M 170 340 L 290 270" stroke="#1e293b" stroke-width="6" stroke-linecap="round" />
-      <path d="M 330 240 L 400 200" stroke="#1e293b" stroke-width="6" stroke-linecap="round" />
-      <path d="M 430 200 L 510 240" stroke="#1e293b" stroke-width="6" stroke-linecap="round" />
+      <path d="M 180 385 L 330 300" stroke="#1e293b" stroke-width="6" stroke-linecap="round" />
+      <path d="M 375 270 L 490 225" stroke="#1e293b" stroke-width="6" stroke-linecap="round" />
+      <path d="M 530 225 L 640 270" stroke="#1e293b" stroke-width="6" stroke-linecap="round" />
 
       <!-- Truss diagonals -->
-      <path d="M 170 340 L 290 270 M 180 338 L 180 346 M 210 321 L 210 329 M 240 303 L 240 311 M 270 286 L 270 294" stroke="#475569" stroke-width="1" />
+      <path d="M 180 385 L 330 300 M 195 382 L 195 390 M 230 362 L 230 370 M 265 342 L 265 350 M 300 322 L 300 330" stroke="#475569" stroke-width="1" />
       
       <!-- Flow lines -->
-      <path d="M 170 340 L 290 270" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6 14" class="pipe-flow-1" stroke-linecap="round" filter="url(#laserGlow)" />
-      <path d="M 330 240 L 400 200" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 14" class="pipe-flow-1" stroke-linecap="round" />
-      <path d="M 430 200 L 510 240" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6 14" class="pipe-flow-1" stroke-linecap="round" />
+      <path d="M 180 385 L 330 300" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6 14" class="pipe-flow-1" stroke-linecap="round" filter="url(#laserGlow)" />
+      <path d="M 375 270 L 490 225" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6 14" class="pipe-flow-1" stroke-linecap="round" />
+      <path d="M 530 225 L 640 270" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6 14" class="pipe-flow-1" stroke-linecap="round" />
 
       <!-- Sifter to A & B laser pipelines -->
-      <path d="M 520 250 L 660 300" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5 15" class="laser-beam-1" filter="url(#laserGlow)" />
-      <path d="M 520 250 L 720 340" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5 15" class="laser-beam-1" filter="url(#laserGlow)" />
+      <path d="M 655 285 L 815 335" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5 15" class="laser-beam-1" filter="url(#laserGlow)" />
+      <path d="M 655 285 L 900 395" stroke="#0284c7" stroke-width="2.5" stroke-dasharray="5 15" class="laser-beam-1" filter="url(#laserGlow)" />
 
 
       <!-- 3. DETAILED MODELS -->
 
       <!-- 采矿区 101 工作面 (重塑为三层立体岩石断面与支护隧道) -->
-      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(80, 270)" @mouseenter="hoveredNode = 'mining'" @mouseleave="hoveredNode = null">
+      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(80, 310)" @mouseenter="hoveredNode = 'mining'" @mouseleave="hoveredNode = null">
         <!-- Rock base block -->
         <path d="M 10 110 L 30 70 L 110 50 L 130 110 Z" fill="url(#rockGrad)" stroke="#475569" stroke-width="1.5" />
         <path d="M 10 110 L 130 110 L 120 125 L 0 125 Z" fill="#0f172a" opacity="0.8" />
@@ -117,7 +117,7 @@
       </g>
 
       <!-- 振动放矿机2号 & 竖井矿石仓 (加设钢支撑腿和水泥基座) -->
-      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(250, 110)">
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(290, 130)">
         <!-- Concrete base foundation -->
         <polygon points="10,65 20,55 60,55 50,65" fill="#334155" stroke="#475569" />
         <!-- Structural steel legs -->
@@ -139,7 +139,7 @@
       </g>
 
       <!-- 重力分选分析塔 (重塑为带有精细钢结构平台、护栏、和高反光主罐体的模型) -->
-      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(370, 90)" @mouseenter="hoveredNode = 'screening'" @mouseleave="hoveredNode = null">
+      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(440, 100)" @mouseenter="hoveredNode = 'screening'" @mouseleave="hoveredNode = null">
         <!-- Structural Platform / Girders under tower -->
         <polygon points="10,122 10,132 80,132 80,122" fill="#334155" stroke="#1e293b" />
         <line x1="20" y1="122" x2="20" y2="145" stroke="#475569" stroke-width="3" />
@@ -183,7 +183,7 @@
       </g>
 
       <!-- 筛分及配煤中仓 (带有高光金属圆筒结构与支腿) -->
-      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(480, 150)">
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(580, 170)">
         <ellipse cx="30" cy="10" rx="20" ry="8" fill="#475569" stroke="#334155" />
         <path d="M 10 10 A 20 8 0 0 0 50 10 L 50 40 A 20 8 0 0 1 10 40 Z" fill="url(#metalCylinder)" stroke="#1e293b" />
         <path d="M 10 40 A 20 8 0 0 0 50 40 L 30 55 Z" fill="#1e293b" stroke="#475569" />
@@ -197,7 +197,7 @@
       </g>
 
       <!-- 地面原煤仓 -->
-      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(560, 180)">
+      <g class="iso-node-group" filter="url(#softShadow)" transform="translate(690, 200)">
         <ellipse cx="30" cy="10" rx="20" ry="8" fill="#475569" stroke="#334155" />
         <path d="M 10 10 A 20 8 0 0 0 50 10 L 50 42 A 20 8 0 0 1 10 42 Z" fill="url(#metalCylinder)" stroke="#1e293b" />
         <path d="M 10 42 A 20 8 0 0 0 50 42 L 30 58 Z" fill="#1e293b" stroke="#475569" />
@@ -211,7 +211,7 @@
       </g>
 
       <!-- 精矿筒仓 A (上方较大，加攀爬梯、工字钢底部基座、玻璃视量表) -->
-      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(640, 220)" @mouseenter="hoveredNode = 'silo_a'" @mouseleave="hoveredNode = null">
+      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(800, 250)" @mouseenter="hoveredNode = 'silo_a'" @mouseleave="hoveredNode = null">
         <!-- Structural Legs -->
         <line x1="20" y1="52" x2="20" y2="67" stroke="#475569" stroke-width="2.5" />
         <line x1="50" y1="52" x2="50" y2="67" stroke="#475569" stroke-width="2.5" />
@@ -233,7 +233,7 @@
       </g>
 
       <!-- 副矿筒仓 B (下方较小，虚线透视发光展示内部金黄色矿石堆) -->
-      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(710, 275)" @mouseenter="hoveredNode = 'silo_b'" @mouseleave="hoveredNode = null">
+      <g class="iso-node-group iso-node" filter="url(#softShadow)" transform="translate(890, 310)" @mouseenter="hoveredNode = 'silo_b'" @mouseleave="hoveredNode = null">
         <!-- Structural legs -->
         <line x1="15" y1="38" x2="15" y2="48" stroke="#0ea5e9" stroke-width="1.5" stroke-dasharray="2 2" />
         <line x1="35" y1="38" x2="35" y2="48" stroke="#0ea5e9" stroke-width="1.5" stroke-dasharray="2 2" />
