@@ -308,6 +308,62 @@ function createLoadingDock(group: THREE.Group) {
   }
 }
 
+function createRaisedFloorZone(group: THREE.Group) {
+  addMesh(group, new THREE.BoxGeometry(12, 0.08, 8), createStandardMaterial(0x334155, 0.3, 0.82), [0, 0.04, 0])
+  const tileMat = createStandardMaterial(0x475569, 0.35, 0.78)
+  for (let x = -5; x <= 5; x += 2) {
+    for (let z = -3; z <= 3; z += 2) {
+      addMesh(group, new THREE.BoxGeometry(1.8, 0.01, 1.8), tileMat, [x, 0.09, z])
+    }
+  }
+}
+
+function createColdAislePod(group: THREE.Group) {
+  addMesh(group, new THREE.BoxGeometry(8, 0.06, 2.4), createStandardMaterial(0x0f172a, 0.18, 0.9), [0, 0.03, 0])
+  addMesh(group, new THREE.BoxGeometry(8, 0.08, 2.3), new THREE.MeshStandardMaterial({
+    color: 0x67e8f9,
+    transparent: true,
+    opacity: 0.18,
+    metalness: 0.85,
+    roughness: 0.08,
+  }), [0, 2.75, 0])
+  addMesh(group, new THREE.BoxGeometry(0.08, 2.4, 2.3), createStandardMaterial(0x64748b, 0.68, 0.26), [-4, 1.2, 0])
+  addMesh(group, new THREE.BoxGeometry(0.08, 2.4, 2.3), createStandardMaterial(0x64748b, 0.68, 0.26), [4, 1.2, 0])
+  addMesh(group, new THREE.BoxGeometry(7.9, 2.4, 0.06), createStandardMaterial(0x64748b, 0.68, 0.26), [0, 1.2, -1.15])
+  addMesh(group, new THREE.BoxGeometry(7.9, 2.4, 0.06), createStandardMaterial(0x64748b, 0.68, 0.26), [0, 1.2, 1.15])
+}
+
+function createBusway(group: THREE.Group) {
+  addMesh(group, new THREE.BoxGeometry(10, 0.22, 0.34), createStandardMaterial(0x94a3b8, 0.72, 0.24), [0, 3.6, 0])
+  for (const x of [-3.6, -1.2, 1.2, 3.6]) {
+    addMesh(group, new THREE.BoxGeometry(0.16, 1.8, 0.08), createStandardMaterial(0x64748b, 0.68, 0.26), [x, 2.68, 0])
+  }
+}
+
+function createPowerCabinet(group: THREE.Group) {
+  addMesh(group, new THREE.BoxGeometry(1.4, 2.3, 0.95), createStandardMaterial(0xe5e7eb, 0.24, 0.62), [0, 1.15, 0])
+  addMesh(group, new THREE.BoxGeometry(0.95, 1.85, 0.04), createStandardMaterial(0x0f172a, 0.88, 0.16), [0, 1.25, 0.48])
+  for (const y of [0.55, 0.95, 1.35, 1.75]) {
+    addMesh(group, new THREE.BoxGeometry(0.82, 0.06, 0.05), createStandardMaterial(0x94a3b8, 0.24, 0.72), [0, y, 0.49])
+  }
+  addMesh(group, new THREE.CylinderGeometry(0.06, 0.06, 0.04, 16), new THREE.MeshStandardMaterial({
+    color: 0x22c55e,
+    emissive: 0x22c55e,
+    emissiveIntensity: 0.5,
+  }), [0.45, 0.55, 0.5], [Math.PI / 2, 0, 0])
+}
+
+function createUpsModule(group: THREE.Group) {
+  addMesh(group, new THREE.BoxGeometry(2.1, 2.4, 1), createStandardMaterial(0xe2e8f0, 0.24, 0.58), [0, 1.2, 0])
+  addMesh(group, new THREE.BoxGeometry(1.5, 1.2, 0.04), createStandardMaterial(0x0f172a, 0.9, 0.16), [0, 1.6, 0.52])
+  addMesh(group, new THREE.BoxGeometry(1.6, 0.12, 0.04), createStandardMaterial(0x94a3b8, 0.28, 0.66), [0, 0.75, 0.52])
+  addMesh(group, new THREE.CylinderGeometry(0.08, 0.08, 0.05, 18), new THREE.MeshStandardMaterial({
+    color: 0xf59e0b,
+    emissive: 0xf59e0b,
+    emissiveIntensity: 0.45,
+  }), [0.72, 0.76, 0.54], [Math.PI / 2, 0, 0])
+}
+
 export function createProceduralMesh(type: string, id: string): THREE.Group {
   const group = new THREE.Group()
   group.name = id
@@ -375,6 +431,21 @@ export function createProceduralMesh(type: string, id: string): THREE.Group {
       break
     case 'loadingDock':
       createLoadingDock(group)
+      break
+    case 'raisedFloor':
+      createRaisedFloorZone(group)
+      break
+    case 'coldAisle':
+      createColdAislePod(group)
+      break
+    case 'busway':
+      createBusway(group)
+      break
+    case 'powerCabinet':
+      createPowerCabinet(group)
+      break
+    case 'upsModule':
+      createUpsModule(group)
       break
     default:
       createPump(group)

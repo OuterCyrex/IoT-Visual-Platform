@@ -68,6 +68,112 @@ import type {
   ScreenProject,
 } from '../types/platform.ts'
 
+const virtualServerRoomSource: DataSource = {
+  id: 'ds-virtual-server-room',
+  name: '机房实时 Mock REST',
+  type: 'REST',
+  host: 'http://factory.local/mock',
+  database: '/server-room',
+  owner: 'System',
+  status: 'connected',
+  updatedAt: '2026-07-11 00:00',
+}
+
+const virtualServerRoomDatasets: Dataset[] = [
+  {
+    id: 'set-server-room-live',
+    name: '机房设备实时数据',
+    dataSourceId: virtualServerRoomSource.id,
+    sourceName: virtualServerRoomSource.name,
+    tableName: 'server-room/live',
+    refreshMode: 'real-time',
+    fieldCount: 9,
+    updatedAt: '2026-07-11 00:00',
+  },
+]
+
+const buildServerRoomLiveRows = () => {
+  const nowMs = Date.now()
+  const drift = Math.sin(nowMs / 4000)
+  const swing = Math.cos(nowMs / 5200)
+  const rows: Array<Record<string, unknown>> = []
+
+  const rackZones = ['A列', 'B列', 'C列', 'D列']
+  rackZones.forEach((zone, zoneIndex) => {
+    for (let i = 1; i <= 8; i += 1) {
+      const code = `${zone.charAt(0).toLowerCase()}${String(i).padStart(2, '0')}`
+      const phase = zoneIndex * 0.45 + i * 0.12
+      rows.push({
+        id: `rack-${code}`,
+        device: `rack-${code}`,
+        name: `${zone}-${String(i).padStart(2, '0')} 机柜`,
+        zone,
+        status: zoneIndex === 1 && i === 5 ? 'warning' : zoneIndex === 3 && i === 8 ? 'idle' : 'running',
+        intake_temp: Number((22.4 + drift * 1.1 + phase * 0.15).toFixed(1)),
+        outlet_temp: Number((29.8 + swing * 1.9 + phase * 0.22).toFixed(1)),
+        power_kw: Number((4.8 + zoneIndex * 0.7 + i * 0.18 + drift * 0.55).toFixed(2)),
+        humidity: Number((44.5 + swing * 1.6 + zoneIndex * 0.45).toFixed(1)),
+        timestamp: nowText(),
+      })
+    }
+  })
+
+  for (let i = 1; i <= 4; i += 1) {
+    rows.push({
+      id: `cooling-${String(i).padStart(2, '0')}`,
+      device: `cooling-${String(i).padStart(2, '0')}`,
+      name: `${i}号精密空调`,
+      zone: '制冷区',
+      status: i === 2 && swing > 0.72 ? 'warning' : 'running',
+      supply_temp: Number((18.1 + i * 0.15 + drift * 0.85).toFixed(1)),
+      return_temp: Number((26.4 + i * 0.2 + swing * 1.25).toFixed(1)),
+      airflow: Number((7800 + i * 220 + drift * 360).toFixed(0)),
+      load_percent: Number((56 + i * 3 + swing * 6.5).toFixed(1)),
+      timestamp: nowText(),
+    })
+  }
+
+  for (let i = 1; i <= 2; i += 1) {
+    rows.push({
+      id: `ups-${String(i).padStart(2, '0')}`,
+      device: `ups-${String(i).padStart(2, '0')}`,
+      name: `${i}号 UPS 机组`,
+      zone: '动力区',
+      status: i === 1 && drift > 0.82 ? 'warning' : 'running',
+      load_percent: Number((48 + i * 4 + drift * 8).toFixed(1)),
+      battery_soc: Number((95 - i * 1.8 - Math.abs(swing) * 3.6).toFixed(1)),
+      output_kw: Number((36 + i * 6.8 + swing * 3.2).toFixed(1)),
+      timestamp: nowText(),
+    })
+
+    rows.push({
+      id: `pdu-${String(i).padStart(2, '0')}`,
+      device: `pdu-${String(i).padStart(2, '0')}`,
+      name: `${i}号列头柜 PDU`,
+      zone: '动力区',
+      status: 'running',
+      load_percent: Number((44 + i * 3 + swing * 5.5).toFixed(1)),
+      current_amp: Number((152 + i * 11 + drift * 10).toFixed(1)),
+      voltage: Number((220 + swing * 1.8).toFixed(1)),
+      timestamp: nowText(),
+    })
+
+    rows.push({
+      id: `power-${String(i).padStart(2, '0')}`,
+      device: `power-${String(i).padStart(2, '0')}`,
+      name: `${i}号动力柜`,
+      zone: '配电区',
+      status: 'running',
+      load_percent: Number((50 + i * 4 + drift * 4).toFixed(1)),
+      current_amp: Number((180 + i * 15 + swing * 8).toFixed(1)),
+      voltage: Number((380 + drift * 3).toFixed(1)),
+      timestamp: nowText(),
+    })
+  }
+
+  return rows
+}
+
 const sanitizeUser = (user: PlatformUser) => {
   const { passwordHash: _passwordHash, ...safeUser } = user
   return safeUser
@@ -679,6 +785,33 @@ const datasetPreviewRoute: RouteDefinition = {
   pattern: /^\/api\/datasets\/(?<id>[^/]+)\/preview$/,
   permission: 'dataset:read',
   handler: async ({ res, params }) => {
+    if (params.id === 'set-server-room-live') {
+      const nowMs = Date.now()
+      const drift = Math.sin(nowMs / 4000)
+      const swing = Math.cos(nowMs / 5200)
+      const rows = [
+        { id: 'rack-a01', device: 'rack-a01', name: 'A01 核心机柜', zone: 'A列', status: 'running', intake_temp: Number((23.8 + drift * 1.4).toFixed(1)), outlet_temp: Number((31.6 + swing * 1.8).toFixed(1)), power_kw: Number((6.8 + drift * 0.9).toFixed(2)), humidity: Number((46 + swing * 2.2).toFixed(1)), timestamp: nowText() },
+        { id: 'rack-a02', device: 'rack-a02', name: 'A02 数据机柜', zone: 'A列', status: swing > 0.72 ? 'warning' : 'running', intake_temp: Number((24.6 + swing * 1.7).toFixed(1)), outlet_temp: Number((33.2 + drift * 2.4).toFixed(1)), power_kw: Number((7.4 + swing * 1.1).toFixed(2)), humidity: Number((47.5 + drift * 2.1).toFixed(1)), timestamp: nowText() },
+        { id: 'rack-b01', device: 'rack-b01', name: 'B01 存储机柜', zone: 'B列', status: 'running', intake_temp: Number((22.9 + drift * 1.1).toFixed(1)), outlet_temp: Number((30.4 + swing * 1.5).toFixed(1)), power_kw: Number((5.9 + drift * 0.7).toFixed(2)), humidity: Number((45.4 + swing * 1.9).toFixed(1)), timestamp: nowText() },
+        { id: 'rack-b02', device: 'rack-b02', name: 'B02 备用机柜', zone: 'B列', status: drift < -0.82 ? 'idle' : 'running', intake_temp: Number((21.8 + swing * 0.8).toFixed(1)), outlet_temp: Number((28.1 + drift * 1.2).toFixed(1)), power_kw: Number((2.6 + Math.max(drift, -0.2) * 0.6).toFixed(2)), humidity: Number((44.8 + swing * 1.5).toFixed(1)), timestamp: nowText() },
+        { id: 'cooling-01', device: 'cooling-01', name: '1号精密空调', zone: '制冷区', status: swing > 0.82 ? 'warning' : 'running', supply_temp: Number((18.4 + drift * 0.9).toFixed(1)), return_temp: Number((27.3 + swing * 1.4).toFixed(1)), airflow: Number((8200 + drift * 420).toFixed(0)), load_percent: Number((63 + swing * 8).toFixed(1)), timestamp: nowText() },
+        { id: 'cooling-02', device: 'cooling-02', name: '2号精密空调', zone: '制冷区', status: 'running', supply_temp: Number((18.1 + swing * 0.8).toFixed(1)), return_temp: Number((26.8 + drift * 1.1).toFixed(1)), airflow: Number((7980 + swing * 380).toFixed(0)), load_percent: Number((58 + drift * 7).toFixed(1)), timestamp: nowText() },
+        { id: 'ups-01', device: 'ups-01', name: 'UPS 机组', zone: '动力区', status: drift > 0.88 ? 'warning' : 'running', load_percent: Number((54 + drift * 9).toFixed(1)), battery_soc: Number((93 - Math.abs(swing) * 4).toFixed(1)), output_kw: Number((42 + swing * 3.5).toFixed(1)), timestamp: nowText() },
+        { id: 'pdu-01', device: 'pdu-01', name: '列头柜 PDU', zone: '动力区', status: 'running', load_percent: Number((48 + swing * 6).toFixed(1)), current_amp: Number((168 + drift * 12).toFixed(1)), voltage: Number((220 + swing * 2).toFixed(1)), timestamp: nowText() },
+      ]
+      return sendJson(res, 200, {
+        datasetId: 'set-server-room-live',
+        sourceId: virtualServerRoomSource.id,
+        sourceName: virtualServerRoomSource.name,
+        sourceType: virtualServerRoomSource.type,
+        sourceHost: virtualServerRoomSource.host,
+        tableName: 'server-room/live',
+        limit: 20,
+        columns: Object.keys(rows[0]),
+        rows,
+      })
+    }
+
     const dataset = ((await listDatasets()) ?? []).find((item) => item.id === params.id)
     if (!dataset) {
       return sendJson(res, 404, { message: 'Dataset not found' })
@@ -1503,7 +1636,11 @@ export const routes: RouteDefinition[] = [
 
   ...resourceRouteCollection<Dataset>({
     base: '/api/datasets',
-    list: () => listDatasets(),
+    list: async () => {
+      const items = (await listDatasets()) ?? []
+      const exists = items.some((item) => item.id === 'set-server-room-live')
+      return exists ? items : [...virtualServerRoomDatasets, ...items]
+    },
     create: (item) => createDataset(item),
     update: (id, patch) => updateDataset(id, patch),
     remove: (id) => deleteDataset(id),

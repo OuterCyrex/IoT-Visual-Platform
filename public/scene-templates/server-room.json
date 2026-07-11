@@ -1,0 +1,172 @@
+{
+  "sceneNodes": [
+    {
+      "id": "rack-a01-node",
+      "name": "A01 核心机柜",
+      "type": "serverRack",
+      "sourceType": "procedural",
+      "position": { "x": -3.6, "y": 0, "z": -2.6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "rack-a01",
+        "valueField": "intake_temp",
+        "valueLabel": "进风温度",
+        "statusField": "status",
+        "secondaryField": "power_kw",
+        "secondaryLabel": "功率(kW)",
+        "displayTitle": "A01 核心机柜",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "rack-a02-node",
+      "name": "A02 数据机柜",
+      "type": "serverRack",
+      "sourceType": "procedural",
+      "position": { "x": -1.2, "y": 0, "z": -2.6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "rack-a02",
+        "valueField": "outlet_temp",
+        "valueLabel": "出风温度",
+        "statusField": "status",
+        "secondaryField": "humidity",
+        "secondaryLabel": "湿度(%)",
+        "displayTitle": "A02 数据机柜",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "rack-b01-node",
+      "name": "B01 存储机柜",
+      "type": "serverRack",
+      "sourceType": "procedural",
+      "position": { "x": 1.2, "y": 0, "z": -2.6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "rack-b01",
+        "valueField": "power_kw",
+        "valueLabel": "功率(kW)",
+        "statusField": "status",
+        "secondaryField": "intake_temp",
+        "secondaryLabel": "进风温度",
+        "displayTitle": "B01 存储机柜",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "rack-b02-node",
+      "name": "B02 备用机柜",
+      "type": "serverRack",
+      "sourceType": "procedural",
+      "position": { "x": 3.6, "y": 0, "z": -2.6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "rack-b02",
+        "valueField": "power_kw",
+        "valueLabel": "功率(kW)",
+        "statusField": "status",
+        "secondaryField": "outlet_temp",
+        "secondaryLabel": "出风温度",
+        "displayTitle": "B02 备用机柜",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "cooling-01-node",
+      "name": "1号精密空调",
+      "type": "coolingUnit",
+      "sourceType": "procedural",
+      "position": { "x": -5.6, "y": 0, "z": 2.4 },
+      "rotation": { "x": 0, "y": 0.35, "z": 0 },
+      "scale": { "x": 1.1, "y": 1.1, "z": 1.1 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "cooling-01",
+        "valueField": "supply_temp",
+        "valueLabel": "送风温度",
+        "statusField": "status",
+        "secondaryField": "load_percent",
+        "secondaryLabel": "负载(%)",
+        "displayTitle": "1号精密空调",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "cooling-02-node",
+      "name": "2号精密空调",
+      "type": "coolingUnit",
+      "sourceType": "procedural",
+      "position": { "x": 5.6, "y": 0, "z": 2.4 },
+      "rotation": { "x": 0, "y": -0.35, "z": 0 },
+      "scale": { "x": 1.1, "y": 1.1, "z": 1.1 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "cooling-02",
+        "valueField": "return_temp",
+        "valueLabel": "回风温度",
+        "statusField": "status",
+        "secondaryField": "airflow",
+        "secondaryLabel": "风量",
+        "displayTitle": "2号精密空调",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "ups-01-node",
+      "name": "UPS 机组",
+      "type": "controlCabinet",
+      "sourceType": "procedural",
+      "position": { "x": -2.2, "y": 0, "z": 3.6 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.2, "y": 1.15, "z": 1.2 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "ups-01",
+        "valueField": "load_percent",
+        "valueLabel": "负载(%)",
+        "statusField": "status",
+        "secondaryField": "battery_soc",
+        "secondaryLabel": "电池SoC",
+        "displayTitle": "UPS 机组",
+        "refreshInterval": 2000
+      }
+    },
+    {
+      "id": "pdu-01-node",
+      "name": "列头柜 PDU",
+      "type": "controlCabinet",
+      "sourceType": "procedural",
+      "position": { "x": 2.2, "y": 0, "z": 3.6 },
+      "rotation": { "x": 0, "y": 3.1416, "z": 0 },
+      "scale": { "x": 1.2, "y": 1.15, "z": 1.2 },
+      "props": {
+        "datasetId": "set-server-room-live",
+        "matchField": "device",
+        "matchValue": "pdu-01",
+        "valueField": "load_percent",
+        "valueLabel": "负载(%)",
+        "statusField": "status",
+        "secondaryField": "current_amp",
+        "secondaryLabel": "电流(A)",
+        "displayTitle": "列头柜 PDU",
+        "refreshInterval": 2000
+      }
+    }
+  ]
+}

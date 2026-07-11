@@ -16,7 +16,7 @@
       </div>
     </header>
 
-    <div class="grid h-[calc(100vh-4rem)] min-h-0 grid-cols-[320px_1fr_320px]">
+    <div class="grid h-[calc(100vh-4rem)] min-h-0 grid-cols-[340px_1fr_380px]">
       <aside class="overflow-y-auto border-r border-slate-200 bg-white p-4">
         <div class="mb-4 flex items-center justify-between">
           <div>
@@ -87,7 +87,7 @@
       <aside class="overflow-y-auto border-l border-slate-200 bg-white p-4">
         <div class="mb-4">
           <div class="text-sm font-medium text-slate-900">属性面板</div>
-          <div class="mt-1 text-xs text-slate-500">选中模型后可调整位姿并设置数据绑定</div>
+          <div class="mt-1 text-xs text-slate-500">选中模型后可调整位姿并配置运行数据</div>
         </div>
 
         <template v-if="selectedNode">
@@ -135,28 +135,58 @@
             <el-divider><span class="text-xs text-slate-400">数据配置</span></el-divider>
 
             <el-form-item label="绑定数据集">
-              <el-select
-                v-model="selectedNode.props.datasetId"
-                placeholder="选择关联数据集"
-                clearable
-                class="w-full"
-                @change="handleDatasetChange"
-              >
+              <el-select v-model="selectedNode.props.datasetId" placeholder="选择关联数据集" clearable class="w-full" @change="handleDatasetChange">
                 <el-option v-for="ds in datasetOptions" :key="ds.id" :label="ds.name" :value="ds.id" />
               </el-select>
             </el-form-item>
 
             <template v-if="selectedNode.props.datasetId">
-              <el-form-item label="告警字段">
-                <el-select v-model="selectedNode.props.alarmField" placeholder="选择告警字段" class="w-full">
-                  <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
-                </el-select>
-              </el-form-item>
+              <div class="grid grid-cols-2 gap-3">
+                <el-form-item label="匹配字段">
+                  <el-select v-model="selectedNode.props.matchField" placeholder="如 device / id" class="w-full">
+                    <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="匹配值">
+                  <el-input v-model="selectedNode.props.matchValue" placeholder="如 rack-a01 / ups-01" />
+                </el-form-item>
+              </div>
 
-              <el-form-item label="速度字段">
-                <el-select v-model="selectedNode.props.speedField" placeholder="选择速度字段" class="w-full">
-                  <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
-                </el-select>
+              <div class="grid grid-cols-2 gap-3">
+                <el-form-item label="主值字段">
+                  <el-select v-model="selectedNode.props.valueField" placeholder="选择主值字段" class="w-full">
+                    <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="主值标题">
+                  <el-input v-model="selectedNode.props.valueLabel" placeholder="如 进风温度 / 负载 / 功率" />
+                </el-form-item>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <el-form-item label="状态字段">
+                  <el-select v-model="selectedNode.props.statusField" placeholder="选择状态字段" class="w-full">
+                    <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="辅助字段">
+                  <el-select v-model="selectedNode.props.secondaryField" placeholder="如 humidity / battery_soc / airflow" clearable class="w-full">
+                    <el-option v-for="col in datasetColumns" :key="col" :label="col" :value="col" />
+                  </el-select>
+                </el-form-item>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <el-form-item label="辅助标题">
+                  <el-input v-model="selectedNode.props.secondaryLabel" placeholder="如 湿度 / 风量 / 电池SoC" />
+                </el-form-item>
+                <el-form-item label="刷新频率(ms)">
+                  <el-input-number v-model="selectedNode.props.refreshInterval" :min="1000" :step="1000" class="w-full" />
+                </el-form-item>
+              </div>
+
+              <el-form-item label="显示标题">
+                <el-input v-model="selectedNode.props.displayTitle" placeholder="留空则使用模型名称" />
               </el-form-item>
             </template>
 
@@ -182,12 +212,21 @@ import type { Dataset, ModelAsset, SceneNodeData, SceneProject } from '../../typ
 import { loadImportedModel } from './scene-model-loader'
 import { createProceduralMesh } from './scene-mesh-factory'
 
+type SceneNodeProps = {
+  datasetId?: string
+  matchField?: string
+  matchValue?: string
+  valueField?: string
+  valueLabel?: string
+  statusField?: string
+  secondaryField?: string
+  secondaryLabel?: string
+  displayTitle?: string
+  refreshInterval?: number
+}
+
 type SceneNode = SceneNodeData & {
-  props: {
-    datasetId?: string
-    alarmField?: string
-    speedField?: string
-  }
+  props: SceneNodeProps
 }
 
 type ProceduralLibraryItem = {
@@ -199,27 +238,31 @@ type ProceduralLibraryItem = {
 type TransformMode = 'translate' | 'rotate' | 'scale'
 
 const proceduralLibrary: ProceduralLibraryItem[] = [
-  { type: 'cnc', name: 'CNC 机床', desc: '适合绑定运行状态、告警和转速等设备数据' },
-  { type: 'arm', name: '机械臂', desc: '适合绑定动作节拍、工位状态和产线任务数据' },
-  { type: 'pump', name: '离心泵', desc: '适合绑定转速、流量、温度和设备告警数据' },
-  { type: 'conveyor', name: '输送线', desc: '用于表现物料流转、线体节拍和工序衔接' },
-  { type: 'storageTank', name: '储罐', desc: '适合化工、能源和液体存储等工业场景' },
-  { type: 'pipeSkid', name: '管道 skid', desc: '用于泵站、流体输送和工艺管网场景' },
-  { type: 'controlCabinet', name: '控制柜', desc: '适合配电柜、PLC 柜和工业控制终端' },
-  { type: 'serverRack', name: '机柜', desc: '用于机房、边缘计算和监控网关场景' },
-  { type: 'coolingUnit', name: '精密空调', desc: '适合机房和控制室的环境设备布局' },
-  { type: 'workbench', name: '工作台', desc: '适合装配工位、维修工位和质检工位' },
-  { type: 'forklift', name: '叉车', desc: '用于厂内搬运、仓储物流和车辆调度场景' },
-  { type: 'road', name: '道路', desc: '用于厂区道路、消防通道和物流通道' },
-  { type: 'fence', name: '围栏', desc: '适合安全隔离、区域划分和边界表达' },
-  { type: 'lampPost', name: '路灯', desc: '用于厂区外场照明和道路节点标识' },
-  { type: 'factoryHall', name: '厂房', desc: '适合搭建总装车间、加工车间和生产主厂房' },
-  { type: 'warehouse', name: '仓库', desc: '适合原料仓、成品仓和立体仓储外围布局' },
-  { type: 'officeBuilding', name: '办公楼', desc: '用于厂务办公、调度中心和综合楼布局' },
-  { type: 'gateComplex', name: '门岗', desc: '用于厂区主入口、门禁和访客通行区域' },
-  { type: 'parkingLot', name: '停车区', desc: '适合办公区、访客区和物流车辆停车区域' },
-  { type: 'substation', name: '变配电区', desc: '用于配电、变压器和动力基础设施场景' },
-  { type: 'loadingDock', name: '装卸月台', desc: '适合仓库装卸、托盘堆垛和收发货区域' },
+  { type: 'serverRack', name: '机柜', desc: '机房核心设备，适合绑定温度、功率和状态' },
+  { type: 'coolingUnit', name: '精密空调', desc: '适合绑定送回风温度、风量和负载' },
+  { type: 'powerCabinet', name: '动力柜', desc: '适合列头柜、PDU 和配电柜' },
+  { type: 'upsModule', name: 'UPS 模组', desc: '适合绑定 UPS 负载和电池 SoC' },
+  { type: 'coldAisle', name: '冷通道', desc: '用于大型机房冷热通道封闭结构' },
+  { type: 'busway', name: '母线槽', desc: '用于顶部供电母线与电力走线' },
+  { type: 'raisedFloor', name: '防静电地板区', desc: '用于构建大面积机房地板底座' },
+  { type: 'controlCabinet', name: '控制柜', desc: '适合网络柜、列头柜和辅助控制柜' },
+  { type: 'workbench', name: '运维工作台', desc: '适合值班席位、巡检台和工位桌' },
+  { type: 'factoryHall', name: '大空间机房壳体', desc: '可作为大空间机房大厅或外壳' },
+  { type: 'warehouse', name: '设备仓', desc: '适合备件仓、设备仓和网络仓' },
+  { type: 'substation', name: '变配电区', desc: '用于机房外侧供配电基础设施' },
+  { type: 'road', name: '道路', desc: '园区机房外场或物流道路' },
+  { type: 'fence', name: '围栏', desc: '外场边界和动力区隔离' },
+  { type: 'lampPost', name: '路灯', desc: '园区或外场照明' },
+  { type: 'parkingLot', name: '停车区', desc: '运维车辆或访客停车区域' },
+  { type: 'gateComplex', name: '门岗', desc: '园区入口和门禁场景' },
+  { type: 'loadingDock', name: '装卸月台', desc: '大件设备进场与收发货区域' },
+  { type: 'cnc', name: 'CNC 机床', desc: '保留工业通用设备类型' },
+  { type: 'arm', name: '机械臂', desc: '保留工业通用设备类型' },
+  { type: 'pump', name: '离心泵', desc: '保留工业通用设备类型' },
+  { type: 'conveyor', name: '输送线', desc: '保留工业通用设备类型' },
+  { type: 'storageTank', name: '储罐', desc: '保留工业通用设备类型' },
+  { type: 'pipeSkid', name: '管道 skid', desc: '保留工业通用设备类型' },
+  { type: 'forklift', name: '叉车', desc: '保留工业通用设备类型' },
 ]
 
 const route = useRoute()
@@ -246,7 +289,7 @@ const filteredAssets = computed(() => {
   )
 })
 
-const selectedNode = computed(() => sceneNodes.value.find((n) => n.id === selectedId.value) || null)
+const selectedNode = computed(() => sceneNodes.value.find((node) => node.id === selectedId.value) || null)
 
 const canvasContainer = ref<HTMLDivElement | null>(null)
 let scene: THREE.Scene
@@ -303,9 +346,7 @@ async function mountNode(node: SceneNode) {
 function removeNodeMesh(id: string) {
   const mesh = modelGroupMap.get(id)
   if (!mesh) return
-  if (transformControls.object === mesh) {
-    transformControls.detach()
-  }
+  if (transformControls.object === mesh) transformControls.detach()
   scene.remove(mesh)
   modelGroupMap.delete(id)
 }
@@ -316,20 +357,17 @@ function attachTransformControls(id: string | null) {
     transformControls.detach()
     return
   }
-
   const mesh = modelGroupMap.get(id)
   if (!mesh) {
     transformControls.detach()
     return
   }
-
   transformControls.attach(mesh)
   transformControls.setMode(transformMode.value)
 }
 
 function setupInteraction() {
   const dom = renderer.domElement
-
   dom.addEventListener('mousedown', (event) => {
     mouseDownTime = Date.now()
     mouseDownPos = { x: event.clientX, y: event.clientY }
@@ -337,7 +375,6 @@ function setupInteraction() {
 
   dom.addEventListener('mouseup', (event) => {
     if (transformControls?.dragging) return
-
     const elapsed = Date.now() - mouseDownTime
     const distance = Math.hypot(event.clientX - mouseDownPos.x, event.clientY - mouseDownPos.y)
     if (elapsed >= 200 || distance >= 3) return
@@ -350,15 +387,12 @@ function setupInteraction() {
 
     if (intersects.length > 0) {
       let rootObject: THREE.Object3D | null = intersects[0].object
-      while (rootObject && rootObject.parent && rootObject.parent !== scene) {
-        rootObject = rootObject.parent
-      }
+      while (rootObject && rootObject.parent && rootObject.parent !== scene) rootObject = rootObject.parent
       if (rootObject && modelGroupMap.has(rootObject.name)) {
         selectedId.value = rootObject.name
         return
       }
     }
-
     selectedId.value = null
   })
 }
@@ -374,16 +408,15 @@ function createBaseNode(partial: Partial<SceneNode>): SceneNode {
     position: partial.position ?? { x: (Math.random() - 0.5) * 8, y: 0, z: (Math.random() - 0.5) * 8 },
     rotation: partial.rotation ?? { x: 0, y: 0, z: 0 },
     scale: partial.scale ?? { x: 1, y: 1, z: 1 },
-    props: partial.props ?? {},
+    props: {
+      refreshInterval: 5000,
+      ...(partial.props ?? {}),
+    },
   }
 }
 
 async function addProceduralModel(item: ProceduralLibraryItem) {
-  const node = createBaseNode({
-    name: item.name,
-    type: item.type,
-    sourceType: 'procedural',
-  })
+  const node = createBaseNode({ name: item.name, type: item.type, sourceType: 'procedural' })
   sceneNodes.value.push(node)
   selectedId.value = node.id
   await mountNode(node)
@@ -420,9 +453,7 @@ watch(
   (nodes) => {
     nodes.forEach((node) => {
       const mesh = modelGroupMap.get(node.id)
-      if (mesh) {
-        applyNodeTransform(mesh, node)
-      }
+      if (mesh) applyNodeTransform(mesh, node)
     })
   },
   { deep: true },
@@ -466,12 +497,16 @@ async function fetchModelAssets() {
 }
 
 async function handleDatasetChange(datasetId: string) {
-  if (selectedNode.value) {
-    selectedNode.value.props.alarmField = undefined
-    selectedNode.value.props.speedField = undefined
-  }
   datasetColumns.value = []
-  if (!datasetId) return
+  if (!selectedNode.value) return
+  if (!datasetId) {
+    selectedNode.value.props.matchField = ''
+    selectedNode.value.props.matchValue = ''
+    selectedNode.value.props.valueField = ''
+    selectedNode.value.props.statusField = ''
+    selectedNode.value.props.secondaryField = ''
+    return
+  }
   const res: any = await request.get(`/api/datasets/${datasetId}/preview`)
   datasetColumns.value = res.columns || []
 }
@@ -498,7 +533,10 @@ function normalizeSceneNodes(rawNodes: SceneProject['sceneNodes']): SceneNode[] 
     position: node.position ?? { x: 0, y: 0, z: 0 },
     rotation: node.rotation ?? { x: 0, y: 0, z: 0 },
     scale: node.scale ?? { x: 1, y: 1, z: 1 },
-    props: node.props ?? {},
+    props: {
+      refreshInterval: 5000,
+      ...(node.props ?? {}),
+    },
   }))
 }
 
@@ -515,7 +553,6 @@ async function loadScene() {
   for (const node of sceneNodes.value) {
     await mountNode(node)
   }
-
   attachTransformControls(selectedId.value)
 }
 
@@ -563,7 +600,6 @@ function openAssetLibrary() {
 
 function initThree() {
   if (!canvasContainer.value) return
-
   const width = canvasContainer.value.clientWidth
   const height = canvasContainer.value.clientHeight
 
@@ -571,7 +607,7 @@ function initThree() {
   scene.fog = new THREE.FogExp2(0x020617, 0.015)
 
   camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000)
-  camera.position.set(10, 10, 15)
+  camera.position.set(12, 10, 16)
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false })
   renderer.setSize(width, height)
@@ -597,7 +633,7 @@ function initThree() {
   })
   scene.add(transformControls.getHelper())
 
-  scene.add(new THREE.GridHelper(50, 50, 0x0891b2, 0x1e293b))
+  scene.add(new THREE.GridHelper(100, 100, 0x0891b2, 0x1e293b))
   scene.add(new THREE.AmbientLight(0xffffff, 0.35))
 
   const dirLight = new THREE.DirectionalLight(0xffffff, 0.75)
