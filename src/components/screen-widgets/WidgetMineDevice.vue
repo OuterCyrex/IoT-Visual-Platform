@@ -182,101 +182,200 @@
         <line x1="100" y1="148.5" x2="100" y2="155.5" stroke="#854d0e" stroke-width="0.6" />
       </g>
 
-      <!-- TYPE 3: SILO_CONCRETE (混凝土配煤仓) -->
+      <!-- TYPE 3: SILO_CONCRETE (混凝土配煤仓 - 深度优化版本) -->
       <g v-else-if="deviceType === 'silo_concrete'" class="isometric-group">
         <!-- Shadows -->
-        <ellipse cx="100" cy="185" rx="55" ry="20" fill="black" opacity="0.45" />
+        <ellipse cx="100" cy="188" rx="62" ry="18" fill="black" opacity="0.5" />
 
-        <!-- Concrete Heavy Base Pillars -->
-        <rect x="68" y="125" width="10" height="50" fill="#334155" stroke="#1e293b" />
-        <rect x="122" y="125" width="10" height="50" fill="#334155" stroke="#1e293b" />
-        <polygon points="65,125 100,140 135,125 100,120" fill="#475569" />
-
-        <!-- Concrete Silo Body (Wide) -->
-        <ellipse cx="100" cy="45" rx="38" ry="14" fill="#64748b" stroke="#475569" />
-        <path :d="'M 62 45 A 38 14 0 0 0 138 45 L 138 120 A 38 14 0 0 1 62 120 Z'" :fill="'url(#towerMetal-' + id + ')'" stroke="#1e293b" />
+        <!-- Concrete Heavy Base Pillars with Chevron stripes -->
+        <!-- Left Pillar -->
+        <rect x="64" y="125" width="12" height="52" fill="#334155" stroke="#1e293b" />
+        <line x1="64" y1="135" x2="76" y2="140" stroke="#000" stroke-width="1.5" />
+        <line x1="64" y1="145" x2="76" y2="150" stroke="#000" stroke-width="1.5" />
+        <line x1="64" y1="155" x2="76" y2="160" stroke="#000" stroke-width="1.5" />
         
-        <!-- Cone bottom discharge -->
-        <path d="M 62 120 A 38 14 0 0 0 138 120 L 100 142 Z" fill="#1e293b" />
+        <!-- Right Pillar -->
+        <rect x="124" y="125" width="12" height="52" fill="#334155" stroke="#1e293b" />
+        <line x1="124" y1="135" x2="136" y2="140" stroke="#000" stroke-width="1.5" />
+        <line x1="124" y1="145" x2="136" y2="150" stroke="#000" stroke-width="1.5" />
+        <line x1="124" y1="155" x2="136" y2="160" stroke="#000" stroke-width="1.5" />
 
-        <!-- Heavy steel inspection platforms -->
-        <ellipse cx="100" cy="95" rx="42" ry="14.5" fill="none" stroke="#475569" stroke-width="1.5" />
-        <line x1="58" y1="91" x2="58" y2="97" stroke="#64748b" stroke-width="1.2" />
-        <line x1="142" y1="91" x2="142" y2="97" stroke="#64748b" stroke-width="1.2" />
+        <!-- Concrete Base foundation cap -->
+        <polygon points="60,125 100,138 140,125 100,118" fill="#475569" stroke="#1e293b" stroke-width="1" />
+
+        <!-- Wide Concrete Silo Body (High-quality gradient texture) -->
+        <ellipse cx="100" cy="45" rx="42" ry="15" fill="#64748b" stroke="#475569" />
+        <path :d="'M 58 45 A 42 15 0 0 0 142 45 L 142 120 A 42 15 0 0 1 58 120 Z'" :fill="'url(#towerMetal-' + id + ')'" stroke="#1e293b" />
+        
+        <!-- Double discharge hopper cones (双出料锥斗 - 非常重工业化) -->
+        <!-- Left Hopper -->
+        <path d="M 58 120 A 21 7.5 0 0 0 100 120 L 79 140 Z" fill="#1e293b" stroke="#334155" />
+        <line x1="79" y1="140" x2="79" y2="150" stroke="#ca8a04" stroke-width="2" />
+        
+        <!-- Right Hopper -->
+        <path d="M 100 120 A 21 7.5 0 0 0 142 120 L 121 140 Z" fill="#1e293b" stroke="#334155" />
+        <line x1="121" y1="140" x2="121" y2="150" stroke="#ca8a04" stroke-width="2" />
+
+        <!-- Catwalk/Inspection Platform around concrete center (环形钢构走道) -->
+        <ellipse cx="100" cy="90" rx="46" ry="16" fill="none" stroke="#475569" stroke-width="1.5" />
+        <!-- Handrail vertical struts -->
+        <line x1="54" y1="84" x2="54" y2="90" stroke="#64748b" stroke-width="1" />
+        <line x1="146" y1="84" x2="146" y2="90" stroke="#64748b" stroke-width="1" />
+        <line x1="100" y1="96" x2="100" y2="106" stroke="#64748b" stroke-width="1" />
+        <ellipse cx="100" cy="84" rx="46" ry="16" fill="none" stroke="#64748b" stroke-width="1" />
+
+        <!-- Top intake conveyor box (皮带受料小箱) -->
+        <rect x="85" y="20" width="30" height="20" fill="#1e293b" stroke="#334155" stroke-width="1.2" rx="1" />
+        <polygon points="85,20 100,10 115,20 100,30" fill="#334155" stroke="#475569" />
+        <circle cx="100" cy="20" r="2.5" fill="#38bdf8" class="drill-led" />
       </g>
 
-      <!-- TYPE 4: CRUSHER_JAW (重型颚式破碎机) -->
+      <!-- TYPE 4: CRUSHER_JAW (重型颚式破碎机 - 深度优化版本) -->
       <g v-else-if="deviceType === 'crusher_jaw'" class="isometric-group">
         <!-- Shadows -->
-        <ellipse cx="100" cy="180" rx="55" ry="16" fill="black" opacity="0.45" />
+        <ellipse cx="100" cy="180" rx="60" ry="16" fill="black" opacity="0.5" />
 
-        <!-- Crusher Base Frame (Steel girders) -->
-        <polygon points="45,170 55,145 145,145 155,170" fill="#334155" stroke="#1e293b" />
-        <rect x="50" y="165" width="100" height="10" fill="#1e293b" />
+        <!-- Heavy I-Beam Steel Foundation Frame (工字钢底架) -->
+        <polygon points="40,172 52,142 148,142 160,172" fill="#1e293b" stroke="#334155" stroke-width="1.5" />
+        <!-- Structural bolted corner plates -->
+        <circle cx="48" cy="165" r="1.5" fill="#ca8a04" />
+        <circle cx="152" cy="165" r="1.5" fill="#ca8a04" />
 
-        <!-- Main Mechanical Chamber -->
-        <rect x="58" y="90" width="84" height="60" :fill="'url(#towerMetal-' + id + ')'" stroke="#1e293b" />
+        <!-- Left Flywheel (Symmetrical Depth) -->
+        <g transform="translate(62, 115)" class="fan-spin">
+          <circle cx="0" cy="0" r="14" fill="#334155" stroke="#0f172a" stroke-width="1" />
+          <line x1="-14" y1="0" x2="14" y2="0" stroke="#475569" stroke-width="2" />
+          <line x1="0" y1="-14" x2="0" y2="14" stroke="#475569" stroke-width="2" />
+        </g>
+
+        <!-- Main Heavy Cast Steel Chamber (铸钢箱体) -->
+        <rect x="58" y="90" width="84" height="56" :fill="'url(#towerMetal-' + id + ')'" stroke="#1e293b" stroke-width="1.5" />
         <polygon points="50,90 100,75 150,90 100,105" fill="#334155" stroke="#1e293b" />
 
-        <!-- Inlet Hopper (漏斗) -->
-        <polygon points="65,90 55,55 145,55 135,90" fill="#475569" stroke="#334155" />
-        <polygon points="75,90 65,60 135,60 125,90" fill="#0f172a" />
+        <!-- Bolted inspection panels on the side -->
+        <rect x="70" y="105" width="22" height="26" fill="#1e293b" stroke="#475569" stroke-width="1" />
+        <circle cx="73" cy="108" r="1" fill="#cbd5e1" />
+        <circle cx="89" cy="108" r="1" fill="#cbd5e1" />
+        <circle cx="73" cy="128" r="1" fill="#cbd5e1" />
+        <circle cx="89" cy="128" r="1" fill="#cbd5e1" />
 
-        <!-- Flywheel details (Spinning pulleys!) -->
-        <g transform="translate(138, 120)" class="fan-spin">
-          <circle cx="0" cy="0" r="16" :fill="'url(#metalCylinder-' + id + ')'" stroke="#0f172a" stroke-width="1.5" />
-          <line x1="-16" y1="0" x2="16" y2="0" stroke="#64748b" stroke-width="2.5" />
-          <line x1="0" y1="-16" x2="0" y2="16" stroke="#64748b" stroke-width="2.5" />
-          <circle cx="0" cy="0" r="5" fill="#eab308" />
+        <!-- Heavy Hopper Feed Funnel (加料斗) -->
+        <polygon points="62,90 50,50 150,50 138,90" fill="#475569" stroke="#1e293b" stroke-width="1.2" />
+        <polygon points="72,90 62,56 138,56 128,90" fill="#0f172a" />
+        <!-- Structural ribs on feed hopper -->
+        <line x1="75" y1="50" x2="85" y2="90" stroke="#334155" stroke-width="2" />
+        <line x1="125" y1="50" x2="115" y2="90" stroke="#334155" stroke-width="2" />
+
+        <!-- Right Main Flywheel (Spinning Pulley) with drive belts -->
+        <g transform="translate(138, 115)" class="fan-spin">
+          <circle cx="0" cy="0" r="18" :fill="'url(#metalCylinder-' + id + ')'" stroke="#0f172a" stroke-width="1.5" />
+          <!-- Spokes -->
+          <line x1="-18" y1="0" x2="18" y2="0" stroke="#64748b" stroke-width="3" />
+          <line x1="0" y1="-18" x2="0" y2="18" stroke="#64748b" stroke-width="3" />
+          <!-- Inner ring -->
+          <circle cx="0" cy="0" r="7" fill="#334155" stroke="#0f172a" />
+          <circle cx="0" cy="0" r="3" fill="#eab308" />
         </g>
+        
+        <!-- Safety Wire Mesh Guard on flywheel (半透明防护网) -->
+        <path d="M 120 100 A 22 22 0 0 1 158 135 L 120 135 Z" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" stroke-dasharray="2 2" stroke-width="0.8" />
+
+        <!-- Hydraulic lubrication tubes & pressure indicator -->
+        <path d="M 98 100 L 98 135 L 115 135" fill="none" stroke="#ca8a04" stroke-width="1.5" stroke-linecap="round" />
+        <circle cx="98" cy="115" r="3" fill="#030712" stroke="#e11d48" stroke-width="1" /> <!-- Pressure gauge dial -->
+        <line x1="98" y1="115" x2="100" y2="113" stroke="#e11d48" stroke-width="0.7" />
       </g>
 
-      <!-- TYPE 5: SIFTER_VIBRATORY (双层智能振动筛) -->
+      <!-- TYPE 5: SIFTER_VIBRATORY (双层智能振动筛 - 深度优化版本) -->
       <g v-else-if="deviceType === 'sifter_vibratory'" class="isometric-group">
         <!-- Shadows -->
-        <ellipse cx="100" cy="180" rx="60" ry="18" fill="black" opacity="0.45" />
+        <ellipse cx="100" cy="184" rx="65" ry="16" fill="black" opacity="0.45" />
 
-        <!-- Dampening spring columns (弹簧支撑座) -->
-        <rect x="60" y="145" width="12" height="25" rx="2" fill="none" stroke="#475569" stroke-width="1.5" />
-        <path d="M 60 145 L 72 150 M 60 152 L 72 157 M 60 160 L 72 165" stroke="#64748b" stroke-width="2" />
-        
-        <rect x="128" y="145" width="12" height="25" rx="2" fill="none" stroke="#475569" stroke-width="1.5" />
-        <path d="M 128 145 L 140 150 M 128 152 L 140 157 M 128 160 L 140 165" stroke="#64748b" stroke-width="2" />
+        <!-- 4 Helical coil springs (精细螺旋减震弹簧) -->
+        <!-- Front Left Spring -->
+        <g transform="translate(58, 140)">
+          <path d="M0,0 Q6,3 12,0 Q0,5 12,8 Q0,11 12,14 Q0,17 12,20 M 6,-3 L 6,23" fill="none" stroke="#475569" stroke-width="2.5" />
+          <rect x="-2" y="20" width="16" height="4" fill="#1e293b" />
+        </g>
+        <!-- Front Right Spring -->
+        <g transform="translate(130, 140)">
+          <path d="M0,0 Q6,3 12,0 Q0,5 12,8 Q0,11 12,14 Q0,17 12,20 M 6,-3 L 6,23" fill="none" stroke="#475569" stroke-width="2.5" />
+          <rect x="-2" y="20" width="16" height="4" fill="#1e293b" />
+        </g>
 
         <!-- Sifter body with shake vibration animation -->
         <g class="sifter-vibrate">
-          <!-- Main sorting deck angled -->
-          <polygon points="50,105 150,65 150,125 50,145" :fill="'url(#towerMetal-' + id + ')'" stroke="#1e293b" />
-          <polygon points="50,105 150,65 125,50 35,85" fill="#475569" />
+          <!-- Main sorting deck angled side plate -->
+          <polygon points="45,95 155,55 155,120 45,140" :fill="'url(#towerMetal-' + id + ')'" stroke="#1e293b" stroke-width="1.5" />
+          <polygon points="45,95 155,55 130,42 20,82" fill="#475569" stroke="#334155" />
 
-          <!-- Multi-tier mesh screens -->
-          <line x1="50" y1="120" x2="150" y2="80" stroke="#eab308" stroke-dasharray="2 2" stroke-width="2" />
-          <line x1="50" y1="132" x2="150" y2="92" stroke="#38bdf8" stroke-dasharray="2 2" stroke-width="2" />
+          <!-- Heavy stiffener ribs on side plate -->
+          <line x1="75" y1="84" x2="75" y2="128" stroke="#334155" stroke-width="2.5" />
+          <line x1="115" y1="69" x2="115" y2="113" stroke="#334155" stroke-width="2.5" />
 
-          <!-- Coarse outlet chute (出料斜槽) -->
-          <polygon points="35,85 15,95 15,115 50,120" fill="#1e293b" stroke="#334155" />
+          <!-- Eccentric Vibrator Unit (双轴激振器 - 核心动力源) -->
+          <circle cx="95" cy="98" r="14" fill="#0f172a" stroke="#ca8a04" stroke-width="1.5" />
+          <circle cx="95" cy="98" r="8" fill="#3b4252" />
+          <rect x="91" y="93" width="8" height="10" fill="#eab308" class="fan-spin" /> <!-- Eccentric block rotating -->
+
+          <!-- Multi-tier mesh screens (inside) -->
+          <!-- Top Screen (Coarse) -->
+          <line x1="45" y1="110" x2="155" y2="70" stroke="#fbbf24" stroke-dasharray="3 3" stroke-width="2.5" />
+          <!-- Bottom Screen (Fine) -->
+          <line x1="45" y1="125" x2="155" y2="85" stroke="#38bdf8" stroke-dasharray="2 2" stroke-width="2" />
+
+          <!-- Outlets (排料槽) -->
+          <!-- Fine material outlet (Fine coal particles pouring down) -->
+          <polygon points="20,82 5,92 5,110 45,115" fill="#19243b" stroke="#334155" />
+          
+          <!-- Falling materials animation particles -->
+          <circle cx="2" cy="115" r="1.5" fill="#38bdf8" class="drill-led" />
+          <circle cx="6" cy="120" r="1" fill="#38bdf8" class="drill-led" />
+          <circle cx="-1" cy="126" r="1.2" fill="#38bdf8" class="drill-led" />
         </g>
       </g>
 
-      <!-- TYPE 6: CONVEYOR_BELT (桁架皮带机) -->
+      <!-- TYPE 6: CONVEYOR_BELT (桁架皮带机 - 深度优化版本) -->
       <g v-else-if="deviceType === 'conveyor_belt'" class="isometric-group">
         <!-- Shadows -->
-        <ellipse cx="100" cy="180" rx="70" ry="14" fill="black" opacity="0.35" />
+        <ellipse cx="100" cy="180" rx="75" ry="12" fill="black" opacity="0.35" />
 
-        <!-- Truss structures -->
-        <line x1="30" y1="140" x2="30" y2="175" stroke="#475569" stroke-width="2.5" />
-        <line x1="170" y1="75" x2="170" y2="120" stroke="#475569" stroke-width="2.5" />
+        <!-- Heavy Structural Support Girders (支撑立柱及斜撑) -->
+        <line x1="40" y1="130" x2="40" y2="175" stroke="#475569" stroke-width="3" />
+        <line x1="160" y1="75" x2="160" y2="120" stroke="#475569" stroke-width="3" />
+        <line x1="40" y1="130" x2="60" y2="175" stroke="#334155" stroke-width="1.5" />
+        <line x1="160" y1="75" x2="140" y2="120" stroke="#334155" stroke-width="1.5" />
+
+        <!-- Double Layer Steel Truss Structure (双轨桁架结构) -->
+        <!-- Lower frame chord -->
+        <path d="M 20 145 L 180 75" stroke="#1e293b" stroke-width="4" stroke-linecap="round" />
+        <!-- Upper frame chord -->
+        <path d="M 20 130 L 180 60" stroke="#334155" stroke-width="5" stroke-linecap="round" />
         
-        <path d="M 20 140 L 180 70" stroke="#1e293b" stroke-width="8" stroke-linecap="round" />
-        <!-- Structural steel diagonals -->
-        <path d="M 20 140 L 180 70 M 35 133 L 35 142 M 70 118 L 70 127 M 105 103 L 105 112 M 140 88 L 140 97" stroke="#64748b" stroke-width="1.5" />
+        <!-- Cross lattice bars (工字钢交叉拉撑) -->
+        <path d="M 20 130 L 50 131 M 50 117 L 80 118 M 80 104 L 110 105 M 110 90 L 140 91 M 140 77 L 170 78" stroke="#475569" stroke-width="1.5" />
+        <path d="M 20 130 L 50 117 L 80 104 L 110 90 L 140 77 L 170 64" stroke="#475569" stroke-width="1.2" />
+        <path d="M 20 145 L 50 130 L 80 117 L 110 104 L 140 90 L 170 77" stroke="#475569" stroke-width="1.2" />
 
-        <!-- Flowing coal material on conveyor belt -->
-        <path d="M 20 140 L 180 70" stroke="#0ea5e9" stroke-width="3" stroke-dasharray="6 12" class="pipe-flow-1" stroke-linecap="round" :filter="'url(#laserGlow-' + id + ')'" />
+        <!-- Conveyor belt return strand (底段皮带) -->
+        <path d="M 22 136 L 178 68" stroke="#090d16" stroke-width="1.8" />
 
-        <!-- Conveyor Roller wheel -->
-        <circle cx="25" cy="140" r="6" fill="#475569" stroke="#0f172a" />
-        <circle cx="175" cy="70" r="6" fill="#475569" stroke="#0f172a" />
+        <!-- Carrying Idlers (槽形托辊组) -->
+        <circle cx="45" cy="116" r="2.5" fill="#475569" />
+        <circle cx="80" cy="101" r="2.5" fill="#475569" />
+        <circle cx="115" cy="86" r="2.5" fill="#475569" />
+        <circle cx="150" cy="71" r="2.5" fill="#475569" />
+
+        <!-- Actual Rubber Conveyor Belt (上层胶带) -->
+        <path d="M 18 128 L 182 56" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
+
+        <!-- Flowing coal material lumps (输送的原煤料流 - 带有流光脉冲与发光粒子) -->
+        <path d="M 18 127 L 182 55" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="8 14" class="pipe-flow-1" stroke-linecap="round" :filter="'url(#laserGlow-' + id + ')'" />
+        <path d="M 18 128 L 182 56" stroke="#ca8a04" stroke-width="3.5" stroke-dasharray="4 22" class="pipe-flow-1" stroke-linecap="round" />
+
+        <!-- Large Head & Tail Drums (主/副滚筒轮) -->
+        <circle cx="20" cy="132" r="6" fill="url(#metalCylinder)" stroke="#0f172a" stroke-width="1.5" />
+        <circle cx="180" cy="62" r="6" fill="url(#metalCylinder)" stroke="#0f172a" stroke-width="1.5" />
       </g>
 
       <!-- TYPE 7: DUST_COLLECTOR (点式除尘器) -->
