@@ -17,6 +17,9 @@ import WidgetRingProgress from './WidgetRingProgress.vue'
 import WidgetScrollTable from './WidgetScrollTable.vue'
 import WidgetTimeWeather from './WidgetTimeWeather.vue'
 import WidgetTopologyDevice from './WidgetTopologyDevice.vue'
+import WidgetMineProcessMap from './WidgetMineProcessMap.vue'
+import WidgetMineDevice from './WidgetMineDevice.vue'
+import WidgetPvDevice from './WidgetPvDevice.vue'
 
 export const screenComponentMap = {
   rect: WidgetRect,
@@ -37,5 +40,8 @@ export const screenComponentMap = {
   ringProgress: WidgetRingProgress,
   scrollTable: WidgetScrollTable,
   timeWeather: WidgetTimeWeather,
-  topologyDevice: WidgetTopologyDevice
+  topologyDevice: WidgetTopologyDevice,
+  mineProcessMap: WidgetMineProcessMap,
+  mineDevice: WidgetMineDevice,
+  pvDevice: WidgetPvDevice
 }

@@ -1,40 +1,58 @@
 <template>
-  <div class="relative w-full h-full flex flex-col p-3 rounded bg-slate-900 border border-slate-800/80 text-slate-200 overflow-hidden">
-    <!-- Header to match charts -->
-    <div class="text-xs font-semibold text-cyan-400 mb-2 border-b border-slate-800/60 pb-1.5 flex justify-between items-center select-none">
-      <span>{{ titleText }}</span>
-      <span v-if="!hasData" class="text-[9px] text-slate-500">(演示数据)</span>
-      <span v-else class="rounded border border-cyan-500/30 bg-cyan-400/10 px-1.5 py-0.5 text-[8px] text-cyan-300">LIVE</span>
-    </div>
-
-    <!-- Body content -->
-    <div class="flex-1 flex flex-col justify-between min-h-0 pt-1">
-      <div class="text-xs text-slate-400 truncate">
-        {{ subtitleText }}
+  <div class="relative w-full h-full flex flex-col p-2.5 rounded-lg bg-gradient-to-br from-slate-900/40 via-slate-900/30 to-cyan-950/20 backdrop-blur-md border border-cyan-500/10 text-slate-200 overflow-hidden shadow-[inset_0_0_12px_rgba(6,182,212,0.03)] justify-center">
+    <!-- Compact Layout -->
+    <template v-if="compact">
+      <div class="text-[10px] font-medium text-slate-400 truncate select-none">
+        {{ titleText }}
       </div>
-
-      <div class="mt-2 flex items-end justify-between gap-4">
-        <div class="min-w-0 flex-1">
-          <div class="truncate text-3xl font-bold leading-none text-white font-mono">
-            {{ valueText }}
-          </div>
-          <div class="mt-3 h-1 rounded-full bg-slate-800 overflow-hidden">
-            <div
-              class="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-emerald-400"
-              :style="{ width: `${accentWidth}%` }"
-            />
-          </div>
+      <div class="flex items-baseline justify-between mt-1 min-h-0">
+        <div class="text-lg font-bold font-mono text-white leading-none truncate">
+          {{ valueText }}
         </div>
-        <div class="text-right shrink-0">
-          <div class="text-[9px] uppercase tracking-wider text-slate-500">
-            状态
-          </div>
-          <div class="mt-1 text-xs font-medium text-emerald-400">
-            正常
-          </div>
+        <div class="text-[9px] text-cyan-400/80 truncate font-sans shrink-0 ml-2">
+          {{ subtitleText }}
         </div>
       </div>
-    </div>
+    </template>
+
+    <!-- Standard Layout -->
+    <template v-else>
+      <!-- Header to match charts -->
+      <div class="text-xs font-semibold text-cyan-400 mb-2 border-b border-slate-800/60 pb-1.5 flex justify-between items-center select-none">
+        <span>{{ titleText }}</span>
+        <span v-if="!hasData" class="text-[9px] text-slate-500">(演示数据)</span>
+        <span v-else class="rounded border border-cyan-500/30 bg-cyan-400/10 px-1.5 py-0.5 text-[8px] text-cyan-300">LIVE</span>
+      </div>
+
+      <!-- Body content -->
+      <div class="flex-1 flex flex-col justify-between min-h-0 pt-1">
+        <div class="text-xs text-slate-400 truncate">
+          {{ subtitleText }}
+        </div>
+
+        <div class="mt-2 flex items-end justify-between gap-4">
+          <div class="min-w-0 flex-1">
+            <div class="truncate text-3xl font-bold leading-none text-white font-mono">
+              {{ valueText }}
+            </div>
+            <div class="mt-3 h-1 rounded-full bg-slate-800 overflow-hidden">
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-emerald-400"
+                :style="{ width: `${accentWidth}%` }"
+              />
+            </div>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-[9px] uppercase tracking-wider text-slate-500">
+              状态
+            </div>
+            <div class="mt-1 text-xs font-medium text-emerald-400">
+              正常
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -47,9 +65,11 @@ const props = withDefaults(
     xField?: string
     yField?: string
     rows?: Record<string, unknown>[]
+    compact?: boolean
   }>(),
   {
     rows: () => [],
+    compact: false,
   }
 )
 
