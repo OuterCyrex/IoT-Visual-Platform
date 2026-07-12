@@ -1101,7 +1101,44 @@ const datasetPreviewRoute: RouteDefinition = {
 
         if (useMock) {
           // Generate beautiful mock REST API response depending on tableName
-          if (dataset.tableName.includes('alarm') || dataset.tableName.includes('alert')) {
+          if (dataset.tableName.includes('pv/telemetry')) {
+            rows = [
+              {
+                id: 1,
+                timestamp: nowText(),
+                daily_effective_gen: 386.8,
+                daily_grid_gen: 373.6,
+                inverter_total_power: 24.8,
+                output_total_power: 23.95,
+                irradiance: 862.4,
+                temperature: 28.7,
+                wind_speed: 3.1,
+                humidity: 44.2,
+                module_temp: 42.8,
+                inverter_temp: 55.6,
+              },
+            ]
+          } else if (dataset.tableName.includes('pv/curves')) {
+            rows = [
+              { id: 1, time_label: '06:00', power: 0.2, radiation: 58.0, current: 0.6, voltage: 304.5 },
+              { id: 2, time_label: '08:00', power: 5.8, radiation: 226.0, current: 16.1, voltage: 342.8 },
+              { id: 3, time_label: '10:00', power: 16.2, radiation: 578.0, current: 45.0, voltage: 366.4 },
+              { id: 4, time_label: '12:00', power: 25.1, radiation: 872.0, current: 69.8, voltage: 381.5 },
+              { id: 5, time_label: '14:00', power: 23.4, radiation: 806.0, current: 65.1, voltage: 376.8 },
+              { id: 6, time_label: '16:00', power: 12.7, radiation: 428.0, current: 35.3, voltage: 352.1 },
+              { id: 7, time_label: '18:00', power: 1.8, radiation: 112.0, current: 5.0, voltage: 312.6 },
+            ]
+          } else if (dataset.tableName.includes('pv/monthly-generation')) {
+            rows = [
+              { id: 1, month_label: '1月', generation: 120.5 },
+              { id: 2, month_label: '2月', generation: 135.2 },
+              { id: 3, month_label: '3月', generation: 158.0 },
+              { id: 4, month_label: '4月', generation: 182.4 },
+              { id: 5, month_label: '5月', generation: 210.0 },
+              { id: 6, month_label: '6月', generation: 245.8 },
+              { id: 7, month_label: '7月', generation: 280.0 },
+            ]
+          } else if (dataset.tableName.includes('alarm') || dataset.tableName.includes('alert')) {
             rows = [
               { id: 101, timestamp: nowText(), device_id: 'REST-DEV-01', alarm_level: 'Critical', alarm_message: 'REST API: 轴承震动超限 (12mm/s)', status: 'Active' },
               { id: 102, timestamp: nowText(), device_id: 'REST-DEV-02', alarm_level: 'Warning', alarm_message: 'REST API: 进料速度过慢', status: 'Active' },

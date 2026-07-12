@@ -260,12 +260,14 @@ app.get('/factory/alarms', (req, res) => {
 app.get('/pv/telemetry', (req, res) => {
   const now = new Date();
   const hour = now.getHours() + now.getMinutes() / 60;
-  const sun = solarProfile(hour);
+  const sun = Math.max(0.22, solarProfile(hour));
   const t = Date.now();
-  const cloudFactor = 0.88 + Math.sin(t / 45000) * 0.08 + randBetween(-0.03, 0.03);
+  const tick = Math.floor(t / 1000);
+  const showPulse = Math.sin(tick * 1.7) * 0.22 + Math.cos(tick * 0.9) * 0.14 + randBetween(-0.1, 0.1);
+  const cloudFactor = Math.max(0.45, 0.9 + showPulse);
   const irradiance = Math.max(0, round(980 * sun * cloudFactor, 2));
-  const inverterTotalPower = round(28.6 * sun * cloudFactor + randBetween(-0.35, 0.35), 2);
-  const outputTotalPower = round(Math.max(0, inverterTotalPower * (0.965 + Math.sin(t / 60000) * 0.01)), 2);
+  const inverterTotalPower = round(28.6 * sun * cloudFactor + randBetween(-1.8, 1.8), 2);
+  const outputTotalPower = round(Math.max(0, inverterTotalPower * (0.94 + Math.sin(tick * 1.3) * 0.05)), 2);
   const minutesSinceSunrise = Math.max(0, Math.min(720, (hour - 6) * 60));
   const generationBase = minutesSinceSunrise * 0.82 * (0.35 + sun * 0.65);
 
@@ -273,16 +275,16 @@ app.get('/pv/telemetry', (req, res) => {
     {
       id: 1,
       timestamp: now.toISOString().replace('T', ' ').substring(0, 19),
-      daily_effective_gen: round(96 + generationBase + Math.sin(t / 90000) * 2.4, 2),
-      daily_grid_gen: round(92 + generationBase * 0.965 + Math.sin(t / 95000) * 2.1, 2),
+      daily_effective_gen: round(96 + generationBase + Math.sin(tick * 1.1) * 12 + randBetween(-3, 3), 2),
+      daily_grid_gen: round(92 + generationBase * 0.965 + Math.cos(tick * 1.2) * 10 + randBetween(-3, 3), 2),
       inverter_total_power: Math.max(0, inverterTotalPower),
       output_total_power: outputTotalPower,
       irradiance,
-      temperature: round(25.5 + sun * 7.2 + Math.sin(t / 120000) * 1.1 + randBetween(-0.2, 0.2), 2),
-      wind_speed: round(2.4 + Math.sin(t / 35000) * 0.8 + randBetween(-0.15, 0.15), 2),
-      humidity: round(58 - sun * 16 + Math.cos(t / 100000) * 2.5 + randBetween(-0.8, 0.8), 2),
-      module_temp: round(30 + sun * 19 + Math.sin(t / 70000) * 1.8 + randBetween(-0.4, 0.4), 2),
-      inverter_temp: round(38 + sun * 20 + Math.sin(t / 85000) * 1.5 + randBetween(-0.4, 0.4), 2)
+      temperature: round(25.5 + sun * 7.2 + Math.sin(tick * 1.4) * 3.2 + randBetween(-0.8, 0.8), 2),
+      wind_speed: round(2.8 + Math.sin(tick * 2.1) * 1.8 + randBetween(-0.4, 0.4), 2),
+      humidity: round(58 - sun * 16 + Math.cos(tick * 1.6) * 7 + randBetween(-2.2, 2.2), 2),
+      module_temp: round(30 + sun * 19 + Math.sin(tick * 1.5) * 6 + randBetween(-1.2, 1.2), 2),
+      inverter_temp: round(38 + sun * 20 + Math.sin(tick * 1.8) * 7 + randBetween(-1.4, 1.4), 2)
     }
   ]);
 });
@@ -291,36 +293,38 @@ app.get('/pv/curves', (req, res) => {
   const now = new Date();
   const currentHour = now.getHours() + now.getMinutes() / 60;
   const t = Date.now();
+  const tick = Math.floor(t / 1000);
   const labels = ['06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00'];
 
   res.json(labels.map((timeLabel, index) => {
     const hour = Number(timeLabel.slice(0, 2));
-    const sun = solarProfile(hour);
+    const sun = Math.max(0.12, solarProfile(hour));
     const isCurrentOrFuture = hour >= Math.floor(currentHour / 2) * 2;
-    const liveBoost = isCurrentOrFuture ? Math.sin(t / (32000 + index * 4000)) * 0.06 : 0;
-    const cloudFactor = 0.9 + Math.sin((t / 70000) + index) * 0.07 + liveBoost;
+    const liveBoost = isCurrentOrFuture ? Math.sin(tick * 1.5 + index) * 0.22 : Math.sin(tick * 0.7 + index) * 0.08;
+    const cloudFactor = Math.max(0.42, 0.9 + liveBoost + randBetween(-0.08, 0.08));
     const radiation = Math.max(0, 950 * sun * cloudFactor);
-    const power = Math.max(0, 29.5 * sun * cloudFactor + randBetween(-0.25, 0.25));
+    const power = Math.max(0, 29.5 * sun * cloudFactor + randBetween(-1.7, 1.7));
 
     return {
       id: index + 1,
       time_label: timeLabel,
       power: round(power, 2),
       radiation: round(radiation, 2),
-      current: round(power * 2.78 + randBetween(-0.5, 0.5), 2),
-      voltage: round(306 + sun * 76 + Math.sin((t / 65000) + index) * 3.5, 2)
+      current: round(power * 2.78 + Math.sin(tick * 1.9 + index) * 4 + randBetween(-1.5, 1.5), 2),
+      voltage: round(306 + sun * 76 + Math.sin(tick * 1.3 + index) * 14 + randBetween(-3, 3), 2)
     };
   }));
 });
 
 app.get('/pv/monthly-generation', (req, res) => {
   const t = Date.now();
+  const tick = Math.floor(t / 1000);
   const base = [120.5, 135.2, 158.0, 182.4, 210.0, 245.8, 280.0, 302.5, 268.4, 221.6, 168.2, 132.8];
 
   res.json(base.map((generation, index) => ({
     id: index + 1,
     month_label: `${index + 1}月`,
-    generation: round(generation + Math.sin(t / 120000 + index) * 3.5 + randBetween(-0.4, 0.4), 2)
+    generation: round(generation + Math.sin(tick * 1.2 + index) * 18 + randBetween(-4, 4), 2)
   })));
 });
 
