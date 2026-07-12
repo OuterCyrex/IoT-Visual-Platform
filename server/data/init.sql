@@ -251,6 +251,9 @@ INSERT INTO datasets (id, name, data_source_id, source_name, table_name, refresh
 ('set-hourly-throughput', '每小时产量数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/production-trend', '5 min', 3, '2026-07-11 11:00'),
 ('set-equipment-vibration', '设备遥测数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/equipment-vibration', '5 min', 3, '2026-07-11 11:00'),
 ('set-active-alarms', '实时告警数据集', 'ds-ev-rest', '设备主数据 REST 服务', 'factory/alarms', '5 min', 3, '2026-07-11 11:00'),
+('set-pv-telemetry', '光伏实时发电与环境遥测', 'ds-ev-mysql', '生产 MySQL 主库', 'pv_telemetry', 'real-time', 12, '2026-07-12 10:50'),
+('set-pv-monthly', '光伏月度发电量统计', 'ds-ev-mysql', '生产 MySQL 主库', 'pv_monthly_generation', '5 min', 3, '2026-07-12 10:50'),
+('set-pv-curves', '光伏功率电流电压曲线', 'ds-ev-mysql', '生产 MySQL 主库', 'pv_curves', 'real-time', 6, '2026-07-12 10:50'),
 ('set-ev-mqtt', '设备实时遥测 (MQTT)', 'ds-ev-mqtt', '公共测试 MQTT 代理', 'factory/telemetry/erasernoob', 'real-time', 6, '2026-07-11 12:00');
 
 INSERT INTO project_memberships (id, user_id, project_id, access_level) VALUES
@@ -341,6 +344,8 @@ CREATE TABLE IF NOT EXISTS pv_telemetry (
   inverter_temp DECIMAL(10, 2) NOT NULL
 );
 
+DELETE FROM pv_telemetry;
+
 INSERT INTO pv_telemetry (timestamp, daily_effective_gen, daily_grid_gen, inverter_total_power, output_total_power, irradiance, temperature, wind_speed, humidity, module_temp, inverter_temp) VALUES
 (NOW(), 385.60, 372.40, 24.50, 23.80, 850.00, 28.50, 3.20, 45.00, 42.00, 55.00);
 
@@ -349,6 +354,8 @@ CREATE TABLE IF NOT EXISTS pv_monthly_generation (
   month_label VARCHAR(16) NOT NULL,
   generation DECIMAL(10, 2) NOT NULL
 );
+
+DELETE FROM pv_monthly_generation;
 
 INSERT INTO pv_monthly_generation (month_label, generation) VALUES
 ('1月', 120.5), ('2月', 135.2), ('3月', 158.0), ('4月', 182.4), ('5月', 210.0), ('6月', 245.8), ('7月', 280.0);
@@ -361,6 +368,8 @@ CREATE TABLE IF NOT EXISTS pv_curves (
   current DECIMAL(10, 2) NOT NULL,
   voltage DECIMAL(10, 2) NOT NULL
 );
+
+DELETE FROM pv_curves;
 
 INSERT INTO pv_curves (time_label, power, radiation, current, voltage) VALUES
 ('06:00', 0.0, 50, 0.0, 300),
