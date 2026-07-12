@@ -78,6 +78,16 @@ body {
   outline-offset: 2px;
 }
 
+.screen-node.locked {
+  outline: 1.5px dashed #f59e0b;
+  outline-offset: 1px;
+}
+
+.screen-node.selected.locked {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
 .screen-node-block,
 .screen-node-text,
 .screen-node-chart {

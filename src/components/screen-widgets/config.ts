@@ -19,6 +19,7 @@ import WidgetTimeWeather from './WidgetTimeWeather.vue'
 import WidgetTopologyDevice from './WidgetTopologyDevice.vue'
 import WidgetMineProcessMap from './WidgetMineProcessMap.vue'
 import WidgetMineDevice from './WidgetMineDevice.vue'
+import WidgetPvDevice from './WidgetPvDevice.vue'
 
 export const screenComponentMap = {
   rect: WidgetRect,
@@ -41,5 +42,6 @@ export const screenComponentMap = {
   timeWeather: WidgetTimeWeather,
   topologyDevice: WidgetTopologyDevice,
   mineProcessMap: WidgetMineProcessMap,
-  mineDevice: WidgetMineDevice
+  mineDevice: WidgetMineDevice,
+  pvDevice: WidgetPvDevice
 }

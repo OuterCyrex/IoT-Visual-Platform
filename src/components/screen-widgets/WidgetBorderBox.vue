@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full relative border border-cyan-500/20 bg-slate-950/90 rounded-xl overflow-hidden flex flex-col p-4 shadow-[inset_0_0_20px_rgba(6,182,212,0.05)]">
+  <div class="h-full w-full relative border border-cyan-500/25 bg-gradient-to-br from-slate-950/50 via-slate-950/30 to-cyan-950/15 rounded-xl overflow-hidden flex flex-col p-4 shadow-[inset_0_0_25px_rgba(6,182,212,0.06)] backdrop-blur-lg">
     <!-- Cyberpunk Corner Accents -->
     <div class="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-cyan-400 rounded-tl"></div>
     <div class="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-cyan-400 rounded-tr"></div>

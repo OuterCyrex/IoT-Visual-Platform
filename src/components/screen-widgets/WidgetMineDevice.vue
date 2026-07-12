@@ -9,7 +9,15 @@
     <div class="foundation-shadow" v-if="!isTransparent"></div>
 
     <!-- Main SVG Render Area -->
-    <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg" class="device-svg" :style="svgStyle">
+    <svg
+      viewBox="0 0 200 220"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      class="device-svg"
+      :class="{ 'is-pipeline': deviceType === 'pipeline' }"
+      :style="svgStyle"
+      :preserveAspectRatio="deviceType === 'pipeline' ? 'none' : undefined"
+    >
       <defs>
         <!-- Steel Gradients for realistic specular highlights -->
         <linearGradient :id="'metalCylinder-' + id" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -40,8 +48,8 @@
           <stop offset="100%" stop-color="#0369a1" />
         </linearGradient>
 
-        <!-- Filters for Neon Glow -->
-        <filter :id="'laserGlow-' + id" x="-30%" y="-30%" width="160%" height="160%">
+        <!-- Filters for Neon Glow (Fixed for horizontal/vertical lines using userSpaceOnUse) -->
+        <filter :id="'laserGlow-' + id" filterUnits="userSpaceOnUse" x="-50" y="-50" width="300" height="320">
           <feGaussianBlur stdDeviation="4" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
@@ -335,47 +343,130 @@
         </g>
       </g>
 
-      <!-- TYPE 6: CONVEYOR_BELT (桁架皮带机 - 深度优化版本) -->
+      <!-- TYPE 6: CONVEYOR_BELT (标准皮带机) -->
       <g v-else-if="deviceType === 'conveyor_belt'" class="isometric-group">
         <!-- Shadows -->
         <ellipse cx="100" cy="180" rx="75" ry="12" fill="black" opacity="0.35" />
 
-        <!-- Heavy Structural Support Girders (支撑立柱及斜撑) -->
+        <!-- Heavy Structural Support Girders -->
         <line x1="40" y1="130" x2="40" y2="175" stroke="#475569" stroke-width="3" />
         <line x1="160" y1="75" x2="160" y2="120" stroke="#475569" stroke-width="3" />
         <line x1="40" y1="130" x2="60" y2="175" stroke="#334155" stroke-width="1.5" />
         <line x1="160" y1="75" x2="140" y2="120" stroke="#334155" stroke-width="1.5" />
 
-        <!-- Double Layer Steel Truss Structure (双轨桁架结构) -->
-        <!-- Lower frame chord -->
+        <!-- Double Layer Steel Truss Structure -->
         <path d="M 20 145 L 180 75" stroke="#1e293b" stroke-width="4" stroke-linecap="round" />
-        <!-- Upper frame chord -->
         <path d="M 20 130 L 180 60" stroke="#334155" stroke-width="5" stroke-linecap="round" />
         
-        <!-- Cross lattice bars (工字钢交叉拉撑) -->
+        <!-- Cross lattice bars -->
         <path d="M 20 130 L 50 131 M 50 117 L 80 118 M 80 104 L 110 105 M 110 90 L 140 91 M 140 77 L 170 78" stroke="#475569" stroke-width="1.5" />
         <path d="M 20 130 L 50 117 L 80 104 L 110 90 L 140 77 L 170 64" stroke="#475569" stroke-width="1.2" />
         <path d="M 20 145 L 50 130 L 80 117 L 110 104 L 140 90 L 170 77" stroke="#475569" stroke-width="1.2" />
 
-        <!-- Conveyor belt return strand (底段皮带) -->
         <path d="M 22 136 L 178 68" stroke="#090d16" stroke-width="1.8" />
 
-        <!-- Carrying Idlers (槽形托辊组) -->
+        <!-- Carrying Idlers -->
         <circle cx="45" cy="116" r="2.5" fill="#475569" />
         <circle cx="80" cy="101" r="2.5" fill="#475569" />
         <circle cx="115" cy="86" r="2.5" fill="#475569" />
         <circle cx="150" cy="71" r="2.5" fill="#475569" />
 
-        <!-- Actual Rubber Conveyor Belt (上层胶带) -->
+        <!-- Rubber Belt -->
         <path d="M 18 128 L 182 56" stroke="#1e293b" stroke-width="3" stroke-linecap="round" />
 
-        <!-- Flowing coal material lumps (输送的原煤料流 - 带有流光脉冲与发光粒子) -->
+        <!-- Flowing material -->
         <path d="M 18 127 L 182 55" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="8 14" class="pipe-flow-1" stroke-linecap="round" :filter="'url(#laserGlow-' + id + ')'" />
         <path d="M 18 128 L 182 56" stroke="#ca8a04" stroke-width="3.5" stroke-dasharray="4 22" class="pipe-flow-1" stroke-linecap="round" />
 
-        <!-- Large Head & Tail Drums (主/副滚筒轮) -->
+        <!-- Roller wheels -->
         <circle cx="20" cy="132" r="6" fill="url(#metalCylinder)" stroke="#0f172a" stroke-width="1.5" />
         <circle cx="180" cy="62" r="6" fill="url(#metalCylinder)" stroke="#0f172a" stroke-width="1.5" />
+      </g>
+
+      <!-- TYPE 6B: CONVEYOR_BELT_LONG (长型皮带机) -->
+      <g v-else-if="deviceType === 'conveyor_belt_long'" class="isometric-group">
+        <!-- Shadows -->
+        <ellipse cx="100" cy="180" rx="90" ry="10" fill="black" opacity="0.3" />
+
+        <!-- 3 Support columns (左、中、右) -->
+        <line x1="30" y1="140" x2="30" y2="175" stroke="#475569" stroke-width="2.5" />
+        <line x1="100" y1="110" x2="100" y2="155" stroke="#475569" stroke-width="2.5" />
+        <line x1="170" y1="80" x2="170" y2="120" stroke="#475569" stroke-width="2.5" />
+
+        <!-- Long Flat steel frame structure -->
+        <path d="M 10 152 L 190 77" stroke="#1e293b" stroke-width="3.5" stroke-linecap="round" />
+        <path d="M 10 140 L 190 65" stroke="#334155" stroke-width="4.5" stroke-linecap="round" />
+
+        <!-- Denser Cross Bracing (更密集的桁架格构) -->
+        <path d="M 10 140 L 32 141 M 32 129 L 55 130 M 55 117 L 78 118 M 78 105 L 100 106 M 100 93 L 122 94 M 122 81 L 145 82 M 145 69 L 168 70 M 168 57 L 190 58" stroke="#475569" stroke-width="1.2" />
+        <path d="M 10 140 L 32 129 L 55 117 L 78 105 L 100 93 L 122 81 L 145 69 L 168 57 L 190 45" stroke="#475569" stroke-width="1" />
+
+        <!-- Return conveyor strand -->
+        <path d="M 12 145 L 188 71" stroke="#090d16" stroke-width="1.5" />
+
+        <!-- Idler rollers -->
+        <circle cx="30" cy="131" r="2.2" fill="#475569" />
+        <circle cx="55" cy="119" r="2.2" fill="#475569" />
+        <circle cx="80" cy="107" r="2.2" fill="#475569" />
+        <circle cx="105" cy="95" r="2.2" fill="#475569" />
+        <circle cx="130" cy="83" r="2.2" fill="#475569" />
+        <circle cx="155" cy="71" r="2.2" fill="#475569" />
+        <circle cx="180" cy="59" r="2.2" fill="#475569" />
+
+        <!-- Main conveyor rubber belt -->
+        <path d="M 8 138 L 192 61" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round" />
+
+        <!-- Material flow (Long) -->
+        <path d="M 8 137 L 192 60" stroke="#fbbf24" stroke-width="2" stroke-dasharray="8 12" class="pipe-flow-1" stroke-linecap="round" :filter="'url(#laserGlow-' + id + ')'" />
+        <path d="M 8 138 L 192 61" stroke="#ca8a04" stroke-width="3" stroke-dasharray="3 18" class="pipe-flow-1" stroke-linecap="round" />
+
+        <!-- End drums -->
+        <circle cx="10" cy="142" r="5" fill="url(#metalCylinder)" stroke="#0f172a" />
+        <circle cx="190" cy="67" r="5" fill="url(#metalCylinder)" stroke="#0f172a" />
+      </g>
+
+      <!-- TYPE 6C: CONVEYOR_BELT_WIDE (宽型重载皮带机) -->
+      <g v-else-if="deviceType === 'conveyor_belt_wide'" class="isometric-group">
+        <!-- Shadows -->
+        <ellipse cx="100" cy="180" rx="80" ry="15" fill="black" opacity="0.4" />
+
+        <!-- Heavy Double Support Pillars on each end -->
+        <!-- Left Side double legs -->
+        <line x1="36" y1="130" x2="36" y2="175" stroke="#475569" stroke-width="3.5" />
+        <line x1="44" y1="130" x2="44" y2="175" stroke="#334155" stroke-width="2.5" />
+        <line x1="36" y1="150" x2="44" y2="150" stroke="#334155" stroke-width="1.5" />
+        <!-- Right Side double legs -->
+        <line x1="156" y1="75" x2="156" y2="120" stroke="#475569" stroke-width="3.5" />
+        <line x1="164" y1="75" x2="164" y2="120" stroke="#334155" stroke-width="2.5" />
+        <line x1="156" y1="95" x2="164" y2="95" stroke="#334155" stroke-width="1.5" />
+
+        <!-- Heavy Girders (宽体粗槽钢桁架) -->
+        <path d="M 20 148 L 180 78" stroke="#1e293b" stroke-width="6" stroke-linecap="round" />
+        <path d="M 20 130 L 180 60" stroke="#334155" stroke-width="8" stroke-linecap="round" />
+        
+        <!-- Double cross lattice braces -->
+        <path d="M 20 130 L 50 132 M 50 117 L 80 119 M 80 104 L 110 106" stroke="#475569" stroke-width="2.5" />
+        <path d="M 20 130 L 80 117 L 140 104 M 50 130 L 110 117 L 170 104" stroke="#475569" stroke-width="2" />
+
+        <!-- Double return strands -->
+        <path d="M 22 138 L 178 70" stroke="#090d16" stroke-width="3" />
+
+        <!-- Heavy rollers -->
+        <circle cx="45" cy="115" r="4.5" fill="#475569" stroke="#1e293b" stroke-width="1" />
+        <circle cx="80" cy="100" r="4.5" fill="#475569" stroke="#1e293b" stroke-width="1" />
+        <circle cx="115" cy="85" r="4.5" fill="#475569" stroke="#1e293b" stroke-width="1" />
+        <circle cx="150" cy="70" r="4.5" fill="#475569" stroke="#1e293b" stroke-width="1" />
+
+        <!-- Wide heavy rubber belt -->
+        <path d="M 16 126 L 184 54" stroke="#1e293b" stroke-width="5.5" stroke-linecap="round" />
+
+        <!-- Heavy flowing ore stream (Thick and glowing) -->
+        <path d="M 16 125 L 184 53" stroke="#fbbf24" stroke-width="4.5" stroke-dasharray="10 15" class="pipe-flow-1" stroke-linecap="round" :filter="'url(#laserGlow-' + id + ')'" />
+        <path d="M 16 126 L 184 54" stroke="#ca8a04" stroke-width="5.5" stroke-dasharray="5 20" class="pipe-flow-1" stroke-linecap="round" />
+
+        <!-- Massive head and tail drums -->
+        <circle cx="20" cy="130" r="8.5" fill="url(#metalCylinder)" stroke="#0f172a" stroke-width="2" />
+        <circle cx="180" cy="60" r="8.5" fill="url(#metalCylinder)" stroke="#0f172a" stroke-width="2" />
       </g>
 
       <!-- TYPE 7: FEEDER_PLATE (重型板式给料机) -->
@@ -466,6 +557,15 @@
         <circle cx="165" cy="40" r="3.5" fill="#10b981" class="drill-led" />
       </g>
 
+      <!-- TYPE 11: PIPELINE (流光连接管道) -->
+      <g v-else-if="deviceType === 'pipeline'" class="isometric-group">
+        <!-- Standard Slurry Pipe Shape: Double-walled tube with glowing inner core -->
+        <path :d="pipePathD" :stroke="bgPipeColor" stroke-width="8" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+
+        <!-- Inner Core Flowing laser line -->
+        <path :d="pipePathD" :stroke="corePipeColor" :stroke-width="corePipeWidth" :stroke-dasharray="pipeDashArray" class="pipe-flow-1" stroke-linecap="round" :filter="'url(#laserGlow-' + id + ')'" vector-effect="non-scaling-stroke" />
+      </g>
+
       <!-- TYPE 10: DUST_COLLECTOR (点式除尘器) -->
       <g v-else class="isometric-group">
         <!-- Shadows -->
@@ -491,7 +591,7 @@
     </svg>
 
     <!-- Overlay Info Inside Node Card -->
-    <div class="info-overlay">
+    <div class="info-overlay" v-if="deviceType !== 'pipeline'">
       <div class="name-text">{{ titleText }}</div>
       <div class="metric-text font-mono">
         <span class="value">{{ valueText }}</span>
@@ -500,7 +600,7 @@
     </div>
 
     <!-- Status Pulse Beacon (Dynamic UI) -->
-    <div class="status-beacon" :class="finalStatus"></div>
+    <div class="status-beacon" :class="finalStatus" v-if="deviceType !== 'pipeline'"></div>
 
     <!-- Interactive Telemetry Tooltip Overlay (Floating style) -->
     <transition name="fade">
@@ -562,13 +662,16 @@ const props = withDefaults(
   defineProps<{
     id?: string
     text?: string
-    deviceType?: 'shaft' | 'silo_metal' | 'silo_concrete' | 'crusher_jaw' | 'sifter_vibratory' | 'conveyor_belt' | 'dust_collector' | 'feeder_plate' | 'iron_remover' | 'baghouse_filter'
+    deviceType?: 'shaft' | 'silo_metal' | 'silo_concrete' | 'crusher_jaw' | 'sifter_vibratory' | 'conveyor_belt' | 'conveyor_belt_long' | 'conveyor_belt_wide' | 'dust_collector' | 'feeder_plate' | 'iron_remover' | 'baghouse_filter' | 'pipeline'
     status?: 'running' | 'warning' | 'stopped'
     value?: string | number
     unit?: string
     flipX?: boolean
     flipY?: boolean
     transparentBg?: boolean
+    pipeShape?: 'slope_up' | 'slope_down' | 'horizontal' | 'vertical' | 'elbow_l'
+    pipeColor?: 'cyan' | 'green' | 'gold' | 'red'
+    pipeStyle?: 'solid' | 'dashed'
     xField?: string
     yField?: string
     rows?: Record<string, unknown>[]
@@ -581,18 +684,43 @@ const props = withDefaults(
     unit: '',
     flipX: false,
     flipY: false,
-    transparentBg: undefined,
+    transparentBg: true,
+    pipeShape: 'slope_up',
+    pipeColor: 'cyan',
+    pipeStyle: 'solid',
     rows: () => []
   }
 )
 
 const isHovered = ref(false)
 
-const isTransparent = computed(() => {
-  if (props.transparentBg !== undefined) {
-    return props.transparentBg
-  }
-  return props.deviceType === 'conveyor_belt'
+const isTransparent = computed(() => props.transparentBg)
+
+const pipePathD = computed(() => {
+  if (props.pipeShape === 'horizontal') return 'M 5 110 L 195 110'
+  if (props.pipeShape === 'vertical') return 'M 100 5 L 100 215'
+  if (props.pipeShape === 'slope_down') return 'M 10 10 L 190 210'
+  if (props.pipeShape === 'elbow_l') return 'M 10 210 L 100 210 L 100 10'
+  return 'M 10 210 L 190 10' // default slope_up
+})
+
+const bgPipeColor = computed(() => {
+  return 'rgba(30, 41, 59, 0.75)'
+})
+
+const corePipeColor = computed(() => {
+  if (props.pipeColor === 'green') return '#10b981'
+  if (props.pipeColor === 'gold') return '#fbbf24'
+  if (props.pipeColor === 'red') return '#ef4444'
+  return '#38bdf8' // Default cyan
+})
+
+const corePipeWidth = computed(() => {
+  return props.pipeStyle === 'dashed' ? 2 : 3.5
+})
+
+const pipeDashArray = computed(() => {
+  return props.pipeStyle === 'dashed' ? '5 15' : '8 12'
 })
 
 const svgStyle = computed(() => {
@@ -649,10 +777,13 @@ function getDefaultStaticValue() {
   if (props.deviceType === 'crusher_jaw') return '48.5'
   if (props.deviceType === 'sifter_vibratory') return '48'
   if (props.deviceType === 'conveyor_belt') return '62'
+  if (props.deviceType === 'conveyor_belt_long') return '62'
+  if (props.deviceType === 'conveyor_belt_wide') return '62'
   if (props.deviceType === 'dust_collector') return '19'
   if (props.deviceType === 'feeder_plate') return '62.0'
   if (props.deviceType === 'iron_remover') return '正常'
   if (props.deviceType === 'baghouse_filter') return '1.25'
+  if (props.deviceType === 'pipeline') return '正常'
   return '--'
 }
 </script>
@@ -714,6 +845,10 @@ function getDefaultStaticValue() {
   height: calc(100% - 35px);
   z-index: 2;
   overflow: visible;
+}
+
+.device-svg.is-pipeline {
+  height: 100% !important;
 }
 
 .isometric-group {

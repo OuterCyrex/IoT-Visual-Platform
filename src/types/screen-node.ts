@@ -5,6 +5,9 @@ export interface ScreenNode {
   w: number
   h: number
   component: string
+  locked?: boolean
+  groupId?: string
+  rotate?: number
   props: {
     text?: string
     datasetId?: string

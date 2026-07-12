@@ -1,6 +1,6 @@
 <template>
   <!-- Real ECharts canvas container -->
-  <div class="relative w-full h-full flex flex-col p-3 rounded bg-slate-900 border border-slate-800/80 text-slate-200 overflow-hidden">
+  <div class="relative w-full h-full flex flex-col p-3 rounded-lg bg-gradient-to-br from-slate-900/40 via-slate-900/30 to-cyan-950/20 backdrop-blur-md border border-cyan-500/10 text-slate-200 overflow-hidden shadow-[inset_0_0_12px_rgba(6,182,212,0.03)]">
     <div
       class="text-xs font-semibold text-cyan-400 mb-2 border-b border-slate-800/60 pb-1.5 flex justify-between items-center select-none">
       <span>{{ text || '趋势分析图表' }}</span>

@@ -9,6 +9,9 @@ export interface ScreenNode {
   w: number
   h: number
   component: string
+  locked?: boolean
+  groupId?: string
+  rotate?: number
   props: Record<string, unknown>
 }
 

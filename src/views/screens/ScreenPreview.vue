@@ -28,7 +28,8 @@
           left: `${node.x}px`,
           top: `${node.y}px`,
           width: `${node.w}px`,
-          height: `${node.h}px`
+          height: `${node.h}px`,
+          transform: node.rotate ? `rotate(${node.rotate}deg)` : undefined
         }">
 
         <component :is="screenComponentMap[node.component as keyof typeof screenComponentMap]" v-bind="buildComponentProps(node)" />

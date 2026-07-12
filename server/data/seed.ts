@@ -4,6 +4,555 @@ import { hashPassword } from '../lib/auth.ts'
 export const seedState: PlatformState = {
   screenProjects: [
     {
+      "id": "scr-006",
+      "name": "智慧光伏发电拓扑集成管控大屏",
+      "group": "能源中心",
+      "scene": "光伏站拓扑",
+      "owner": "李工",
+      "status": "published",
+      "publishedVersion": "v1.0.0",
+      "tags": [
+            "光伏系统",
+            "等轴测",
+            "拓扑大屏"
+      ],
+      "screenNodes": [
+            {
+                  "id": "node-title",
+                  "x": 300,
+                  "y": 25,
+                  "w": 1320,
+                  "h": 60,
+                  "component": "text",
+                  "props": {
+                        "text": "智慧光伏系统等轴测拓扑大屏"
+                  }
+            },
+            {
+                  "id": "node-time",
+                  "x": 40,
+                  "y": 25,
+                  "w": 320,
+                  "h": 80,
+                  "component": "timeWeather",
+                  "props": {
+                        "text": "系统时间"
+                  }
+            },
+            {
+                  "id": "node-topology-box",
+                  "x": 40,
+                  "y": 120,
+                  "w": 1840,
+                  "h": 920,
+                  "component": "borderBox",
+                  "props": {
+                        "text": "光伏并网一体化等轴测拓扑总览"
+                  }
+            },
+            {
+                  "id": "dev-pylon",
+                  "x": 100,
+                  "y": 750,
+                  "w": 200,
+                  "h": 220,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "110kV 并网高压电塔",
+                        "deviceType": "transmission_tower",
+                        "status": "running",
+                        "value": "110.2",
+                        "unit": "kV",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-transformer",
+                  "x": 380,
+                  "y": 700,
+                  "w": 200,
+                  "h": 220,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "35kV 箱式变压器",
+                        "deviceType": "box_transformer",
+                        "status": "running",
+                        "value": "35.4",
+                        "unit": "kV",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-inverter-1",
+                  "x": 450,
+                  "y": 460,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "#1 智能逆变器",
+                        "deviceType": "inverter",
+                        "status": "running",
+                        "value": "315",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-inverter-2",
+                  "x": 950,
+                  "y": 680,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "#2 智能逆变器",
+                        "deviceType": "inverter",
+                        "status": "running",
+                        "value": "315",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-inverter-3",
+                  "x": 1350,
+                  "y": 800,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "#3 智能逆变器",
+                        "deviceType": "inverter",
+                        "status": "running",
+                        "value": "315",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-combiner-1",
+                  "x": 470,
+                  "y": 220,
+                  "w": 120,
+                  "h": 140,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "#1 智能汇流箱",
+                        "deviceType": "combiner_box",
+                        "status": "running",
+                        "value": "180",
+                        "unit": "A",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-combiner-2",
+                  "x": 970,
+                  "y": 440,
+                  "w": 120,
+                  "h": 140,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "#2 智能汇流箱",
+                        "deviceType": "combiner_box",
+                        "status": "running",
+                        "value": "180",
+                        "unit": "A",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-combiner-3",
+                  "x": 1370,
+                  "y": 560,
+                  "w": 120,
+                  "h": 140,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "#3 智能汇流箱",
+                        "deviceType": "combiner_box",
+                        "status": "running",
+                        "value": "180",
+                        "unit": "A",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-panel-1a",
+                  "x": 180,
+                  "y": 160,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "左区-01 光伏组串",
+                        "deviceType": "pv_panel",
+                        "status": "running",
+                        "value": "8.4",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-panel-1b",
+                  "x": 270,
+                  "y": 160,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "左区-02 光伏组串",
+                        "deviceType": "pv_panel",
+                        "status": "running",
+                        "value": "8.5",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-panel-1c",
+                  "x": 360,
+                  "y": 160,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "左区-03 光伏组串",
+                        "deviceType": "pv_panel",
+                        "status": "running",
+                        "value": "8.3",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-panel-2a",
+                  "x": 680,
+                  "y": 380,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "中区-01 光伏组串",
+                        "deviceType": "pv_panel",
+                        "status": "running",
+                        "value": "8.6",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-panel-2b",
+                  "x": 770,
+                  "y": 380,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "中区-02 光伏组串",
+                        "deviceType": "pv_panel",
+                        "status": "running",
+                        "value": "8.4",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-panel-2c",
+                  "x": 860,
+                  "y": 380,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "中区-03 光伏组串",
+                        "deviceType": "pv_panel",
+                        "status": "running",
+                        "value": "8.5",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-panel-3a",
+                  "x": 1080,
+                  "y": 500,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "右区-01 光伏组串",
+                        "deviceType": "pv_panel",
+                        "status": "running",
+                        "value": "8.2",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-panel-3b",
+                  "x": 1170,
+                  "y": 500,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "右区-02 光伏组串",
+                        "deviceType": "pv_panel",
+                        "status": "running",
+                        "value": "8.4",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "dev-panel-3c",
+                  "x": 1260,
+                  "y": 500,
+                  "w": 160,
+                  "h": 180,
+                  "component": "pvDevice",
+                  "props": {
+                        "text": "右区-03 光伏组串",
+                        "deviceType": "pv_panel",
+                        "status": "running",
+                        "value": "8.3",
+                        "unit": "kW",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-p1a-c1",
+                  "x": 260,
+                  "y": 200,
+                  "w": 220,
+                  "h": 90,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-p1b-c1",
+                  "x": 350,
+                  "y": 200,
+                  "w": 130,
+                  "h": 90,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-p1c-c1",
+                  "x": 440,
+                  "y": 200,
+                  "w": 40,
+                  "h": 90,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-c1-i1",
+                  "x": 526,
+                  "y": 350,
+                  "w": 8,
+                  "h": 120,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "vertical",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-p2a-c2",
+                  "x": 760,
+                  "y": 420,
+                  "w": 220,
+                  "h": 90,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-p2b-c2",
+                  "x": 850,
+                  "y": 420,
+                  "w": 130,
+                  "h": 90,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-p2c-c2",
+                  "x": 940,
+                  "y": 420,
+                  "w": 40,
+                  "h": 90,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-c2-i2",
+                  "x": 1026,
+                  "y": 570,
+                  "w": 8,
+                  "h": 120,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "vertical",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-p3a-c3",
+                  "x": 1160,
+                  "y": 540,
+                  "w": 220,
+                  "h": 90,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-p3b-c3",
+                  "x": 1250,
+                  "y": 540,
+                  "w": 130,
+                  "h": 90,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-p3c-c3",
+                  "x": 1340,
+                  "y": 540,
+                  "w": 40,
+                  "h": 90,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-c3-i3",
+                  "x": 1426,
+                  "y": 690,
+                  "w": 8,
+                  "h": 120,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "vertical",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-i1-t",
+                  "x": 430,
+                  "y": 630,
+                  "w": 50,
+                  "h": 80,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_down",
+                        "pipeColor": "cyan",
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-i2-t",
+                  "x": 560,
+                  "y": 700,
+                  "w": 400,
+                  "h": 80,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_up",
+                        "pipeColor": "cyan",
+                        "flipX": true,
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-i3-t",
+                  "x": 560,
+                  "y": 770,
+                  "w": 800,
+                  "h": 110,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_up",
+                        "pipeColor": "cyan",
+                        "flipX": true,
+                        "transparentBg": true
+                  }
+            },
+            {
+                  "id": "pipe-t-p",
+                  "x": 260,
+                  "y": 760,
+                  "w": 130,
+                  "h": 110,
+                  "component": "mineDevice",
+                  "props": {
+                        "deviceType": "pipeline",
+                        "pipeShape": "slope_up",
+                        "pipeColor": "cyan",
+                        "flipX": true,
+                        "transparentBg": true
+                  }
+            }
+      ],
+      "updatedAt": "2026-07-12 10:00"
+},
+    {
       id: 'scr-001',
       name: '新能源超级工厂集成控制大屏',
       group: '能源中心',
@@ -478,13 +1027,130 @@ export const seedState: PlatformState = {
           props: { text: '周动力用电负荷趋势 (kWh)', datasetId: 'set-hourly-throughput', xField: 'hour', yField: 'count', refreshInterval: 5000 }
         },
         {
-          id: 'node-process-map',
-          x: 560,
-          y: 120,
-          w: 1440,
-          h: 910,
-          component: 'mineProcessMap',
-          props: { text: '等距智能采矿输送物料流', datasetId: 'set-ev-mqtt', xField: 'timestamp', yField: 'value', refreshInterval: 0 }
+          id: 'dev-shaft',
+          x: 600,
+          y: 150,
+          w: 180,
+          h: 200,
+          component: 'mineDevice',
+          props: { text: '主/副竖井塔', deviceType: 'shaft', status: 'running' }
+        },
+        {
+          id: 'dev-feeder-plate',
+          x: 800,
+          y: 170,
+          w: 160,
+          h: 180,
+          component: 'mineDevice',
+          props: { text: '选厂重型板式给料机', deviceType: 'feeder_plate', status: 'running' }
+        },
+        {
+          id: 'dev-conveyor-1',
+          x: 980,
+          y: 200,
+          w: 220,
+          h: 150,
+          component: 'mineDevice',
+          props: { text: '1号原矿皮带机', deviceType: 'conveyor_belt', status: 'running', value: '62', unit: 'm/s', transparentBg: true }
+        },
+        {
+          id: 'dev-iron-remover',
+          x: 1030,
+          y: 170,
+          w: 140,
+          h: 160,
+          component: 'mineDevice',
+          props: { text: '悬挂电磁除铁器', deviceType: 'iron_remover', status: 'running', transparentBg: true }
+        },
+        {
+          id: 'dev-crusher',
+          x: 1220,
+          y: 150,
+          w: 180,
+          h: 180,
+          component: 'mineDevice',
+          props: { text: '选厂重型颚式破碎机', deviceType: 'crusher_jaw', status: 'running' }
+        },
+        {
+          id: 'dev-conveyor-2',
+          x: 1420,
+          y: 180,
+          w: 260,
+          h: 140,
+          component: 'mineDevice',
+          props: { text: '2号粗碎传送机', deviceType: 'conveyor_belt_long', status: 'running', value: '62', unit: 'm/s', flipX: true, transparentBg: true }
+        },
+        {
+          id: 'dev-baghouse',
+          x: 1480,
+          y: 80,
+          w: 150,
+          h: 170,
+          component: 'mineDevice',
+          props: { text: '储料仓布袋除尘器', deviceType: 'baghouse_filter', status: 'running' }
+        },
+        {
+          id: 'dev-buffer-silo',
+          x: 1700,
+          y: 170,
+          w: 180,
+          h: 200,
+          component: 'mineDevice',
+          props: { text: '圆锥给矿缓冲仓', deviceType: 'silo_concrete', status: 'running' }
+        },
+        {
+          id: 'dev-conveyor-3',
+          x: 1460,
+          y: 440,
+          w: 240,
+          h: 160,
+          component: 'mineDevice',
+          props: { text: '3号筛分给矿机', deviceType: 'conveyor_belt_wide', status: 'running', value: '62', unit: 'm/s', flipX: true, transparentBg: true }
+        },
+        {
+          id: 'dev-vibratory-sifter',
+          x: 1260,
+          y: 410,
+          w: 180,
+          h: 180,
+          component: 'mineDevice',
+          props: { text: '高频圆振动筛', deviceType: 'sifter_vibratory', status: 'running' }
+        },
+        {
+          id: 'dev-conveyor-4',
+          x: 1020,
+          y: 440,
+          w: 220,
+          h: 150,
+          component: 'mineDevice',
+          props: { text: '4号成品传送机', deviceType: 'conveyor_belt', status: 'running', value: '62', unit: 'm/s', flipX: true, transparentBg: true }
+        },
+        {
+          id: 'dev-silo-a',
+          x: 820,
+          y: 410,
+          w: 180,
+          h: 200,
+          component: 'mineDevice',
+          props: { text: '原煤成品仓 A', deviceType: 'silo_metal', status: 'running' }
+        },
+        {
+          id: 'dev-silo-b',
+          x: 620,
+          y: 410,
+          w: 180,
+          h: 200,
+          component: 'mineDevice',
+          props: { text: '原煤成品仓 B', deviceType: 'silo_metal', status: 'running' }
+        },
+        {
+          id: 'dev-dust-collector',
+          x: 580,
+          y: 320,
+          w: 140,
+          h: 160,
+          component: 'mineDevice',
+          props: { text: '点式除尘箱', deviceType: 'dust_collector', status: 'running' }
         },
         {
           id: 'node-alarms-table',
