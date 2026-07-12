@@ -7,3 +7,4 @@ dist
 *.tsbuildinfo
 server/data/*.json
 server/uploads/*
+docs/*
